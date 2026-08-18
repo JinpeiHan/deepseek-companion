@@ -24,6 +24,7 @@
     "runtime/frame_renderer.py",
     "runtime/rig_driver.py",
     "runtime/rig_pack.py",
+    "runtime/rig_renderer.py",
     "runtime/__init__.py",
     "runtime/bin/win32-x64/dsh-dafeiyu-helper.exe",
     "scripts/build-helper.ps1",
