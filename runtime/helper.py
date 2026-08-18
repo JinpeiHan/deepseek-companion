@@ -9,27 +9,55 @@ from __future__ import annotations
 
 import argparse
 import json
-import math
 import os
 import random
 import sys
 import threading
 import time
 from pathlib import Path
-from typing import Any, TextIO
+from typing import Any, Callable, TextIO
 
 try:
     from .animation_model import AnimationModel, crossfade_duration
+    from .asset_pack import PackDescriptor, load_pack_descriptor, load_pack_pixmaps, normalise_pack_id
     from .layout_store import default_layout_path, load_layout, save_layout
     from .persona_copy import interaction_copy, load_persona_copy
 except ImportError:
     from animation_model import AnimationModel, crossfade_duration
+    from asset_pack import PackDescriptor, load_pack_descriptor, load_pack_pixmaps, normalise_pack_id
     from layout_store import default_layout_path, load_layout, save_layout
     from persona_copy import interaction_copy, load_persona_copy
 
 
 PROTOCOL_VERSION = 1
 STATES = {"IDLE", "THINKING", "WORKING", "WAITING", "SUCCESS", "ERROR", "DISCONNECTED"}
+PACK_LOAD_ERRORS = (OSError, ValueError, KeyError, json.JSONDecodeError)
+
+
+def resolve_pack(
+    root: Path,
+    pack_id: Any,
+    loader: Callable[[Path, str], Any] = load_pack_descriptor,
+) -> Any:
+    """Load the requested proportion pack, falling back to chibi exactly once.
+
+    The proportion is a user-facing setting that can name a pack whose art was
+    never shipped, so a broken pack has to degrade to the bundled default
+    instead of killing the helper the moment somebody flips the setting. A
+    broken chibi is still fatal: there is nothing left to fall back to.
+    """
+    selected = normalise_pack_id(pack_id)
+    try:
+        return loader(root, selected)
+    except PACK_LOAD_ERRORS as error:
+        if selected == "chibi":
+            raise
+        print(
+            f"warning: proportion pack '{selected}' unavailable ({error}); falling back to chibi",
+            file=sys.stderr,
+            flush=True,
+        )
+    return loader(root, "chibi")
 
 
 def bundle_root() -> Path:
@@ -113,9 +141,14 @@ def run_headless(recorder: EventRecorder) -> int:
 
 def run_visual(recorder: EventRecorder, snapshot_path: Path | None = None) -> int:
     try:
-        from PySide6.QtCore import QObject, QPoint, QRectF, Qt, QTimer, QUrl, Signal
+        from PySide6.QtCore import QObject, QPoint, Qt, QTimer, QUrl, Signal
         from PySide6.QtGui import QColor, QDesktopServices, QFont, QFontMetrics, QMouseEvent, QPainter, QPen, QPixmap
         from PySide6.QtWidgets import QApplication, QMenu, QWidget
+
+        try:
+            from .frame_renderer import FrameRenderer
+        except ImportError:
+            from frame_renderer import FrameRenderer
     except ImportError:
         print(
             "PySide6 is required for visual mode. Run with --headless for protocol tests.",
@@ -128,14 +161,18 @@ def run_visual(recorder: EventRecorder, snapshot_path: Path | None = None) -> in
         message = Signal(dict)
         closed = Signal()
 
-    manifest_path = bundle_root() / "assets" / "pet-manifest.json"
-    asset_root = manifest_path.parent / "pet"
-    try:
-        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-    except (OSError, ValueError) as error:
-        print(f"Unable to load BigFish asset manifest: {error}", file=sys.stderr)
-        recorder.close()
-        return 2
+    def load_pack_assets(root: Path, pack_id: str) -> tuple[PackDescriptor, dict[str, QPixmap]]:
+        """Build a pack only if every one of its frames decodes.
+
+        Half a pack is worse than no pack: a missing frame surfaces as a
+        KeyError inside paintEvent long after the setting was changed.
+        """
+        descriptor = load_pack_descriptor(root, pack_id)
+        pixmaps, missing = load_pack_pixmaps(descriptor, QPixmap, strict=False)
+        if missing:
+            raise ValueError(f"{len(missing)} frame(s) unreadable, first '{missing[0]}'")
+        return descriptor, pixmaps
+
     try:
         persona_copy = load_persona_copy(bundle_root() / "assets" / "persona-copy.zh-CN.json")
     except (OSError, ValueError) as error:
@@ -154,8 +191,12 @@ def run_visual(recorder: EventRecorder, snapshot_path: Path | None = None) -> in
             "DISCONNECTED": "已断开",
         }
 
-        def __init__(self) -> None:
+        def __init__(self, descriptor: PackDescriptor, pixmaps: dict[str, QPixmap]) -> None:
             super().__init__()
+            self.descriptor = descriptor
+            self.manifest = descriptor.manifest
+            self.pixmaps = pixmaps
+            self.renderer = FrameRenderer()
             self.layout_path = default_layout_path()
             self.layout = load_layout(self.layout_path)
             configured_scale = os.environ.get("DSH_DAFEIYU_SCALE")
@@ -190,16 +231,7 @@ def run_visual(recorder: EventRecorder, snapshot_path: Path | None = None) -> in
                 self.bubble_states = [part.strip() for part in configured_bubble_states.split(",") if part.strip()]
             else:
                 self.bubble_states = list(self.layout.get("bubbleStates", ["SUCCESS", "ERROR", "WAITING"]))
-            self.model = AnimationModel(manifest)
-            self.pixmaps: dict[str, QPixmap] = {}
-            for clip in self.model.clips.values():
-                for frame in clip.frames:
-                    if frame in self.pixmaps:
-                        continue
-                    pixmap = QPixmap(str(asset_root / frame))
-                    if pixmap.isNull():
-                        raise RuntimeError(f"Unable to load BigFish frame: {frame}")
-                    self.pixmaps[frame] = pixmap
+            self.model = AnimationModel(self.manifest)
 
             self.display_state = "IDLE"
             self.status_state = "IDLE"
@@ -227,7 +259,7 @@ def run_visual(recorder: EventRecorder, snapshot_path: Path | None = None) -> in
             self.fade_duration = 0.15
             self.animation_timer = QTimer(self)
             self.animation_timer.timeout.connect(self._tick)
-            self.animation_timer.start(40 if self.reduced_motion else 20)
+            self.animation_timer.start(self.renderer.tick_ms(self.reduced_motion))
             self.micro_timer = QTimer(self)
             self.micro_timer.setSingleShot(True)
             self.micro_timer.timeout.connect(self._play_idle_micro)
@@ -235,6 +267,7 @@ def run_visual(recorder: EventRecorder, snapshot_path: Path | None = None) -> in
                 self._schedule_micro()
             self.snapshot_saved = False
             self.interaction_seed = 0
+            self.card_key: tuple[Any, ...] | None = None
             self.setWindowTitle("DSH 小鲸鱼")
             self.setWindowFlags(
                 Qt.WindowType.FramelessWindowHint
@@ -311,8 +344,46 @@ def run_visual(recorder: EventRecorder, snapshot_path: Path | None = None) -> in
             if snapshot_path is not None and not self.snapshot_saved:
                 QTimer.singleShot(180, self._save_snapshot)
 
+        def _switch_pack(self, pack_id: str) -> bool:
+            """Swap the proportion pack in place.
+
+            CONFIG is delivered without restarting the helper, so this runs
+            while the window is visible. Everything is built before anything is
+            published, which is why a pack that fails to load leaves the running
+            pack fully intact instead of half-swapped.
+            """
+            try:
+                descriptor, pixmaps = load_pack_assets(bundle_root(), pack_id)
+            except PACK_LOAD_ERRORS as error:
+                print(
+                    f"warning: proportion pack '{pack_id}' unavailable ({error}); "
+                    f"keeping '{self.descriptor.pack_id}'",
+                    file=sys.stderr,
+                    flush=True,
+                )
+                return False
+            model = AnimationModel(descriptor.manifest)
+            model.apply_state(self.model.base_state, self.model.base_activity)
+            self.descriptor = descriptor
+            self.manifest = descriptor.manifest
+            self.pixmaps = pixmaps
+            self.model = model
+            # The outgoing pixmap belongs to the old pack; fading into the new
+            # one would blend two different characters.
+            self.fade_from_pixmap = None
+            self.last_tick_ms = self._now_ms()
+            self._apply_window_size()
+            self._move_to_pet(self.pet_x, self.pet_y)
+            self.update()
+            return True
+
         def _apply_config(self, message: dict[str, Any]) -> None:
             """Apply a live CONFIG message without restarting the window."""
+            proportion = message.get("characterProportion")
+            if isinstance(proportion, str):
+                pack_id = normalise_pack_id(proportion)
+                if pack_id != self.descriptor.pack_id:
+                    self._switch_pack(pack_id)
             scale = message.get("scale")
             if isinstance(scale, (int, float)) and not isinstance(scale, bool):
                 self.scale = min(1.4, max(0.7, float(scale)))
@@ -322,7 +393,7 @@ def run_visual(recorder: EventRecorder, snapshot_path: Path | None = None) -> in
             reduced_motion = message.get("reducedMotion")
             if isinstance(reduced_motion, bool) and reduced_motion != self.reduced_motion:
                 self.reduced_motion = reduced_motion
-                self.animation_timer.setInterval(40 if self.reduced_motion else 20)
+                self.animation_timer.setInterval(self.renderer.tick_ms(self.reduced_motion))
                 if self.reduced_motion:
                     self.micro_timer.stop()
                 else:
@@ -355,7 +426,15 @@ def run_visual(recorder: EventRecorder, snapshot_path: Path | None = None) -> in
                 self.display_state = self.model.base_state
             if self.overlay_deadline_ms is not None and now_ms >= self.overlay_deadline_ms:
                 self._clear_overlay()
-            self.update()
+            # Only the pet animates between ticks, so the bubble is repainted
+            # solely when its content actually changes -- including the tick on
+            # which a status or overlay deadline expires it away.
+            card_key = (self._bubble_visible(), self._current_card())
+            if card_key != self.card_key:
+                self.card_key = card_key
+                self.update()
+                return
+            self.update(*self._pet_repaint_rect())
 
         def _play_idle_micro(self) -> None:
             if self.reduced_motion:
@@ -421,7 +500,7 @@ def run_visual(recorder: EventRecorder, snapshot_path: Path | None = None) -> in
             self._sync_frame_transition(previous_frame, previous_clip, allow_fade=False)
             self.dragging = False
             self.last_tick_ms = now_ms
-            self.animation_timer.start(40 if self.reduced_motion else 20)
+            self.animation_timer.start(self.renderer.tick_ms(self.reduced_motion))
             if not self.reduced_motion:
                 self._schedule_micro()
 
@@ -454,8 +533,7 @@ def run_visual(recorder: EventRecorder, snapshot_path: Path | None = None) -> in
                 self._move_to_pet(self.pet_x, self.pet_y)
 
         def _apply_window_size(self) -> None:
-            pet_width = round(int(manifest["maxFrameWidth"]) * self.scale)
-            pet_height = round(int(manifest["maxFrameHeight"]) * self.scale)
+            pet_width, pet_height = self._pet_size()
             if self._bubble_visible():
                 bubble_width = round(420 * self.bubble_scale)
                 bubble_height = self._card_height()
@@ -471,8 +549,8 @@ def run_visual(recorder: EventRecorder, snapshot_path: Path | None = None) -> in
 
         def _pet_size(self) -> tuple[int, int]:
             return (
-                round(int(manifest["maxFrameWidth"]) * self.scale),
-                round(int(manifest["maxFrameHeight"]) * self.scale),
+                round(self.descriptor.logical_width * self.scale),
+                round(self.descriptor.logical_height * self.scale),
             )
 
         def _move_to_pet(self, pet_x: int, pet_y: int) -> None:
@@ -520,6 +598,22 @@ def run_visual(recorder: EventRecorder, snapshot_path: Path | None = None) -> in
         def _pet_rect(self) -> tuple[int, int, int, int]:
             pet_width, pet_height = self._pet_size()
             return self._pet_offset_x(pet_width), self.height() - pet_height - 8, pet_width, pet_height
+
+        def _pet_repaint_rect(self) -> tuple[int, int, int, int]:
+            """Pet rect plus the slack the procedural motion can escape into.
+
+            The renderer bobs, sways and rotates the frame around its centre, so
+            repainting only ``_pet_rect`` would leave a smear at the extremes.
+            The margin covers the largest offset (8px), squash (2%) and rotation
+            (2.5 degrees) any clip asks for, scaled with the character.
+            """
+            pet_x, pet_y, pet_width, pet_height = self._pet_rect()
+            margin = round(24 * self.scale) + 8
+            left = max(0, pet_x - margin)
+            top = max(0, pet_y - margin)
+            right = min(self.width(), pet_x + pet_width + margin)
+            bottom = min(self.height(), pet_y + pet_height + margin)
+            return left, top, right - left, bottom - top
 
         def _bubble_rect(self) -> tuple[int, int, int, int]:
             card_width = round(420 * self.bubble_scale)
@@ -846,78 +940,7 @@ def run_visual(recorder: EventRecorder, snapshot_path: Path | None = None) -> in
                     detail_text,
                 )
 
-            pixmap = self.pixmaps[self.model.frame]
-            phase = time.monotonic()
-            motion = self.model.active_clip.motion
-            if self.reduced_motion:
-                motion = None
-            scale_extra = 1.0
-            angle = 0.0
-            offset_x = 0
-            offset_y = 0
-            clip_name = self.model.active_clip_name
-            if motion == "breathe":
-                # 独立版同款：缩放呼吸 + 轻摇摆（无位移）
-                scale_extra = 1.0 + 0.02 * math.sin(phase * 2.5)
-                angle = math.sin(phase * 2.5) * 1.5
-            elif motion == "think":
-                offset_y = math.sin(phase * 2.8) * 3
-                angle = math.sin(phase * 1.3) * 0.8
-            elif motion == "work":
-                offset_x = math.sin(phase * 5.4) * 3
-                angle = math.sin(phase * 3.1) * 1.0
-            elif motion == "wait":
-                offset_y = math.sin(phase * 1.8) * 1
-                angle = math.sin(phase * 1.2) * 0.8
-            elif motion == "bounce":
-                offset_y = -abs(math.sin(phase * 5.2)) * 8
-                scale_extra = 1.0 + 0.02 * math.sin(phase * 5.2)
-            elif motion in {"shake", "dizzy"}:
-                offset_x = math.sin(phase * 11.0) * 4
-                angle = math.sin(phase * 11.0) * 1.5
-            elif motion == "float":
-                offset_y = math.sin(phase * 3.0) * 4
-                angle = math.sin(phase * 1.6) * 1.0
-            # Give walking clips a light bob and quick sway without changing frame timing.
-            if clip_name in ("working_search", "working_command"):
-                offset_y = -abs(math.sin(phase * 4.5)) * 5
-                angle = math.sin(phase * 9.0) * 2.5
-
-            # Scale procedural offsets with the character while retaining subpixel motion.
-            offset_x = offset_x * self.scale
-            offset_y = offset_y * self.scale
-
-            fade_alpha = 1.0
-            if self.fade_from_pixmap is not None and not self.fade_from_pixmap.isNull():
-                fade_elapsed = time.monotonic() - self.fade_started
-                if fade_elapsed < self.fade_duration:
-                    fade_alpha = min(1.0, (fade_elapsed / self.fade_duration) ** 0.7)
-                else:
-                    self.fade_from_pixmap = None
-
-            def draw_pet(pix: QPixmap, alpha: float) -> None:
-                base_width = pix.width() * self.scale
-                base_height = pix.height() * self.scale
-                pw = base_width * scale_extra
-                ph = base_height * scale_extra
-                x = self._pet_offset_x(base_width) + (base_width - pw) / 2 + offset_x
-                y = self.height() - ph - 8 + offset_y
-                if bubble_height > y:
-                    y = bubble_height
-                cx = x + pw / 2
-                cy = y + ph / 2
-                painter.save()
-                painter.setOpacity(alpha)
-                painter.translate(cx, cy)
-                painter.rotate(angle)
-                painter.translate(-cx, -cy)
-                painter.drawPixmap(QRectF(x, y, pw, ph), pix, QRectF(0, 0, pix.width(), pix.height()))
-                painter.restore()
-
-            if fade_alpha < 1.0 and self.fade_from_pixmap is not None:
-                # Keep the old frame opaque underneath so the pet never flashes transparent.
-                draw_pet(self.fade_from_pixmap, 1.0)
-            draw_pet(pixmap, fade_alpha)
+            self.renderer.paint(painter, self, bubble_height)
 
         def mousePressEvent(self, event: QMouseEvent) -> None:
             if event.button() == Qt.MouseButton.LeftButton:
@@ -1004,7 +1027,7 @@ def run_visual(recorder: EventRecorder, snapshot_path: Path | None = None) -> in
                 self._save_layout()
             elif selected == reduced_action:
                 self.reduced_motion = reduced_action.isChecked()
-                self.animation_timer.setInterval(40 if self.reduced_motion else 20)
+                self.animation_timer.setInterval(self.renderer.tick_ms(self.reduced_motion))
                 if self.reduced_motion:
                     self.micro_timer.stop()
                 else:
@@ -1022,8 +1045,18 @@ def run_visual(recorder: EventRecorder, snapshot_path: Path | None = None) -> in
 
     application = QApplication(sys.argv[:1])
     application.setQuitOnLastWindowClosed(False)
+    try:
+        descriptor, pixmaps = resolve_pack(
+            bundle_root(),
+            os.environ.get("DSH_DAFEIYU_PROPORTION"),
+            loader=load_pack_assets,
+        )
+    except PACK_LOAD_ERRORS as error:
+        print(f"Unable to load BigFish asset manifest: {error}", file=sys.stderr)
+        recorder.close()
+        return 2
     inbox = Inbox()
-    window = CompanionWindow()
+    window = CompanionWindow(descriptor, pixmaps)
     inbox.message.connect(window.apply_message)
     inbox.closed.connect(application.quit)
 
