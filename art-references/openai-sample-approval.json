@@ -1,0 +1,41 @@
+{
+  "model": "gpt-image-2",
+  "status": "approved",
+  "note": "四张样片经项目委托方人工视觉确认通过，允许按批准的关键帧范围执行批量生成。",
+  "samples": {
+    "standard/idle/0": "approved",
+    "standard/head_pat/0": "approved",
+    "slender/idle/0": "approved",
+    "slender/head_pat/0": "approved"
+  },
+  "review": {
+    "standard/idle/0": {
+      "file": "art-references/openai-samples/standard-idle.png",
+      "proportion": "约 4 头身，与标准版母图一致",
+      "checks": "512x512 RGBA、透明背景、未触边、无文字/边框/家具；鲸耳、围裙鲸鱼、裙摆金纹、短袜、玛丽珍鞋、分叉鲸尾齐全",
+      "attempts": 2,
+      "firstAttempt": "第一次生成被画成约 7 头身，已加强比例提示词后重生成"
+    },
+    "standard/head_pat/0": {
+      "file": "art-references/openai-samples/standard-head-pat.png",
+      "proportion": "约 4 头身，与 standard/idle/0 同体型",
+      "checks": "512x512 RGBA、透明背景、未触边；缩肩闭眼的被摸头起始姿势，画面中无手或其他物体",
+      "attempts": 2,
+      "firstAttempt": "第一次生成被画成约 7 头身，已加强比例提示词后重生成"
+    },
+    "slender/idle/0": {
+      "file": "art-references/openai-samples/slender-idle.png",
+      "proportion": "约 6.5 头身，与修长版母图一致",
+      "checks": "512x512 RGBA、透明背景、未触边；长裙、白色长袜、围裙鲸鱼、后腰蝴蝶结、分叉鲸尾齐全",
+      "attempts": 1,
+      "firstAttempt": null
+    },
+    "slender/head_pat/0": {
+      "file": "art-references/openai-samples/slender-head-pat.png",
+      "proportion": "约 6.5 头身，与 slender/idle/0 同体型",
+      "checks": "512x512 RGBA、透明背景、未触边；闭眼微笑、双手收在身前的被摸头起始姿势",
+      "attempts": 1,
+      "firstAttempt": null
+    }
+  }
+}
