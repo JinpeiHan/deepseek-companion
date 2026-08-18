@@ -21,3 +21,6 @@ art-references/openai-generation-records.jsonl
 # Agent worktrees
 .claude/worktrees/
 
+
+# Local API credentials (never commit)
+.env
