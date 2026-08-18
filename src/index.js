@@ -7,6 +7,7 @@ import {
   CompanionState,
   createMessage,
 } from './protocol.js'
+import { characterName, statusCopy } from './status-copy.js'
 
 const require = createRequire(import.meta.url)
 const pkg = require('../package.json')
@@ -19,7 +20,7 @@ export const name = 'dsh-dafeiyu'
 export const inject = ['sessions', 'settings']
 export const CONFIG_ENDPOINT = '/plugins/dsh-dafeiyu/config'
 export const Config = Schema.object({
-  enabled: Schema.boolean().default(true).description('启用桌面大肥鱼'),
+  enabled: Schema.boolean().default(true).description('启用桌面小鲸鱼'),
   scale: Schema.number().min(0.7).max(1.4).step(0.05).default(1).role('slider').description('角色大小'),
   bubbleScale: Schema.number().min(0.8).max(1.2).step(0.05).default(1).role('slider').description('气泡大小'),
   activityLevel: Schema.union([
@@ -35,7 +36,7 @@ export const Config = Schema.object({
   ]).default('always').description('气泡显示模式'),
   bubbleStates: Schema.array(Schema.string()).default(['SUCCESS', 'ERROR', 'WAITING']).description('自定义模式下显示气泡的状态'),
   includeSubagents: Schema.boolean().default(false).description('允许子 Agent 抢占宠物状态'),
-}).description('由 DeepSeek Harness 状态驱动的桌面大肥鱼伴侣')
+}).description('由 DeepSeek Harness 状态驱动的桌面小鲸鱼伴侣')
 
 const defaults = Object.freeze({
   enabled: true,
@@ -198,13 +199,13 @@ function mount(ctx, config = {}, eventCtx = ctx) {
       state: CompanionState.IDLE,
       host: 'deepseek-harness',
       pluginVersion: pkg.version,
-      message: 'BigFish connected to DSH',
+      message: `${characterName} connected to DSH`,
     }))
     bridge.send(createMessage(CompanionMessageKind.STATE, {
       state: CompanionState.IDLE,
       phase: 'plugin-start',
       stage: '等待任务',
-      message: '我在这儿等新任务哦',
+      message: statusCopy('idle', 0),
       detail: 'DSH · 等待下一次任务',
     }))
     logger.info?.('dsh-dafeiyu companion bridge started')

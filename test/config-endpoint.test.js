@@ -59,3 +59,15 @@ test('settings client debounces each slider independently', async () => {
   assert.match(source, /sliderTimers\.current\.set\(field, timer\)/u)
   assert.match(source, /key: 'dsh-dafeiyu'/u)
 })
+
+test('settings card presents the character as 小鲸鱼', async () => {
+  const source = await readFile(new URL('../lib/client.js', import.meta.url), 'utf8')
+  assert.match(source, /小鲸鱼桌面伴侣/u)
+  assert.doesNotMatch(source, /大肥鱼桌面伴侣|启用大肥鱼|大肥鱼设置/u)
+})
+
+test('package publishes the shared persona copy and loader', async () => {
+  const pkg = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8'))
+  assert.ok(pkg.files.includes('assets/persona-copy.zh-CN.json'))
+  assert.ok(pkg.files.includes('runtime/persona_copy.py'))
+})
