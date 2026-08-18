@@ -61,6 +61,7 @@
     "test:openai-images": "node --test test/openai-image-generation.test.js",
     "art:references": "python scripts/prepare-art-references.py",
     "art:manifests": "node scripts/build-pack-manifests.mjs",
+    "art:normalize": "python scripts/normalize-pack-scale.py",
     "art:preview": "python scripts/export-clip-preview.py",
     "art:jobs": "node scripts/build-generation-jobs.mjs",
     "generate:openai:dry-run": "node scripts/generate-openai-assets.mjs --dry-run",

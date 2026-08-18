@@ -1,0 +1,10 @@
+# Art pipeline only. NOT shipped in the npm package (requirements.txt is the
+# runtime contract and stays PySide6-only).
+#
+# Install into a dedicated environment:
+#   pip install -r requirements-art.txt
+Pillow>=10.3
+numpy>=1.26
+scipy>=1.11
+rembg>=2.0.57
+onnxruntime>=1.18
