@@ -25,14 +25,15 @@
     "DISCONNECTED": "idle"
   },
   "workingActivityMap": {
-    "searching": "working",
-    "commanding": "working",
+    "searching": "working_search",
+    "commanding": "working_command",
     "editing": "working",
-    "testing": "working",
+    "testing": "working_command",
     "using-tool": "working"
   },
   "idleMicroClips": [
-    "blink"
+    "blink",
+    "glance"
   ],
   "clips": {
     "idle": {
@@ -109,6 +110,19 @@
       "frameMs": 100,
       "loop": false
     },
+    "glance": {
+      "frames": [
+        "idle_glance/idle_glance_512_00.png",
+        "idle_glance/idle_glance_512_01.png",
+        "idle_glance/idle_glance_512_02.png",
+        "idle_glance/idle_glance_512_03.png",
+        "idle_glance/idle_glance_512_04.png",
+        "idle_glance/idle_glance_512_05.png",
+        "idle_glance/idle_glance_512_06.png"
+      ],
+      "frameMs": 160,
+      "loop": false
+    },
     "head_pat": {
       "frames": [
         "head_pat/head_pat_512_00.png",
@@ -129,6 +143,68 @@
         "poke_react/poke_react_512_03.png"
       ],
       "frameMs": 170,
+      "loop": false
+    },
+    "tail": {
+      "frames": [
+        "tail_react/tail_react_512_00.png",
+        "tail_react/tail_react_512_01.png",
+        "tail_react/tail_react_512_02.png",
+        "tail_react/tail_react_512_03.png"
+      ],
+      "frameMs": 220,
+      "loop": false
+    },
+    "working_search": {
+      "frames": [
+        "walk_side/walk_side_512_00.png",
+        "walk_side/walk_side_512_01.png",
+        "walk_side/walk_side_512_02.png",
+        "walk_side/walk_side_512_03.png"
+      ],
+      "frameMs": 135,
+      "loop": true
+    },
+    "working_command": {
+      "frames": [
+        "walk_side_right/walk_side_right_512_00.png",
+        "walk_side_right/walk_side_right_512_01.png",
+        "walk_side_right/walk_side_right_512_02.png",
+        "walk_side_right/walk_side_right_512_03.png"
+      ],
+      "frameMs": 135,
+      "loop": true
+    },
+    "walk_start_left": {
+      "frames": [
+        "walk_start_left/walk_start_left_512_00.png",
+        "walk_start_left/walk_start_left_512_01.png"
+      ],
+      "frameMs": 118,
+      "loop": false
+    },
+    "walk_stop_left": {
+      "frames": [
+        "walk_stop_left/walk_stop_left_512_00.png",
+        "walk_stop_left/walk_stop_left_512_01.png"
+      ],
+      "frameMs": 135,
+      "loop": false
+    },
+    "walk_start_right": {
+      "frames": [
+        "walk_start_right/walk_start_right_512_00.png",
+        "walk_start_right/walk_start_right_512_01.png"
+      ],
+      "frameMs": 118,
+      "loop": false
+    },
+    "walk_stop_right": {
+      "frames": [
+        "walk_stop_right/walk_stop_right_512_00.png",
+        "walk_stop_right/walk_stop_right_512_01.png"
+      ],
+      "frameMs": 135,
       "loop": false
     }
   }

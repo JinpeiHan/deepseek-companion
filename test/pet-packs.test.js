@@ -27,7 +27,7 @@ test('new manifests declare the funded keyframe subset symmetrically', async () 
     counts.push(Object.values(manifest.clips).reduce((sum, clip) => sum + clip.frames.length, 0))
   }
   assert.equal(new Set(counts).size, 1, `packs are asymmetric: ${counts.join(' vs ')}`)
-  assert.equal(counts[0], 23)
+  assert.equal(counts[0], 50)
 })
 
 test('new manifests keep chibi timing and reference 512 frame files', async () => {
@@ -66,9 +66,9 @@ test('nothing the helper resolves without a fallback points at an unfunded clip'
 
 test('generation jobs cover both packs exactly once per frame', async () => {
   const { jobs } = await readJson('../art-references/generation-jobs.json')
-  assert.equal(jobs.length, 46)
-  assert.equal(jobs.filter((job) => job.pack === 'standard').length, 23)
-  assert.equal(jobs.filter((job) => job.pack === 'slender').length, 23)
+  assert.equal(jobs.length, 100)
+  assert.equal(jobs.filter((job) => job.pack === 'standard').length, 50)
+  assert.equal(jobs.filter((job) => job.pack === 'slender').length, 50)
   assert.equal(new Set(jobs.map((job) => job.output)).size, jobs.length)
   for (const job of jobs) {
     assert.ok(job.references.length >= 4, `${job.output} needs at least four references`)

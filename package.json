@@ -55,6 +55,7 @@
   "scripts": {
     "test": "node --test --test-timeout=10000 test/assets.test.js test/config-endpoint.test.js test/client-slot-key.test.js test/helper-command.test.js test/protocol.test.js test/status-copy.test.js test/reducer.test.js test/pet-packs.test.js test/helper-lifecycle.test.js test/helper-restart.test.js test/plugin-integration.test.js",
     "test:assets:packs": "node scripts/validate-pet-packs.mjs",
+    "test:assets:animation": "node scripts/validate-pack-animation.mjs",
     "test:openai-images": "node --test test/openai-image-generation.test.js",
     "art:references": "python scripts/prepare-art-references.py",
     "art:manifests": "node scripts/build-pack-manifests.mjs",
