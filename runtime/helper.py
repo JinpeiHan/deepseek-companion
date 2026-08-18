@@ -9,29 +9,54 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import os
 import random
 import sys
 import threading
 import time
 from pathlib import Path
-from typing import Any, Callable, TextIO
+from typing import Any, Callable, NamedTuple, TextIO
 
 try:
     from .animation_model import AnimationModel, crossfade_duration
     from .asset_pack import PackDescriptor, load_pack_descriptor, load_pack_pixmaps, normalise_pack_id
     from .layout_store import default_layout_path, load_layout, save_layout
     from .persona_copy import interaction_copy, load_persona_copy
+    from .rig_driver import RigDriver
+    from .rig_pack import animation_manifest_from_rig, load_rig
 except ImportError:
     from animation_model import AnimationModel, crossfade_duration
     from asset_pack import PackDescriptor, load_pack_descriptor, load_pack_pixmaps, normalise_pack_id
     from layout_store import default_layout_path, load_layout, save_layout
     from persona_copy import interaction_copy, load_persona_copy
+    from rig_driver import RigDriver
+    from rig_pack import animation_manifest_from_rig, load_rig
 
 
 PROTOCOL_VERSION = 1
 STATES = {"IDLE", "THINKING", "WORKING", "WAITING", "SUCCESS", "ERROR", "DISCONNECTED"}
 PACK_LOAD_ERRORS = (OSError, ValueError, KeyError, json.JSONDecodeError)
+
+
+class PackAssets(NamedTuple):
+    """Everything a loaded pack needs, whichever renderer it uses.
+
+    Both renderers travel through the same all-or-nothing loading path, so a
+    rig whose schema, part paths or PNGs are broken is rejected while the caller
+    can still fall back -- exactly like a frame pack with a missing frame.
+    """
+
+    descriptor: PackDescriptor
+    #: Frame pixmaps. Always empty for a rig pack, which never indexes it.
+    pixmaps: dict[str, Any]
+    #: Manifest handed to :class:`AnimationModel`. For a rig this is the
+    #: synthesised one from :func:`animation_manifest_from_rig`, not the rig.
+    animation_manifest: dict[str, Any]
+    #: Parsed rig, or ``None`` for a frame pack.
+    rig: dict[str, Any] | None
+    #: ``FrameRenderer`` or ``RigRenderer``; both expose ``tick_ms``/``paint``.
+    renderer: Any
 
 
 def resolve_pack(
@@ -147,8 +172,10 @@ def run_visual(recorder: EventRecorder, snapshot_path: Path | None = None) -> in
 
         try:
             from .frame_renderer import FrameRenderer
+            from .rig_renderer import RigRenderer
         except ImportError:
             from frame_renderer import FrameRenderer
+            from rig_renderer import RigRenderer
     except ImportError:
         print(
             "PySide6 is required for visual mode. Run with --headless for protocol tests.",
@@ -161,17 +188,28 @@ def run_visual(recorder: EventRecorder, snapshot_path: Path | None = None) -> in
         message = Signal(dict)
         closed = Signal()
 
-    def load_pack_assets(root: Path, pack_id: str) -> tuple[PackDescriptor, dict[str, QPixmap]]:
-        """Build a pack only if every one of its frames decodes.
+    def load_pack_assets(root: Path, pack_id: str) -> PackAssets:
+        """Build a pack only if every one of its assets decodes.
 
         Half a pack is worse than no pack: a missing frame surfaces as a
-        KeyError inside paintEvent long after the setting was changed.
+        KeyError inside paintEvent long after the setting was changed. The rig
+        branch holds the same line -- schema validation, part-path confinement
+        and PNG decoding all happen here, so a rig pack can only reach
+        paintEvent in a state where it is guaranteed to draw.
         """
         descriptor = load_pack_descriptor(root, pack_id)
+        if descriptor.renderer == "rig":
+            rig = load_rig(descriptor)
+            renderer = RigRenderer(descriptor, rig)
+            renderer.part_pixmaps(QPixmap)
+            renderer.alpha_masks()
+            return PackAssets(
+                descriptor, {}, animation_manifest_from_rig(rig), rig, renderer
+            )
         pixmaps, missing = load_pack_pixmaps(descriptor, QPixmap, strict=False)
         if missing:
             raise ValueError(f"{len(missing)} frame(s) unreadable, first '{missing[0]}'")
-        return descriptor, pixmaps
+        return PackAssets(descriptor, pixmaps, descriptor.manifest, None, FrameRenderer())
 
     try:
         persona_copy = load_persona_copy(bundle_root() / "assets" / "persona-copy.zh-CN.json")
@@ -191,12 +229,16 @@ def run_visual(recorder: EventRecorder, snapshot_path: Path | None = None) -> in
             "DISCONNECTED": "已断开",
         }
 
-        def __init__(self, descriptor: PackDescriptor, pixmaps: dict[str, QPixmap]) -> None:
+        def __init__(self, assets: PackAssets) -> None:
             super().__init__()
-            self.descriptor = descriptor
-            self.manifest = descriptor.manifest
-            self.pixmaps = pixmaps
-            self.renderer = FrameRenderer()
+            self.descriptor = assets.descriptor
+            self.manifest = assets.animation_manifest
+            self.pixmaps = assets.pixmaps
+            self.rig = assets.rig
+            self.renderer = assets.renderer
+            self.rig_driver: RigDriver | None = None
+            #: Last solved pose, z-ascending. ``None`` for a frame pack.
+            self.rig_transforms: list[Any] | None = None
             self.layout_path = default_layout_path()
             self.layout = load_layout(self.layout_path)
             configured_scale = os.environ.get("DSH_DAFEIYU_SCALE")
@@ -232,6 +274,7 @@ def run_visual(recorder: EventRecorder, snapshot_path: Path | None = None) -> in
             else:
                 self.bubble_states = list(self.layout.get("bubbleStates", ["SUCCESS", "ERROR", "WAITING"]))
             self.model = AnimationModel(self.manifest)
+            self._build_rig_driver()
 
             self.display_state = "IDLE"
             self.status_state = "IDLE"
@@ -344,6 +387,92 @@ def run_visual(recorder: EventRecorder, snapshot_path: Path | None = None) -> in
             if snapshot_path is not None and not self.snapshot_saved:
                 QTimer.singleShot(180, self._save_snapshot)
 
+        # -- rig plumbing --------------------------------------------------- #
+
+        def _build_rig_driver(self) -> None:
+            """Attach a driver to a rig pack, or clear it for a frame pack."""
+            if self.rig is None:
+                self.rig_driver = None
+                self.rig_transforms = None
+                return
+            self.rig_driver = RigDriver(
+                self.rig,
+                reduced_motion=self.reduced_motion,
+                activity_level=self.activity_level,
+            )
+            self._advance_rig(0, self._now_ms())
+
+        def _advance_rig(self, elapsed_ms: int, now_ms: int) -> None:
+            """Step the driver and re-solve the pose for this tick.
+
+            Solving here rather than inside ``paintEvent`` keeps the paint
+            handler free of state: a repaint triggered by the window manager
+            redraws the pose the last tick produced instead of silently
+            advancing the animation at the compositor's rate.
+            """
+            driver = self.rig_driver
+            if driver is None:
+                return
+            driver.sync_model(
+                self.model.base_clip_name,
+                self.model.pulse_clip_name,
+                self.model.overlay_clip_name,
+                now_ms,
+            )
+            params = driver.advance(elapsed_ms, now_ms)
+            self.rig_transforms = driver.model.solve(params)
+
+        def _pet_padding(self) -> tuple[int, int, int, int]:
+            """Window padding around the logical pet box, in device pixels.
+
+            A frame pack gets exactly the historical 25/18/25/8, so its window
+            geometry is unchanged to the pixel. A rig pack widens the padding to
+            cover its declared ``overflow`` -- unconditionally, at every scale,
+            whatever the current pose is, which is what makes "a swinging tail
+            cannot be clipped" a property of the window rather than a hope about
+            the animation.
+            """
+            left, top, right, bottom = 25, 18, 25, 8
+            if self.rig is None:
+                return left, top, right, bottom
+            over_left, over_top, over_right, over_bottom = self.renderer.overflow_px(
+                self.scale
+            )
+            return (
+                max(left, math.ceil(over_left)),
+                max(top, math.ceil(over_top)),
+                max(right, math.ceil(over_right)),
+                max(bottom, math.ceil(over_bottom)),
+            )
+
+        def _bubble_height(self) -> int:
+            """Vertical space the bubble occupies, mirroring ``paintEvent``.
+
+            ``paintEvent`` derives this inline while drawing; recomputing it
+            here lets the repaint rect use the same clamped pet top the paint
+            will, instead of a rect that is right only when no card is up.
+            """
+            visible = self._bubble_visible()
+            if not visible:
+                return 12
+            if len(self.tasks) >= 2 or self._current_card():
+                _, card_y, _, card_height = self._bubble_rect()
+                return card_y + card_height + 19
+            return 12
+
+        def _rig_anchor(self, bubble_height: int = 0) -> tuple[float, float]:
+            """Widget-space point the rig's rest foot anchor maps onto.
+
+            Derived from ``_pet_rect`` and ``footAnchor`` only -- both of which
+            are rest-space quantities -- so no amount of deformation can move
+            it. This is also the origin Phase F needs to convert a click into
+            rig source coordinates (see ``RigRenderer.to_source``).
+            """
+            pet_x, pet_y, pet_width, pet_height = self._pet_rect()
+            top = max(pet_y, bubble_height)
+            foot_x, foot_y = self.renderer.foot_fraction
+            return (pet_x + foot_x * pet_width, top + foot_y * pet_height)
+
         def _switch_pack(self, pack_id: str) -> bool:
             """Swap the proportion pack in place.
 
@@ -353,7 +482,7 @@ def run_visual(recorder: EventRecorder, snapshot_path: Path | None = None) -> in
             pack fully intact instead of half-swapped.
             """
             try:
-                descriptor, pixmaps = load_pack_assets(bundle_root(), pack_id)
+                assets = load_pack_assets(bundle_root(), pack_id)
             except PACK_LOAD_ERRORS as error:
                 print(
                     f"warning: proportion pack '{pack_id}' unavailable ({error}); "
@@ -362,16 +491,24 @@ def run_visual(recorder: EventRecorder, snapshot_path: Path | None = None) -> in
                     flush=True,
                 )
                 return False
-            model = AnimationModel(descriptor.manifest)
+            model = AnimationModel(assets.animation_manifest)
             model.apply_state(self.model.base_state, self.model.base_activity)
-            self.descriptor = descriptor
-            self.manifest = descriptor.manifest
-            self.pixmaps = pixmaps
+            self.descriptor = assets.descriptor
+            self.manifest = assets.animation_manifest
+            self.pixmaps = assets.pixmaps
+            self.rig = assets.rig
+            self.renderer = assets.renderer
             self.model = model
             # The outgoing pixmap belongs to the old pack; fading into the new
             # one would blend two different characters.
             self.fade_from_pixmap = None
             self.last_tick_ms = self._now_ms()
+            # Switching in either direction changes the tick rate and the rig
+            # state, so both are rebuilt from the incoming pack rather than
+            # patched -- a frames->rig swap must not inherit a stale driver and
+            # a rig->frames swap must not keep solving a rig nobody draws.
+            self._build_rig_driver()
+            self.animation_timer.setInterval(self.renderer.tick_ms(self.reduced_motion))
             self._apply_window_size()
             self._move_to_pet(self.pet_x, self.pet_y)
             self.update()
@@ -393,6 +530,8 @@ def run_visual(recorder: EventRecorder, snapshot_path: Path | None = None) -> in
             reduced_motion = message.get("reducedMotion")
             if isinstance(reduced_motion, bool) and reduced_motion != self.reduced_motion:
                 self.reduced_motion = reduced_motion
+                if self.rig_driver is not None:
+                    self.rig_driver.set_reduced_motion(reduced_motion)
                 self.animation_timer.setInterval(self.renderer.tick_ms(self.reduced_motion))
                 if self.reduced_motion:
                     self.micro_timer.stop()
@@ -401,6 +540,8 @@ def run_visual(recorder: EventRecorder, snapshot_path: Path | None = None) -> in
             activity_level = message.get("activityLevel")
             if activity_level in {"quiet", "normal", "lively"}:
                 self.activity_level = activity_level
+                if self.rig_driver is not None:
+                    self.rig_driver.set_activity_level(activity_level)
                 if not self.reduced_motion:
                     self._schedule_micro()
             bubble_mode = message.get("bubbleMode")
@@ -422,6 +563,7 @@ def run_visual(recorder: EventRecorder, snapshot_path: Path | None = None) -> in
             model_elapsed = 0 if self.reduced_motion and self.model.active_clip.loop else elapsed_ms
             self.model.advance(model_elapsed, now_ms)
             self._sync_frame_transition(previous_frame, previous_clip)
+            self._advance_rig(elapsed_ms, now_ms)
             if had_pulse and self.model.pulse_state is None:
                 self.display_state = self.model.base_state
             if self.overlay_deadline_ms is not None and now_ms >= self.overlay_deadline_ms:
@@ -534,12 +676,18 @@ def run_visual(recorder: EventRecorder, snapshot_path: Path | None = None) -> in
 
         def _apply_window_size(self) -> None:
             pet_width, pet_height = self._pet_size()
+            left, top, right, bottom = self._pet_padding()
             if self._bubble_visible():
                 bubble_width = round(420 * self.bubble_scale)
                 bubble_height = self._card_height()
-                self.setFixedSize(max(pet_width + 50, bubble_width + 28), pet_height + bubble_height + 34)
+                # The bubble already reserves far more headroom than any rig
+                # overflow asks for, so only the bottom padding has to grow.
+                self.setFixedSize(
+                    max(pet_width + left + right, bubble_width + 28),
+                    pet_height + bubble_height + 34 + (bottom - 8),
+                )
             else:
-                self.setFixedSize(pet_width + 50, pet_height + 26)
+                self.setFixedSize(pet_width + left + right, pet_height + top + bottom)
 
         def _screen_geometry_at(self, x: int, y: int):
             screen = QApplication.screenAt(QPoint(x, y)) or QApplication.primaryScreen()
@@ -570,7 +718,7 @@ def run_visual(recorder: EventRecorder, snapshot_path: Path | None = None) -> in
                 self.pet_y = pet_y
                 self.move(
                     pet_x - (self.width() - pet_width) // 2,
-                    pet_y - (self.height() - pet_height - 8),
+                    pet_y - (self.height() - pet_height - self._pet_bottom_slack()),
                 )
                 self.update()
                 return
@@ -585,7 +733,7 @@ def run_visual(recorder: EventRecorder, snapshot_path: Path | None = None) -> in
             offset_x = min(max(pet_x - window_x, 0), self.width() - pet_width)
             self.pet_x = window_x + offset_x
 
-            top_offset_y = self.height() - pet_height - 8
+            top_offset_y = self.height() - pet_height - self._pet_bottom_slack()
             window_y = min(max(pet_y - top_offset_y, min_y), max_y)
             self.pet_y = window_y + top_offset_y
 
@@ -595,9 +743,19 @@ def run_visual(recorder: EventRecorder, snapshot_path: Path | None = None) -> in
         def _pet_offset_x(self, pet_width: int) -> int:
             return min(max(self.pet_x - self.x(), 0), self.width() - pet_width)
 
+        def _pet_bottom_slack(self) -> int:
+            """Gap between the logical pet box and the window's bottom edge.
+
+            8 for frame packs -- the shipped value -- and at least the rig's
+            declared bottom overflow otherwise, so a tail that swings below the
+            feet is inside the window rather than clipped by it.
+            """
+            return self._pet_padding()[3]
+
         def _pet_rect(self) -> tuple[int, int, int, int]:
             pet_width, pet_height = self._pet_size()
-            return self._pet_offset_x(pet_width), self.height() - pet_height - 8, pet_width, pet_height
+            bottom = self._pet_bottom_slack()
+            return self._pet_offset_x(pet_width), self.height() - pet_height - bottom, pet_width, pet_height
 
         def _pet_repaint_rect(self) -> tuple[int, int, int, int]:
             """Pet rect plus the slack the procedural motion can escape into.
@@ -608,6 +766,17 @@ def run_visual(recorder: EventRecorder, snapshot_path: Path | None = None) -> in
             (2.5 degrees) any clip asks for, scaled with the character.
             """
             pet_x, pet_y, pet_width, pet_height = self._pet_rect()
+            if self.rig is not None:
+                # A rig's deformation is bounded by its declared overflow, which
+                # the window already reserves, so the safe area is a constant
+                # per scale rather than the frame renderer's motion-table slack.
+                anchor_x, anchor_y = self._rig_anchor(self._bubble_height())
+                rx, ry, rw, rh = self.renderer.pet_rect(self.scale)
+                left = max(0, int(anchor_x + rx) - 1)
+                top = max(0, int(anchor_y + ry) - 1)
+                right = min(self.width(), int(anchor_x + rx + rw) + 2)
+                bottom = min(self.height(), int(anchor_y + ry + rh) + 2)
+                return left, top, right - left, bottom - top
             margin = round(24 * self.scale) + 8
             left = max(0, pet_x - margin)
             top = max(0, pet_y - margin)
@@ -631,7 +800,7 @@ def run_visual(recorder: EventRecorder, snapshot_path: Path | None = None) -> in
 
         def _restore_visible_position(self) -> None:
             pet_width, pet_height = self._pet_size()
-            top_offset = self.height() - pet_height - 8
+            top_offset = self.height() - pet_height - self._pet_bottom_slack()
             center_offset = (self.width() - pet_width) // 2
             saved_pet_x = self.layout.get("petX")
             saved_pet_y = self.layout.get("petY")
@@ -940,7 +1109,28 @@ def run_visual(recorder: EventRecorder, snapshot_path: Path | None = None) -> in
                     detail_text,
                 )
 
-            self.renderer.paint(painter, self, bubble_height)
+            if self.rig is not None:
+                anchor_x, anchor_y = self._rig_anchor(bubble_height)
+                self.renderer.paint(
+                    painter,
+                    self.rig_transforms or (),
+                    anchor_x=anchor_x,
+                    anchor_y=anchor_y,
+                    scale=self.scale,
+                )
+                if self.renderer.take_degradation_notice():
+                    print(
+                        "warning: rig paint averaged over "
+                        f"{self.renderer.last_paint_ms:.1f}ms; dropping to "
+                        f"{self.renderer.tick_ms(self.reduced_motion)}ms ticks",
+                        file=sys.stderr,
+                        flush=True,
+                    )
+                    self.animation_timer.setInterval(
+                        self.renderer.tick_ms(self.reduced_motion)
+                    )
+            else:
+                self.renderer.paint(painter, self, bubble_height)
 
         def mousePressEvent(self, event: QMouseEvent) -> None:
             if event.button() == Qt.MouseButton.LeftButton:
@@ -1027,6 +1217,8 @@ def run_visual(recorder: EventRecorder, snapshot_path: Path | None = None) -> in
                 self._save_layout()
             elif selected == reduced_action:
                 self.reduced_motion = reduced_action.isChecked()
+                if self.rig_driver is not None:
+                    self.rig_driver.set_reduced_motion(self.reduced_motion)
                 self.animation_timer.setInterval(self.renderer.tick_ms(self.reduced_motion))
                 if self.reduced_motion:
                     self.micro_timer.stop()
@@ -1046,7 +1238,7 @@ def run_visual(recorder: EventRecorder, snapshot_path: Path | None = None) -> in
     application = QApplication(sys.argv[:1])
     application.setQuitOnLastWindowClosed(False)
     try:
-        descriptor, pixmaps = resolve_pack(
+        pack_assets = resolve_pack(
             bundle_root(),
             os.environ.get("DSH_DAFEIYU_PROPORTION"),
             loader=load_pack_assets,
@@ -1056,7 +1248,7 @@ def run_visual(recorder: EventRecorder, snapshot_path: Path | None = None) -> in
         recorder.close()
         return 2
     inbox = Inbox()
-    window = CompanionWindow(descriptor, pixmaps)
+    window = CompanionWindow(pack_assets)
     inbox.message.connect(window.apply_message)
     inbox.closed.connect(application.quit)
 
