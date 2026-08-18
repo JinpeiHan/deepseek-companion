@@ -15,3 +15,16 @@ __pycache__/
 art-references/openai-raw/
 art-references/openai-generation-records.jsonl
 *.tmp.png
+*.tmp.webp
+*.tmp.gif
+
+# Agent worktrees
+.claude/worktrees/
+
+# Generated clip previews (regenerate with: pnpm run art:preview)
+docs/images/chibi-*.webp
+docs/images/chibi-*.gif
+docs/images/standard-*.webp
+docs/images/standard-*.gif
+docs/images/slender-*.webp
+docs/images/slender-*.gif
