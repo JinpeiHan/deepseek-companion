@@ -10,3 +10,8 @@ __pycache__/
 *.py[cod]
 .pytest_cache/
 .dsh-phase0/
+
+# Raw OpenAI image responses and machine-local generation records
+art-references/openai-raw/
+art-references/openai-generation-records.jsonl
+*.tmp.png
