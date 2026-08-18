@@ -1,0 +1,695 @@
+{
+  "formatVersion": 1,
+  "jobs": [
+    {
+      "pack": "standard",
+      "clip": "idle",
+      "frameIndex": 0,
+      "output": "assets/pet-standard/idle_front/idle_front_512.png",
+      "references": [
+        "art-references/standard/turnaround/front.jpg",
+        "art-references/standard/turnaround/side.jpg",
+        "art-references/standard/turnaround/back.jpg",
+        "art-references/standard/details/details.jpg",
+        "assets/pet/idle_front/idle_front_238.png"
+      ],
+      "previousFrame": null,
+      "prompt": "第一张参考图是本帧唯一的比例权威：约四头身的矮身少女比例：全身总高约等于 4 个头高，头部明显偏大、脖子短、躯干和四肢短而圆润，是介于二头身 Q 版和写实之间的“小体型”比例。请严格照抄它的头身比，不要改成更成熟或更修长的体型。保持前四张参考图确立的脸型、蓝色渐变长发、白色荷叶边女仆头饰、头两侧的鲸鱼耳鳍、围裙上的白色小鲸鱼图案、裙摆金色纹样、后腰白色蝴蝶结、短款深藏青女仆裙、白色荷叶边围裙、白色短袜与深蓝玛丽珍鞋，以及身后固定的分叉鲸尾。本帧视角为正面，动作是安静站立待机，双手自然垂在身侧，胸口因呼吸而极轻微起伏的完整姿势。角色完整入画，不裁切头顶、双手、裙摆、鲸尾和双脚。"
+    },
+    {
+      "pack": "standard",
+      "clip": "thinking",
+      "frameIndex": 0,
+      "output": "assets/pet-standard/idle_think/idle_think_512.png",
+      "references": [
+        "art-references/standard/turnaround/front.jpg",
+        "art-references/standard/turnaround/side.jpg",
+        "art-references/standard/turnaround/back.jpg",
+        "art-references/standard/details/details.jpg",
+        "assets/pet/idle_think/idle_think_238.png"
+      ],
+      "previousFrame": null,
+      "prompt": "第一张参考图是本帧唯一的比例权威：约四头身的矮身少女比例：全身总高约等于 4 个头高，头部明显偏大、脖子短、躯干和四肢短而圆润，是介于二头身 Q 版和写实之间的“小体型”比例。请严格照抄它的头身比，不要改成更成熟或更修长的体型。保持前四张参考图确立的脸型、蓝色渐变长发、白色荷叶边女仆头饰、头两侧的鲸鱼耳鳍、围裙上的白色小鲸鱼图案、裙摆金色纹样、后腰白色蝴蝶结、短款深藏青女仆裙、白色荷叶边围裙、白色短袜与深蓝玛丽珍鞋，以及身后固定的分叉鲸尾。本帧视角为正面，动作是思考：一只手抬到下巴附近，视线略微上移，眉头轻挑的完整姿势。角色完整入画，不裁切头顶、双手、裙摆、鲸尾和双脚。"
+    },
+    {
+      "pack": "standard",
+      "clip": "working",
+      "frameIndex": 0,
+      "output": "assets/pet-standard/sweep/sweep_512.png",
+      "references": [
+        "art-references/standard/turnaround/front.jpg",
+        "art-references/standard/turnaround/side.jpg",
+        "art-references/standard/turnaround/back.jpg",
+        "art-references/standard/details/details.jpg",
+        "assets/pet/sweep/sweep_238.png"
+      ],
+      "previousFrame": null,
+      "prompt": "第一张参考图是本帧唯一的比例权威：约四头身的矮身少女比例：全身总高约等于 4 个头高，头部明显偏大、脖子短、躯干和四肢短而圆润，是介于二头身 Q 版和写实之间的“小体型”比例。请严格照抄它的头身比，不要改成更成熟或更修长的体型。保持前四张参考图确立的脸型、蓝色渐变长发、白色荷叶边女仆头饰、头两侧的鲸鱼耳鳍、围裙上的白色小鲸鱼图案、裙摆金色纹样、后腰白色蝴蝶结、短款深藏青女仆裙、白色荷叶边围裙、白色短袜与深蓝玛丽珍鞋，以及身后固定的分叉鲸尾。本帧视角为正面，动作是双手握着扫帚打扫，身体微微前倾的完整姿势。角色完整入画，不裁切头顶、双手、裙摆、鲸尾和双脚。"
+    },
+    {
+      "pack": "standard",
+      "clip": "waiting",
+      "frameIndex": 0,
+      "output": "assets/pet-standard/talk/talk_512.png",
+      "references": [
+        "art-references/standard/turnaround/front.jpg",
+        "art-references/standard/turnaround/side.jpg",
+        "art-references/standard/turnaround/back.jpg",
+        "art-references/standard/details/details.jpg",
+        "assets/pet/talk/talk_238.png"
+      ],
+      "previousFrame": null,
+      "prompt": "第一张参考图是本帧唯一的比例权威：约四头身的矮身少女比例：全身总高约等于 4 个头高，头部明显偏大、脖子短、躯干和四肢短而圆润，是介于二头身 Q 版和写实之间的“小体型”比例。请严格照抄它的头身比，不要改成更成熟或更修长的体型。保持前四张参考图确立的脸型、蓝色渐变长发、白色荷叶边女仆头饰、头两侧的鲸鱼耳鳍、围裙上的白色小鲸鱼图案、裙摆金色纹样、后腰白色蝴蝶结、短款深藏青女仆裙、白色荷叶边围裙、白色短袜与深蓝玛丽珍鞋，以及身后固定的分叉鲸尾。本帧视角为正面，动作是说话等待：一只手抬起做出示意手势，嘴微张的完整姿势。角色完整入画，不裁切头顶、双手、裙摆、鲸尾和双脚。"
+    },
+    {
+      "pack": "standard",
+      "clip": "success",
+      "frameIndex": 0,
+      "output": "assets/pet-standard/happy/happy_512.png",
+      "references": [
+        "art-references/standard/turnaround/front.jpg",
+        "art-references/standard/turnaround/side.jpg",
+        "art-references/standard/turnaround/back.jpg",
+        "art-references/standard/details/details.jpg",
+        "assets/pet/happy/happy_238.png"
+      ],
+      "previousFrame": null,
+      "prompt": "第一张参考图是本帧唯一的比例权威：约四头身的矮身少女比例：全身总高约等于 4 个头高，头部明显偏大、脖子短、躯干和四肢短而圆润，是介于二头身 Q 版和写实之间的“小体型”比例。请严格照抄它的头身比，不要改成更成熟或更修长的体型。保持前四张参考图确立的脸型、蓝色渐变长发、白色荷叶边女仆头饰、头两侧的鲸鱼耳鳍、围裙上的白色小鲸鱼图案、裙摆金色纹样、后腰白色蝴蝶结、短款深藏青女仆裙、白色荷叶边围裙、白色短袜与深蓝玛丽珍鞋，以及身后固定的分叉鲸尾。本帧视角为正面，动作是开心：双手轻轻举起，眼睛弯成笑眼，身体轻快上扬的完整姿势。角色完整入画，不裁切头顶、双手、裙摆、鲸尾和双脚。"
+    },
+    {
+      "pack": "standard",
+      "clip": "error",
+      "frameIndex": 0,
+      "output": "assets/pet-standard/angry/angry_512.png",
+      "references": [
+        "art-references/standard/turnaround/front.jpg",
+        "art-references/standard/turnaround/side.jpg",
+        "art-references/standard/turnaround/back.jpg",
+        "art-references/standard/details/details.jpg",
+        "assets/pet/angry/angry_238.png"
+      ],
+      "previousFrame": null,
+      "prompt": "第一张参考图是本帧唯一的比例权威：约四头身的矮身少女比例：全身总高约等于 4 个头高，头部明显偏大、脖子短、躯干和四肢短而圆润，是介于二头身 Q 版和写实之间的“小体型”比例。请严格照抄它的头身比，不要改成更成熟或更修长的体型。保持前四张参考图确立的脸型、蓝色渐变长发、白色荷叶边女仆头饰、头两侧的鲸鱼耳鳍、围裙上的白色小鲸鱼图案、裙摆金色纹样、后腰白色蝴蝶结、短款深藏青女仆裙、白色荷叶边围裙、白色短袜与深蓝玛丽珍鞋，以及身后固定的分叉鲸尾。本帧视角为正面，动作是生气：双手叉腰，鼓起脸颊，眉毛下压的完整姿势。角色完整入画，不裁切头顶、双手、裙摆、鲸尾和双脚。"
+    },
+    {
+      "pack": "standard",
+      "clip": "error_dizzy",
+      "frameIndex": 0,
+      "output": "assets/pet-standard/dizzy/dizzy_512.png",
+      "references": [
+        "art-references/standard/turnaround/front.jpg",
+        "art-references/standard/turnaround/side.jpg",
+        "art-references/standard/turnaround/back.jpg",
+        "art-references/standard/details/details.jpg",
+        "assets/pet/dizzy/dizzy_238.png"
+      ],
+      "previousFrame": null,
+      "prompt": "第一张参考图是本帧唯一的比例权威：约四头身的矮身少女比例：全身总高约等于 4 个头高，头部明显偏大、脖子短、躯干和四肢短而圆润，是介于二头身 Q 版和写实之间的“小体型”比例。请严格照抄它的头身比，不要改成更成熟或更修长的体型。保持前四张参考图确立的脸型、蓝色渐变长发、白色荷叶边女仆头饰、头两侧的鲸鱼耳鳍、围裙上的白色小鲸鱼图案、裙摆金色纹样、后腰白色蝴蝶结、短款深藏青女仆裙、白色荷叶边围裙、白色短袜与深蓝玛丽珍鞋，以及身后固定的分叉鲸尾。本帧视角为正面，动作是眩晕：身体轻微歪斜，眼睛变成打转的漩涡状的完整姿势。角色完整入画，不裁切头顶、双手、裙摆、鲸尾和双脚。"
+    },
+    {
+      "pack": "standard",
+      "clip": "dragging",
+      "frameIndex": 0,
+      "output": "assets/pet-standard/dragging/dragging_512.png",
+      "references": [
+        "art-references/standard/turnaround/front.jpg",
+        "art-references/standard/turnaround/side.jpg",
+        "art-references/standard/turnaround/back.jpg",
+        "art-references/standard/details/details.jpg",
+        "assets/pet/dragging/dragging_238.png"
+      ],
+      "previousFrame": null,
+      "prompt": "第一张参考图是本帧唯一的比例权威：约四头身的矮身少女比例：全身总高约等于 4 个头高，头部明显偏大、脖子短、躯干和四肢短而圆润，是介于二头身 Q 版和写实之间的“小体型”比例。请严格照抄它的头身比，不要改成更成熟或更修长的体型。保持前四张参考图确立的脸型、蓝色渐变长发、白色荷叶边女仆头饰、头两侧的鲸鱼耳鳍、围裙上的白色小鲸鱼图案、裙摆金色纹样、后腰白色蝴蝶结、短款深藏青女仆裙、白色荷叶边围裙、白色短袜与深蓝玛丽珍鞋，以及身后固定的分叉鲸尾。本帧视角为正面，动作是被从空中拎起拖动：双手上举，头发与裙摆向下垂坠，双脚离地的完整姿势。角色完整入画，不裁切头顶、双手、裙摆、鲸尾和双脚。"
+    },
+    {
+      "pack": "standard",
+      "clip": "blink",
+      "frameIndex": 0,
+      "output": "assets/pet-standard/idle_blink/idle_blink_512_00.png",
+      "references": [
+        "art-references/standard/turnaround/front.jpg",
+        "art-references/standard/turnaround/side.jpg",
+        "art-references/standard/turnaround/back.jpg",
+        "art-references/standard/details/details.jpg",
+        "assets/pet/idle_blink/idle_blink_238_00.png"
+      ],
+      "previousFrame": null,
+      "prompt": "第一张参考图是本帧唯一的比例权威：约四头身的矮身少女比例：全身总高约等于 4 个头高，头部明显偏大、脖子短、躯干和四肢短而圆润，是介于二头身 Q 版和写实之间的“小体型”比例。请严格照抄它的头身比，不要改成更成熟或更修长的体型。保持前四张参考图确立的脸型、蓝色渐变长发、白色荷叶边女仆头饰、头两侧的鲸鱼耳鳍、围裙上的白色小鲸鱼图案、裙摆金色纹样、后腰白色蝴蝶结、短款深藏青女仆裙、白色荷叶边围裙、白色短袜与深蓝玛丽珍鞋，以及身后固定的分叉鲸尾。本帧视角为正面，动作是站立不动地完成一次眨眼的第 1/5 阶段。角色完整入画，不裁切头顶、双手、裙摆、鲸尾和双脚。"
+    },
+    {
+      "pack": "standard",
+      "clip": "blink",
+      "frameIndex": 1,
+      "output": "assets/pet-standard/idle_blink/idle_blink_512_01.png",
+      "references": [
+        "art-references/standard/turnaround/front.jpg",
+        "art-references/standard/turnaround/side.jpg",
+        "art-references/standard/turnaround/back.jpg",
+        "art-references/standard/details/details.jpg",
+        "assets/pet/idle_blink/idle_blink_238_01.png"
+      ],
+      "previousFrame": "assets/pet-standard/idle_blink/idle_blink_512_00.png",
+      "prompt": "第一张参考图是本帧唯一的比例权威：约四头身的矮身少女比例：全身总高约等于 4 个头高，头部明显偏大、脖子短、躯干和四肢短而圆润，是介于二头身 Q 版和写实之间的“小体型”比例。请严格照抄它的头身比，不要改成更成熟或更修长的体型。保持前四张参考图确立的脸型、蓝色渐变长发、白色荷叶边女仆头饰、头两侧的鲸鱼耳鳍、围裙上的白色小鲸鱼图案、裙摆金色纹样、后腰白色蝴蝶结、短款深藏青女仆裙、白色荷叶边围裙、白色短袜与深蓝玛丽珍鞋，以及身后固定的分叉鲸尾。本帧视角为正面，动作是站立不动地完成一次眨眼的第 2/5 阶段。角色完整入画，不裁切头顶、双手、裙摆、鲸尾和双脚。"
+    },
+    {
+      "pack": "standard",
+      "clip": "blink",
+      "frameIndex": 2,
+      "output": "assets/pet-standard/idle_blink/idle_blink_512_02.png",
+      "references": [
+        "art-references/standard/turnaround/front.jpg",
+        "art-references/standard/turnaround/side.jpg",
+        "art-references/standard/turnaround/back.jpg",
+        "art-references/standard/details/details.jpg",
+        "assets/pet/idle_blink/idle_blink_238_02.png"
+      ],
+      "previousFrame": "assets/pet-standard/idle_blink/idle_blink_512_01.png",
+      "prompt": "第一张参考图是本帧唯一的比例权威：约四头身的矮身少女比例：全身总高约等于 4 个头高，头部明显偏大、脖子短、躯干和四肢短而圆润，是介于二头身 Q 版和写实之间的“小体型”比例。请严格照抄它的头身比，不要改成更成熟或更修长的体型。保持前四张参考图确立的脸型、蓝色渐变长发、白色荷叶边女仆头饰、头两侧的鲸鱼耳鳍、围裙上的白色小鲸鱼图案、裙摆金色纹样、后腰白色蝴蝶结、短款深藏青女仆裙、白色荷叶边围裙、白色短袜与深蓝玛丽珍鞋，以及身后固定的分叉鲸尾。本帧视角为正面，动作是站立不动地完成一次眨眼的第 3/5 阶段。角色完整入画，不裁切头顶、双手、裙摆、鲸尾和双脚。"
+    },
+    {
+      "pack": "standard",
+      "clip": "blink",
+      "frameIndex": 3,
+      "output": "assets/pet-standard/idle_blink/idle_blink_512_03.png",
+      "references": [
+        "art-references/standard/turnaround/front.jpg",
+        "art-references/standard/turnaround/side.jpg",
+        "art-references/standard/turnaround/back.jpg",
+        "art-references/standard/details/details.jpg",
+        "assets/pet/idle_blink/idle_blink_238_03.png"
+      ],
+      "previousFrame": "assets/pet-standard/idle_blink/idle_blink_512_02.png",
+      "prompt": "第一张参考图是本帧唯一的比例权威：约四头身的矮身少女比例：全身总高约等于 4 个头高，头部明显偏大、脖子短、躯干和四肢短而圆润，是介于二头身 Q 版和写实之间的“小体型”比例。请严格照抄它的头身比，不要改成更成熟或更修长的体型。保持前四张参考图确立的脸型、蓝色渐变长发、白色荷叶边女仆头饰、头两侧的鲸鱼耳鳍、围裙上的白色小鲸鱼图案、裙摆金色纹样、后腰白色蝴蝶结、短款深藏青女仆裙、白色荷叶边围裙、白色短袜与深蓝玛丽珍鞋，以及身后固定的分叉鲸尾。本帧视角为正面，动作是站立不动地完成一次眨眼的第 4/5 阶段。角色完整入画，不裁切头顶、双手、裙摆、鲸尾和双脚。"
+    },
+    {
+      "pack": "standard",
+      "clip": "blink",
+      "frameIndex": 4,
+      "output": "assets/pet-standard/idle_blink/idle_blink_512_04.png",
+      "references": [
+        "art-references/standard/turnaround/front.jpg",
+        "art-references/standard/turnaround/side.jpg",
+        "art-references/standard/turnaround/back.jpg",
+        "art-references/standard/details/details.jpg",
+        "assets/pet/idle_blink/idle_blink_238_04.png"
+      ],
+      "previousFrame": "assets/pet-standard/idle_blink/idle_blink_512_03.png",
+      "prompt": "第一张参考图是本帧唯一的比例权威：约四头身的矮身少女比例：全身总高约等于 4 个头高，头部明显偏大、脖子短、躯干和四肢短而圆润，是介于二头身 Q 版和写实之间的“小体型”比例。请严格照抄它的头身比，不要改成更成熟或更修长的体型。保持前四张参考图确立的脸型、蓝色渐变长发、白色荷叶边女仆头饰、头两侧的鲸鱼耳鳍、围裙上的白色小鲸鱼图案、裙摆金色纹样、后腰白色蝴蝶结、短款深藏青女仆裙、白色荷叶边围裙、白色短袜与深蓝玛丽珍鞋，以及身后固定的分叉鲸尾。本帧视角为正面，动作是站立不动地完成一次眨眼的第 5/5 阶段。角色完整入画，不裁切头顶、双手、裙摆、鲸尾和双脚。"
+    },
+    {
+      "pack": "standard",
+      "clip": "head_pat",
+      "frameIndex": 0,
+      "output": "assets/pet-standard/head_pat/head_pat_512_00.png",
+      "references": [
+        "art-references/standard/turnaround/front.jpg",
+        "art-references/standard/turnaround/side.jpg",
+        "art-references/standard/turnaround/back.jpg",
+        "art-references/standard/details/details.jpg",
+        "assets/pet/head_pat/head_pat_238_00.png"
+      ],
+      "previousFrame": null,
+      "prompt": "第一张参考图是本帧唯一的比例权威：约四头身的矮身少女比例：全身总高约等于 4 个头高，头部明显偏大、脖子短、躯干和四肢短而圆润，是介于二头身 Q 版和写实之间的“小体型”比例。请严格照抄它的头身比，不要改成更成熟或更修长的体型。保持前四张参考图确立的脸型、蓝色渐变长发、白色荷叶边女仆头饰、头两侧的鲸鱼耳鳍、围裙上的白色小鲸鱼图案、裙摆金色纹样、后腰白色蝴蝶结、短款深藏青女仆裙、白色荷叶边围裙、白色短袜与深蓝玛丽珍鞋，以及身后固定的分叉鲸尾。本帧视角为正面，动作是被摸头：肩膀微缩、眯眼享受，画面中不出现手或角色以外的任何物体的第 1/6 阶段。角色完整入画，不裁切头顶、双手、裙摆、鲸尾和双脚。"
+    },
+    {
+      "pack": "standard",
+      "clip": "head_pat",
+      "frameIndex": 1,
+      "output": "assets/pet-standard/head_pat/head_pat_512_01.png",
+      "references": [
+        "art-references/standard/turnaround/front.jpg",
+        "art-references/standard/turnaround/side.jpg",
+        "art-references/standard/turnaround/back.jpg",
+        "art-references/standard/details/details.jpg",
+        "assets/pet/head_pat/head_pat_238_01.png"
+      ],
+      "previousFrame": "assets/pet-standard/head_pat/head_pat_512_00.png",
+      "prompt": "第一张参考图是本帧唯一的比例权威：约四头身的矮身少女比例：全身总高约等于 4 个头高，头部明显偏大、脖子短、躯干和四肢短而圆润，是介于二头身 Q 版和写实之间的“小体型”比例。请严格照抄它的头身比，不要改成更成熟或更修长的体型。保持前四张参考图确立的脸型、蓝色渐变长发、白色荷叶边女仆头饰、头两侧的鲸鱼耳鳍、围裙上的白色小鲸鱼图案、裙摆金色纹样、后腰白色蝴蝶结、短款深藏青女仆裙、白色荷叶边围裙、白色短袜与深蓝玛丽珍鞋，以及身后固定的分叉鲸尾。本帧视角为正面，动作是被摸头：肩膀微缩、眯眼享受，画面中不出现手或角色以外的任何物体的第 2/6 阶段。角色完整入画，不裁切头顶、双手、裙摆、鲸尾和双脚。"
+    },
+    {
+      "pack": "standard",
+      "clip": "head_pat",
+      "frameIndex": 2,
+      "output": "assets/pet-standard/head_pat/head_pat_512_02.png",
+      "references": [
+        "art-references/standard/turnaround/front.jpg",
+        "art-references/standard/turnaround/side.jpg",
+        "art-references/standard/turnaround/back.jpg",
+        "art-references/standard/details/details.jpg",
+        "assets/pet/head_pat/head_pat_238_02.png"
+      ],
+      "previousFrame": "assets/pet-standard/head_pat/head_pat_512_01.png",
+      "prompt": "第一张参考图是本帧唯一的比例权威：约四头身的矮身少女比例：全身总高约等于 4 个头高，头部明显偏大、脖子短、躯干和四肢短而圆润，是介于二头身 Q 版和写实之间的“小体型”比例。请严格照抄它的头身比，不要改成更成熟或更修长的体型。保持前四张参考图确立的脸型、蓝色渐变长发、白色荷叶边女仆头饰、头两侧的鲸鱼耳鳍、围裙上的白色小鲸鱼图案、裙摆金色纹样、后腰白色蝴蝶结、短款深藏青女仆裙、白色荷叶边围裙、白色短袜与深蓝玛丽珍鞋，以及身后固定的分叉鲸尾。本帧视角为正面，动作是被摸头：肩膀微缩、眯眼享受，画面中不出现手或角色以外的任何物体的第 3/6 阶段。角色完整入画，不裁切头顶、双手、裙摆、鲸尾和双脚。"
+    },
+    {
+      "pack": "standard",
+      "clip": "head_pat",
+      "frameIndex": 3,
+      "output": "assets/pet-standard/head_pat/head_pat_512_03.png",
+      "references": [
+        "art-references/standard/turnaround/front.jpg",
+        "art-references/standard/turnaround/side.jpg",
+        "art-references/standard/turnaround/back.jpg",
+        "art-references/standard/details/details.jpg",
+        "assets/pet/head_pat/head_pat_238_03.png"
+      ],
+      "previousFrame": "assets/pet-standard/head_pat/head_pat_512_02.png",
+      "prompt": "第一张参考图是本帧唯一的比例权威：约四头身的矮身少女比例：全身总高约等于 4 个头高，头部明显偏大、脖子短、躯干和四肢短而圆润，是介于二头身 Q 版和写实之间的“小体型”比例。请严格照抄它的头身比，不要改成更成熟或更修长的体型。保持前四张参考图确立的脸型、蓝色渐变长发、白色荷叶边女仆头饰、头两侧的鲸鱼耳鳍、围裙上的白色小鲸鱼图案、裙摆金色纹样、后腰白色蝴蝶结、短款深藏青女仆裙、白色荷叶边围裙、白色短袜与深蓝玛丽珍鞋，以及身后固定的分叉鲸尾。本帧视角为正面，动作是被摸头：肩膀微缩、眯眼享受，画面中不出现手或角色以外的任何物体的第 4/6 阶段。角色完整入画，不裁切头顶、双手、裙摆、鲸尾和双脚。"
+    },
+    {
+      "pack": "standard",
+      "clip": "head_pat",
+      "frameIndex": 4,
+      "output": "assets/pet-standard/head_pat/head_pat_512_04.png",
+      "references": [
+        "art-references/standard/turnaround/front.jpg",
+        "art-references/standard/turnaround/side.jpg",
+        "art-references/standard/turnaround/back.jpg",
+        "art-references/standard/details/details.jpg",
+        "assets/pet/head_pat/head_pat_238_04.png"
+      ],
+      "previousFrame": "assets/pet-standard/head_pat/head_pat_512_03.png",
+      "prompt": "第一张参考图是本帧唯一的比例权威：约四头身的矮身少女比例：全身总高约等于 4 个头高，头部明显偏大、脖子短、躯干和四肢短而圆润，是介于二头身 Q 版和写实之间的“小体型”比例。请严格照抄它的头身比，不要改成更成熟或更修长的体型。保持前四张参考图确立的脸型、蓝色渐变长发、白色荷叶边女仆头饰、头两侧的鲸鱼耳鳍、围裙上的白色小鲸鱼图案、裙摆金色纹样、后腰白色蝴蝶结、短款深藏青女仆裙、白色荷叶边围裙、白色短袜与深蓝玛丽珍鞋，以及身后固定的分叉鲸尾。本帧视角为正面，动作是被摸头：肩膀微缩、眯眼享受，画面中不出现手或角色以外的任何物体的第 5/6 阶段。角色完整入画，不裁切头顶、双手、裙摆、鲸尾和双脚。"
+    },
+    {
+      "pack": "standard",
+      "clip": "head_pat",
+      "frameIndex": 5,
+      "output": "assets/pet-standard/head_pat/head_pat_512_05.png",
+      "references": [
+        "art-references/standard/turnaround/front.jpg",
+        "art-references/standard/turnaround/side.jpg",
+        "art-references/standard/turnaround/back.jpg",
+        "art-references/standard/details/details.jpg",
+        "assets/pet/head_pat/head_pat_238_05.png"
+      ],
+      "previousFrame": "assets/pet-standard/head_pat/head_pat_512_04.png",
+      "prompt": "第一张参考图是本帧唯一的比例权威：约四头身的矮身少女比例：全身总高约等于 4 个头高，头部明显偏大、脖子短、躯干和四肢短而圆润，是介于二头身 Q 版和写实之间的“小体型”比例。请严格照抄它的头身比，不要改成更成熟或更修长的体型。保持前四张参考图确立的脸型、蓝色渐变长发、白色荷叶边女仆头饰、头两侧的鲸鱼耳鳍、围裙上的白色小鲸鱼图案、裙摆金色纹样、后腰白色蝴蝶结、短款深藏青女仆裙、白色荷叶边围裙、白色短袜与深蓝玛丽珍鞋，以及身后固定的分叉鲸尾。本帧视角为正面，动作是被摸头：肩膀微缩、眯眼享受，画面中不出现手或角色以外的任何物体的第 6/6 阶段。角色完整入画，不裁切头顶、双手、裙摆、鲸尾和双脚。"
+    },
+    {
+      "pack": "standard",
+      "clip": "poke",
+      "frameIndex": 0,
+      "output": "assets/pet-standard/poke_react/poke_react_512_00.png",
+      "references": [
+        "art-references/standard/turnaround/front.jpg",
+        "art-references/standard/turnaround/side.jpg",
+        "art-references/standard/turnaround/back.jpg",
+        "art-references/standard/details/details.jpg",
+        "assets/pet/poke_react/poke_react_238_00.png"
+      ],
+      "previousFrame": null,
+      "prompt": "第一张参考图是本帧唯一的比例权威：约四头身的矮身少女比例：全身总高约等于 4 个头高，头部明显偏大、脖子短、躯干和四肢短而圆润，是介于二头身 Q 版和写实之间的“小体型”比例。请严格照抄它的头身比，不要改成更成熟或更修长的体型。保持前四张参考图确立的脸型、蓝色渐变长发、白色荷叶边女仆头饰、头两侧的鲸鱼耳鳍、围裙上的白色小鲸鱼图案、裙摆金色纹样、后腰白色蝴蝶结、短款深藏青女仆裙、白色荷叶边围裙、白色短袜与深蓝玛丽珍鞋，以及身后固定的分叉鲸尾。本帧视角为正面，动作是被戳到时的反应：身体一缩，露出惊讶表情的第 1/4 阶段。角色完整入画，不裁切头顶、双手、裙摆、鲸尾和双脚。"
+    },
+    {
+      "pack": "standard",
+      "clip": "poke",
+      "frameIndex": 1,
+      "output": "assets/pet-standard/poke_react/poke_react_512_01.png",
+      "references": [
+        "art-references/standard/turnaround/front.jpg",
+        "art-references/standard/turnaround/side.jpg",
+        "art-references/standard/turnaround/back.jpg",
+        "art-references/standard/details/details.jpg",
+        "assets/pet/poke_react/poke_react_238_01.png"
+      ],
+      "previousFrame": "assets/pet-standard/poke_react/poke_react_512_00.png",
+      "prompt": "第一张参考图是本帧唯一的比例权威：约四头身的矮身少女比例：全身总高约等于 4 个头高，头部明显偏大、脖子短、躯干和四肢短而圆润，是介于二头身 Q 版和写实之间的“小体型”比例。请严格照抄它的头身比，不要改成更成熟或更修长的体型。保持前四张参考图确立的脸型、蓝色渐变长发、白色荷叶边女仆头饰、头两侧的鲸鱼耳鳍、围裙上的白色小鲸鱼图案、裙摆金色纹样、后腰白色蝴蝶结、短款深藏青女仆裙、白色荷叶边围裙、白色短袜与深蓝玛丽珍鞋，以及身后固定的分叉鲸尾。本帧视角为正面，动作是被戳到时的反应：身体一缩，露出惊讶表情的第 2/4 阶段。角色完整入画，不裁切头顶、双手、裙摆、鲸尾和双脚。"
+    },
+    {
+      "pack": "standard",
+      "clip": "poke",
+      "frameIndex": 2,
+      "output": "assets/pet-standard/poke_react/poke_react_512_02.png",
+      "references": [
+        "art-references/standard/turnaround/front.jpg",
+        "art-references/standard/turnaround/side.jpg",
+        "art-references/standard/turnaround/back.jpg",
+        "art-references/standard/details/details.jpg",
+        "assets/pet/poke_react/poke_react_238_02.png"
+      ],
+      "previousFrame": "assets/pet-standard/poke_react/poke_react_512_01.png",
+      "prompt": "第一张参考图是本帧唯一的比例权威：约四头身的矮身少女比例：全身总高约等于 4 个头高，头部明显偏大、脖子短、躯干和四肢短而圆润，是介于二头身 Q 版和写实之间的“小体型”比例。请严格照抄它的头身比，不要改成更成熟或更修长的体型。保持前四张参考图确立的脸型、蓝色渐变长发、白色荷叶边女仆头饰、头两侧的鲸鱼耳鳍、围裙上的白色小鲸鱼图案、裙摆金色纹样、后腰白色蝴蝶结、短款深藏青女仆裙、白色荷叶边围裙、白色短袜与深蓝玛丽珍鞋，以及身后固定的分叉鲸尾。本帧视角为正面，动作是被戳到时的反应：身体一缩，露出惊讶表情的第 3/4 阶段。角色完整入画，不裁切头顶、双手、裙摆、鲸尾和双脚。"
+    },
+    {
+      "pack": "standard",
+      "clip": "poke",
+      "frameIndex": 3,
+      "output": "assets/pet-standard/poke_react/poke_react_512_03.png",
+      "references": [
+        "art-references/standard/turnaround/front.jpg",
+        "art-references/standard/turnaround/side.jpg",
+        "art-references/standard/turnaround/back.jpg",
+        "art-references/standard/details/details.jpg",
+        "assets/pet/poke_react/poke_react_238_03.png"
+      ],
+      "previousFrame": "assets/pet-standard/poke_react/poke_react_512_02.png",
+      "prompt": "第一张参考图是本帧唯一的比例权威：约四头身的矮身少女比例：全身总高约等于 4 个头高，头部明显偏大、脖子短、躯干和四肢短而圆润，是介于二头身 Q 版和写实之间的“小体型”比例。请严格照抄它的头身比，不要改成更成熟或更修长的体型。保持前四张参考图确立的脸型、蓝色渐变长发、白色荷叶边女仆头饰、头两侧的鲸鱼耳鳍、围裙上的白色小鲸鱼图案、裙摆金色纹样、后腰白色蝴蝶结、短款深藏青女仆裙、白色荷叶边围裙、白色短袜与深蓝玛丽珍鞋，以及身后固定的分叉鲸尾。本帧视角为正面，动作是被戳到时的反应：身体一缩，露出惊讶表情的第 4/4 阶段。角色完整入画，不裁切头顶、双手、裙摆、鲸尾和双脚。"
+    },
+    {
+      "pack": "slender",
+      "clip": "idle",
+      "frameIndex": 0,
+      "output": "assets/pet-slender/idle_front/idle_front_512.png",
+      "references": [
+        "art-references/slender/turnaround/front.jpg",
+        "art-references/slender/turnaround/side.jpg",
+        "art-references/slender/turnaround/back.jpg",
+        "art-references/slender/details/details.jpg",
+        "assets/pet/idle_front/idle_front_238.png"
+      ],
+      "previousFrame": null,
+      "prompt": "第一张参考图是本帧唯一的比例权威：约六至七头身的修长少女比例：全身总高约等于 6.5 个头高，四肢修长。请严格照抄它的头身比，不要改成更成熟或更修长的体型。保持前四张参考图确立的脸型、蓝色渐变长发、白色荷叶边女仆头饰、头两侧的鲸鱼耳鳍、围裙上的白色小鲸鱼图案、裙摆金色纹样、后腰白色蝴蝶结、长及小腿的深藏青女仆长裙、白色荷叶边长围裙、白色长袜与深蓝玛丽珍鞋，以及身后固定的分叉鲸尾。本帧视角为正面，动作是安静站立待机，双手自然垂在身侧，胸口因呼吸而极轻微起伏的完整姿势。角色完整入画，不裁切头顶、双手、裙摆、鲸尾和双脚。"
+    },
+    {
+      "pack": "slender",
+      "clip": "thinking",
+      "frameIndex": 0,
+      "output": "assets/pet-slender/idle_think/idle_think_512.png",
+      "references": [
+        "art-references/slender/turnaround/front.jpg",
+        "art-references/slender/turnaround/side.jpg",
+        "art-references/slender/turnaround/back.jpg",
+        "art-references/slender/details/details.jpg",
+        "assets/pet/idle_think/idle_think_238.png"
+      ],
+      "previousFrame": null,
+      "prompt": "第一张参考图是本帧唯一的比例权威：约六至七头身的修长少女比例：全身总高约等于 6.5 个头高，四肢修长。请严格照抄它的头身比，不要改成更成熟或更修长的体型。保持前四张参考图确立的脸型、蓝色渐变长发、白色荷叶边女仆头饰、头两侧的鲸鱼耳鳍、围裙上的白色小鲸鱼图案、裙摆金色纹样、后腰白色蝴蝶结、长及小腿的深藏青女仆长裙、白色荷叶边长围裙、白色长袜与深蓝玛丽珍鞋，以及身后固定的分叉鲸尾。本帧视角为正面，动作是思考：一只手抬到下巴附近，视线略微上移，眉头轻挑的完整姿势。角色完整入画，不裁切头顶、双手、裙摆、鲸尾和双脚。"
+    },
+    {
+      "pack": "slender",
+      "clip": "working",
+      "frameIndex": 0,
+      "output": "assets/pet-slender/sweep/sweep_512.png",
+      "references": [
+        "art-references/slender/turnaround/front.jpg",
+        "art-references/slender/turnaround/side.jpg",
+        "art-references/slender/turnaround/back.jpg",
+        "art-references/slender/details/details.jpg",
+        "assets/pet/sweep/sweep_238.png"
+      ],
+      "previousFrame": null,
+      "prompt": "第一张参考图是本帧唯一的比例权威：约六至七头身的修长少女比例：全身总高约等于 6.5 个头高，四肢修长。请严格照抄它的头身比，不要改成更成熟或更修长的体型。保持前四张参考图确立的脸型、蓝色渐变长发、白色荷叶边女仆头饰、头两侧的鲸鱼耳鳍、围裙上的白色小鲸鱼图案、裙摆金色纹样、后腰白色蝴蝶结、长及小腿的深藏青女仆长裙、白色荷叶边长围裙、白色长袜与深蓝玛丽珍鞋，以及身后固定的分叉鲸尾。本帧视角为正面，动作是双手握着扫帚打扫，身体微微前倾的完整姿势。角色完整入画，不裁切头顶、双手、裙摆、鲸尾和双脚。"
+    },
+    {
+      "pack": "slender",
+      "clip": "waiting",
+      "frameIndex": 0,
+      "output": "assets/pet-slender/talk/talk_512.png",
+      "references": [
+        "art-references/slender/turnaround/front.jpg",
+        "art-references/slender/turnaround/side.jpg",
+        "art-references/slender/turnaround/back.jpg",
+        "art-references/slender/details/details.jpg",
+        "assets/pet/talk/talk_238.png"
+      ],
+      "previousFrame": null,
+      "prompt": "第一张参考图是本帧唯一的比例权威：约六至七头身的修长少女比例：全身总高约等于 6.5 个头高，四肢修长。请严格照抄它的头身比，不要改成更成熟或更修长的体型。保持前四张参考图确立的脸型、蓝色渐变长发、白色荷叶边女仆头饰、头两侧的鲸鱼耳鳍、围裙上的白色小鲸鱼图案、裙摆金色纹样、后腰白色蝴蝶结、长及小腿的深藏青女仆长裙、白色荷叶边长围裙、白色长袜与深蓝玛丽珍鞋，以及身后固定的分叉鲸尾。本帧视角为正面，动作是说话等待：一只手抬起做出示意手势，嘴微张的完整姿势。角色完整入画，不裁切头顶、双手、裙摆、鲸尾和双脚。"
+    },
+    {
+      "pack": "slender",
+      "clip": "success",
+      "frameIndex": 0,
+      "output": "assets/pet-slender/happy/happy_512.png",
+      "references": [
+        "art-references/slender/turnaround/front.jpg",
+        "art-references/slender/turnaround/side.jpg",
+        "art-references/slender/turnaround/back.jpg",
+        "art-references/slender/details/details.jpg",
+        "assets/pet/happy/happy_238.png"
+      ],
+      "previousFrame": null,
+      "prompt": "第一张参考图是本帧唯一的比例权威：约六至七头身的修长少女比例：全身总高约等于 6.5 个头高，四肢修长。请严格照抄它的头身比，不要改成更成熟或更修长的体型。保持前四张参考图确立的脸型、蓝色渐变长发、白色荷叶边女仆头饰、头两侧的鲸鱼耳鳍、围裙上的白色小鲸鱼图案、裙摆金色纹样、后腰白色蝴蝶结、长及小腿的深藏青女仆长裙、白色荷叶边长围裙、白色长袜与深蓝玛丽珍鞋，以及身后固定的分叉鲸尾。本帧视角为正面，动作是开心：双手轻轻举起，眼睛弯成笑眼，身体轻快上扬的完整姿势。角色完整入画，不裁切头顶、双手、裙摆、鲸尾和双脚。"
+    },
+    {
+      "pack": "slender",
+      "clip": "error",
+      "frameIndex": 0,
+      "output": "assets/pet-slender/angry/angry_512.png",
+      "references": [
+        "art-references/slender/turnaround/front.jpg",
+        "art-references/slender/turnaround/side.jpg",
+        "art-references/slender/turnaround/back.jpg",
+        "art-references/slender/details/details.jpg",
+        "assets/pet/angry/angry_238.png"
+      ],
+      "previousFrame": null,
+      "prompt": "第一张参考图是本帧唯一的比例权威：约六至七头身的修长少女比例：全身总高约等于 6.5 个头高，四肢修长。请严格照抄它的头身比，不要改成更成熟或更修长的体型。保持前四张参考图确立的脸型、蓝色渐变长发、白色荷叶边女仆头饰、头两侧的鲸鱼耳鳍、围裙上的白色小鲸鱼图案、裙摆金色纹样、后腰白色蝴蝶结、长及小腿的深藏青女仆长裙、白色荷叶边长围裙、白色长袜与深蓝玛丽珍鞋，以及身后固定的分叉鲸尾。本帧视角为正面，动作是生气：双手叉腰，鼓起脸颊，眉毛下压的完整姿势。角色完整入画，不裁切头顶、双手、裙摆、鲸尾和双脚。"
+    },
+    {
+      "pack": "slender",
+      "clip": "error_dizzy",
+      "frameIndex": 0,
+      "output": "assets/pet-slender/dizzy/dizzy_512.png",
+      "references": [
+        "art-references/slender/turnaround/front.jpg",
+        "art-references/slender/turnaround/side.jpg",
+        "art-references/slender/turnaround/back.jpg",
+        "art-references/slender/details/details.jpg",
+        "assets/pet/dizzy/dizzy_238.png"
+      ],
+      "previousFrame": null,
+      "prompt": "第一张参考图是本帧唯一的比例权威：约六至七头身的修长少女比例：全身总高约等于 6.5 个头高，四肢修长。请严格照抄它的头身比，不要改成更成熟或更修长的体型。保持前四张参考图确立的脸型、蓝色渐变长发、白色荷叶边女仆头饰、头两侧的鲸鱼耳鳍、围裙上的白色小鲸鱼图案、裙摆金色纹样、后腰白色蝴蝶结、长及小腿的深藏青女仆长裙、白色荷叶边长围裙、白色长袜与深蓝玛丽珍鞋，以及身后固定的分叉鲸尾。本帧视角为正面，动作是眩晕：身体轻微歪斜，眼睛变成打转的漩涡状的完整姿势。角色完整入画，不裁切头顶、双手、裙摆、鲸尾和双脚。"
+    },
+    {
+      "pack": "slender",
+      "clip": "dragging",
+      "frameIndex": 0,
+      "output": "assets/pet-slender/dragging/dragging_512.png",
+      "references": [
+        "art-references/slender/turnaround/front.jpg",
+        "art-references/slender/turnaround/side.jpg",
+        "art-references/slender/turnaround/back.jpg",
+        "art-references/slender/details/details.jpg",
+        "assets/pet/dragging/dragging_238.png"
+      ],
+      "previousFrame": null,
+      "prompt": "第一张参考图是本帧唯一的比例权威：约六至七头身的修长少女比例：全身总高约等于 6.5 个头高，四肢修长。请严格照抄它的头身比，不要改成更成熟或更修长的体型。保持前四张参考图确立的脸型、蓝色渐变长发、白色荷叶边女仆头饰、头两侧的鲸鱼耳鳍、围裙上的白色小鲸鱼图案、裙摆金色纹样、后腰白色蝴蝶结、长及小腿的深藏青女仆长裙、白色荷叶边长围裙、白色长袜与深蓝玛丽珍鞋，以及身后固定的分叉鲸尾。本帧视角为正面，动作是被从空中拎起拖动：双手上举，头发与裙摆向下垂坠，双脚离地的完整姿势。角色完整入画，不裁切头顶、双手、裙摆、鲸尾和双脚。"
+    },
+    {
+      "pack": "slender",
+      "clip": "blink",
+      "frameIndex": 0,
+      "output": "assets/pet-slender/idle_blink/idle_blink_512_00.png",
+      "references": [
+        "art-references/slender/turnaround/front.jpg",
+        "art-references/slender/turnaround/side.jpg",
+        "art-references/slender/turnaround/back.jpg",
+        "art-references/slender/details/details.jpg",
+        "assets/pet/idle_blink/idle_blink_238_00.png"
+      ],
+      "previousFrame": null,
+      "prompt": "第一张参考图是本帧唯一的比例权威：约六至七头身的修长少女比例：全身总高约等于 6.5 个头高，四肢修长。请严格照抄它的头身比，不要改成更成熟或更修长的体型。保持前四张参考图确立的脸型、蓝色渐变长发、白色荷叶边女仆头饰、头两侧的鲸鱼耳鳍、围裙上的白色小鲸鱼图案、裙摆金色纹样、后腰白色蝴蝶结、长及小腿的深藏青女仆长裙、白色荷叶边长围裙、白色长袜与深蓝玛丽珍鞋，以及身后固定的分叉鲸尾。本帧视角为正面，动作是站立不动地完成一次眨眼的第 1/5 阶段。角色完整入画，不裁切头顶、双手、裙摆、鲸尾和双脚。"
+    },
+    {
+      "pack": "slender",
+      "clip": "blink",
+      "frameIndex": 1,
+      "output": "assets/pet-slender/idle_blink/idle_blink_512_01.png",
+      "references": [
+        "art-references/slender/turnaround/front.jpg",
+        "art-references/slender/turnaround/side.jpg",
+        "art-references/slender/turnaround/back.jpg",
+        "art-references/slender/details/details.jpg",
+        "assets/pet/idle_blink/idle_blink_238_01.png"
+      ],
+      "previousFrame": "assets/pet-slender/idle_blink/idle_blink_512_00.png",
+      "prompt": "第一张参考图是本帧唯一的比例权威：约六至七头身的修长少女比例：全身总高约等于 6.5 个头高，四肢修长。请严格照抄它的头身比，不要改成更成熟或更修长的体型。保持前四张参考图确立的脸型、蓝色渐变长发、白色荷叶边女仆头饰、头两侧的鲸鱼耳鳍、围裙上的白色小鲸鱼图案、裙摆金色纹样、后腰白色蝴蝶结、长及小腿的深藏青女仆长裙、白色荷叶边长围裙、白色长袜与深蓝玛丽珍鞋，以及身后固定的分叉鲸尾。本帧视角为正面，动作是站立不动地完成一次眨眼的第 2/5 阶段。角色完整入画，不裁切头顶、双手、裙摆、鲸尾和双脚。"
+    },
+    {
+      "pack": "slender",
+      "clip": "blink",
+      "frameIndex": 2,
+      "output": "assets/pet-slender/idle_blink/idle_blink_512_02.png",
+      "references": [
+        "art-references/slender/turnaround/front.jpg",
+        "art-references/slender/turnaround/side.jpg",
+        "art-references/slender/turnaround/back.jpg",
+        "art-references/slender/details/details.jpg",
+        "assets/pet/idle_blink/idle_blink_238_02.png"
+      ],
+      "previousFrame": "assets/pet-slender/idle_blink/idle_blink_512_01.png",
+      "prompt": "第一张参考图是本帧唯一的比例权威：约六至七头身的修长少女比例：全身总高约等于 6.5 个头高，四肢修长。请严格照抄它的头身比，不要改成更成熟或更修长的体型。保持前四张参考图确立的脸型、蓝色渐变长发、白色荷叶边女仆头饰、头两侧的鲸鱼耳鳍、围裙上的白色小鲸鱼图案、裙摆金色纹样、后腰白色蝴蝶结、长及小腿的深藏青女仆长裙、白色荷叶边长围裙、白色长袜与深蓝玛丽珍鞋，以及身后固定的分叉鲸尾。本帧视角为正面，动作是站立不动地完成一次眨眼的第 3/5 阶段。角色完整入画，不裁切头顶、双手、裙摆、鲸尾和双脚。"
+    },
+    {
+      "pack": "slender",
+      "clip": "blink",
+      "frameIndex": 3,
+      "output": "assets/pet-slender/idle_blink/idle_blink_512_03.png",
+      "references": [
+        "art-references/slender/turnaround/front.jpg",
+        "art-references/slender/turnaround/side.jpg",
+        "art-references/slender/turnaround/back.jpg",
+        "art-references/slender/details/details.jpg",
+        "assets/pet/idle_blink/idle_blink_238_03.png"
+      ],
+      "previousFrame": "assets/pet-slender/idle_blink/idle_blink_512_02.png",
+      "prompt": "第一张参考图是本帧唯一的比例权威：约六至七头身的修长少女比例：全身总高约等于 6.5 个头高，四肢修长。请严格照抄它的头身比，不要改成更成熟或更修长的体型。保持前四张参考图确立的脸型、蓝色渐变长发、白色荷叶边女仆头饰、头两侧的鲸鱼耳鳍、围裙上的白色小鲸鱼图案、裙摆金色纹样、后腰白色蝴蝶结、长及小腿的深藏青女仆长裙、白色荷叶边长围裙、白色长袜与深蓝玛丽珍鞋，以及身后固定的分叉鲸尾。本帧视角为正面，动作是站立不动地完成一次眨眼的第 4/5 阶段。角色完整入画，不裁切头顶、双手、裙摆、鲸尾和双脚。"
+    },
+    {
+      "pack": "slender",
+      "clip": "blink",
+      "frameIndex": 4,
+      "output": "assets/pet-slender/idle_blink/idle_blink_512_04.png",
+      "references": [
+        "art-references/slender/turnaround/front.jpg",
+        "art-references/slender/turnaround/side.jpg",
+        "art-references/slender/turnaround/back.jpg",
+        "art-references/slender/details/details.jpg",
+        "assets/pet/idle_blink/idle_blink_238_04.png"
+      ],
+      "previousFrame": "assets/pet-slender/idle_blink/idle_blink_512_03.png",
+      "prompt": "第一张参考图是本帧唯一的比例权威：约六至七头身的修长少女比例：全身总高约等于 6.5 个头高，四肢修长。请严格照抄它的头身比，不要改成更成熟或更修长的体型。保持前四张参考图确立的脸型、蓝色渐变长发、白色荷叶边女仆头饰、头两侧的鲸鱼耳鳍、围裙上的白色小鲸鱼图案、裙摆金色纹样、后腰白色蝴蝶结、长及小腿的深藏青女仆长裙、白色荷叶边长围裙、白色长袜与深蓝玛丽珍鞋，以及身后固定的分叉鲸尾。本帧视角为正面，动作是站立不动地完成一次眨眼的第 5/5 阶段。角色完整入画，不裁切头顶、双手、裙摆、鲸尾和双脚。"
+    },
+    {
+      "pack": "slender",
+      "clip": "head_pat",
+      "frameIndex": 0,
+      "output": "assets/pet-slender/head_pat/head_pat_512_00.png",
+      "references": [
+        "art-references/slender/turnaround/front.jpg",
+        "art-references/slender/turnaround/side.jpg",
+        "art-references/slender/turnaround/back.jpg",
+        "art-references/slender/details/details.jpg",
+        "assets/pet/head_pat/head_pat_238_00.png"
+      ],
+      "previousFrame": null,
+      "prompt": "第一张参考图是本帧唯一的比例权威：约六至七头身的修长少女比例：全身总高约等于 6.5 个头高，四肢修长。请严格照抄它的头身比，不要改成更成熟或更修长的体型。保持前四张参考图确立的脸型、蓝色渐变长发、白色荷叶边女仆头饰、头两侧的鲸鱼耳鳍、围裙上的白色小鲸鱼图案、裙摆金色纹样、后腰白色蝴蝶结、长及小腿的深藏青女仆长裙、白色荷叶边长围裙、白色长袜与深蓝玛丽珍鞋，以及身后固定的分叉鲸尾。本帧视角为正面，动作是被摸头：肩膀微缩、眯眼享受，画面中不出现手或角色以外的任何物体的第 1/6 阶段。角色完整入画，不裁切头顶、双手、裙摆、鲸尾和双脚。"
+    },
+    {
+      "pack": "slender",
+      "clip": "head_pat",
+      "frameIndex": 1,
+      "output": "assets/pet-slender/head_pat/head_pat_512_01.png",
+      "references": [
+        "art-references/slender/turnaround/front.jpg",
+        "art-references/slender/turnaround/side.jpg",
+        "art-references/slender/turnaround/back.jpg",
+        "art-references/slender/details/details.jpg",
+        "assets/pet/head_pat/head_pat_238_01.png"
+      ],
+      "previousFrame": "assets/pet-slender/head_pat/head_pat_512_00.png",
+      "prompt": "第一张参考图是本帧唯一的比例权威：约六至七头身的修长少女比例：全身总高约等于 6.5 个头高，四肢修长。请严格照抄它的头身比，不要改成更成熟或更修长的体型。保持前四张参考图确立的脸型、蓝色渐变长发、白色荷叶边女仆头饰、头两侧的鲸鱼耳鳍、围裙上的白色小鲸鱼图案、裙摆金色纹样、后腰白色蝴蝶结、长及小腿的深藏青女仆长裙、白色荷叶边长围裙、白色长袜与深蓝玛丽珍鞋，以及身后固定的分叉鲸尾。本帧视角为正面，动作是被摸头：肩膀微缩、眯眼享受，画面中不出现手或角色以外的任何物体的第 2/6 阶段。角色完整入画，不裁切头顶、双手、裙摆、鲸尾和双脚。"
+    },
+    {
+      "pack": "slender",
+      "clip": "head_pat",
+      "frameIndex": 2,
+      "output": "assets/pet-slender/head_pat/head_pat_512_02.png",
+      "references": [
+        "art-references/slender/turnaround/front.jpg",
+        "art-references/slender/turnaround/side.jpg",
+        "art-references/slender/turnaround/back.jpg",
+        "art-references/slender/details/details.jpg",
+        "assets/pet/head_pat/head_pat_238_02.png"
+      ],
+      "previousFrame": "assets/pet-slender/head_pat/head_pat_512_01.png",
+      "prompt": "第一张参考图是本帧唯一的比例权威：约六至七头身的修长少女比例：全身总高约等于 6.5 个头高，四肢修长。请严格照抄它的头身比，不要改成更成熟或更修长的体型。保持前四张参考图确立的脸型、蓝色渐变长发、白色荷叶边女仆头饰、头两侧的鲸鱼耳鳍、围裙上的白色小鲸鱼图案、裙摆金色纹样、后腰白色蝴蝶结、长及小腿的深藏青女仆长裙、白色荷叶边长围裙、白色长袜与深蓝玛丽珍鞋，以及身后固定的分叉鲸尾。本帧视角为正面，动作是被摸头：肩膀微缩、眯眼享受，画面中不出现手或角色以外的任何物体的第 3/6 阶段。角色完整入画，不裁切头顶、双手、裙摆、鲸尾和双脚。"
+    },
+    {
+      "pack": "slender",
+      "clip": "head_pat",
+      "frameIndex": 3,
+      "output": "assets/pet-slender/head_pat/head_pat_512_03.png",
+      "references": [
+        "art-references/slender/turnaround/front.jpg",
+        "art-references/slender/turnaround/side.jpg",
+        "art-references/slender/turnaround/back.jpg",
+        "art-references/slender/details/details.jpg",
+        "assets/pet/head_pat/head_pat_238_03.png"
+      ],
+      "previousFrame": "assets/pet-slender/head_pat/head_pat_512_02.png",
+      "prompt": "第一张参考图是本帧唯一的比例权威：约六至七头身的修长少女比例：全身总高约等于 6.5 个头高，四肢修长。请严格照抄它的头身比，不要改成更成熟或更修长的体型。保持前四张参考图确立的脸型、蓝色渐变长发、白色荷叶边女仆头饰、头两侧的鲸鱼耳鳍、围裙上的白色小鲸鱼图案、裙摆金色纹样、后腰白色蝴蝶结、长及小腿的深藏青女仆长裙、白色荷叶边长围裙、白色长袜与深蓝玛丽珍鞋，以及身后固定的分叉鲸尾。本帧视角为正面，动作是被摸头：肩膀微缩、眯眼享受，画面中不出现手或角色以外的任何物体的第 4/6 阶段。角色完整入画，不裁切头顶、双手、裙摆、鲸尾和双脚。"
+    },
+    {
+      "pack": "slender",
+      "clip": "head_pat",
+      "frameIndex": 4,
+      "output": "assets/pet-slender/head_pat/head_pat_512_04.png",
+      "references": [
+        "art-references/slender/turnaround/front.jpg",
+        "art-references/slender/turnaround/side.jpg",
+        "art-references/slender/turnaround/back.jpg",
+        "art-references/slender/details/details.jpg",
+        "assets/pet/head_pat/head_pat_238_04.png"
+      ],
+      "previousFrame": "assets/pet-slender/head_pat/head_pat_512_03.png",
+      "prompt": "第一张参考图是本帧唯一的比例权威：约六至七头身的修长少女比例：全身总高约等于 6.5 个头高，四肢修长。请严格照抄它的头身比，不要改成更成熟或更修长的体型。保持前四张参考图确立的脸型、蓝色渐变长发、白色荷叶边女仆头饰、头两侧的鲸鱼耳鳍、围裙上的白色小鲸鱼图案、裙摆金色纹样、后腰白色蝴蝶结、长及小腿的深藏青女仆长裙、白色荷叶边长围裙、白色长袜与深蓝玛丽珍鞋，以及身后固定的分叉鲸尾。本帧视角为正面，动作是被摸头：肩膀微缩、眯眼享受，画面中不出现手或角色以外的任何物体的第 5/6 阶段。角色完整入画，不裁切头顶、双手、裙摆、鲸尾和双脚。"
+    },
+    {
+      "pack": "slender",
+      "clip": "head_pat",
+      "frameIndex": 5,
+      "output": "assets/pet-slender/head_pat/head_pat_512_05.png",
+      "references": [
+        "art-references/slender/turnaround/front.jpg",
+        "art-references/slender/turnaround/side.jpg",
+        "art-references/slender/turnaround/back.jpg",
+        "art-references/slender/details/details.jpg",
+        "assets/pet/head_pat/head_pat_238_05.png"
+      ],
+      "previousFrame": "assets/pet-slender/head_pat/head_pat_512_04.png",
+      "prompt": "第一张参考图是本帧唯一的比例权威：约六至七头身的修长少女比例：全身总高约等于 6.5 个头高，四肢修长。请严格照抄它的头身比，不要改成更成熟或更修长的体型。保持前四张参考图确立的脸型、蓝色渐变长发、白色荷叶边女仆头饰、头两侧的鲸鱼耳鳍、围裙上的白色小鲸鱼图案、裙摆金色纹样、后腰白色蝴蝶结、长及小腿的深藏青女仆长裙、白色荷叶边长围裙、白色长袜与深蓝玛丽珍鞋，以及身后固定的分叉鲸尾。本帧视角为正面，动作是被摸头：肩膀微缩、眯眼享受，画面中不出现手或角色以外的任何物体的第 6/6 阶段。角色完整入画，不裁切头顶、双手、裙摆、鲸尾和双脚。"
+    },
+    {
+      "pack": "slender",
+      "clip": "poke",
+      "frameIndex": 0,
+      "output": "assets/pet-slender/poke_react/poke_react_512_00.png",
+      "references": [
+        "art-references/slender/turnaround/front.jpg",
+        "art-references/slender/turnaround/side.jpg",
+        "art-references/slender/turnaround/back.jpg",
+        "art-references/slender/details/details.jpg",
+        "assets/pet/poke_react/poke_react_238_00.png"
+      ],
+      "previousFrame": null,
+      "prompt": "第一张参考图是本帧唯一的比例权威：约六至七头身的修长少女比例：全身总高约等于 6.5 个头高，四肢修长。请严格照抄它的头身比，不要改成更成熟或更修长的体型。保持前四张参考图确立的脸型、蓝色渐变长发、白色荷叶边女仆头饰、头两侧的鲸鱼耳鳍、围裙上的白色小鲸鱼图案、裙摆金色纹样、后腰白色蝴蝶结、长及小腿的深藏青女仆长裙、白色荷叶边长围裙、白色长袜与深蓝玛丽珍鞋，以及身后固定的分叉鲸尾。本帧视角为正面，动作是被戳到时的反应：身体一缩，露出惊讶表情的第 1/4 阶段。角色完整入画，不裁切头顶、双手、裙摆、鲸尾和双脚。"
+    },
+    {
+      "pack": "slender",
+      "clip": "poke",
+      "frameIndex": 1,
+      "output": "assets/pet-slender/poke_react/poke_react_512_01.png",
+      "references": [
+        "art-references/slender/turnaround/front.jpg",
+        "art-references/slender/turnaround/side.jpg",
+        "art-references/slender/turnaround/back.jpg",
+        "art-references/slender/details/details.jpg",
+        "assets/pet/poke_react/poke_react_238_01.png"
+      ],
+      "previousFrame": "assets/pet-slender/poke_react/poke_react_512_00.png",
+      "prompt": "第一张参考图是本帧唯一的比例权威：约六至七头身的修长少女比例：全身总高约等于 6.5 个头高，四肢修长。请严格照抄它的头身比，不要改成更成熟或更修长的体型。保持前四张参考图确立的脸型、蓝色渐变长发、白色荷叶边女仆头饰、头两侧的鲸鱼耳鳍、围裙上的白色小鲸鱼图案、裙摆金色纹样、后腰白色蝴蝶结、长及小腿的深藏青女仆长裙、白色荷叶边长围裙、白色长袜与深蓝玛丽珍鞋，以及身后固定的分叉鲸尾。本帧视角为正面，动作是被戳到时的反应：身体一缩，露出惊讶表情的第 2/4 阶段。角色完整入画，不裁切头顶、双手、裙摆、鲸尾和双脚。"
+    },
+    {
+      "pack": "slender",
+      "clip": "poke",
+      "frameIndex": 2,
+      "output": "assets/pet-slender/poke_react/poke_react_512_02.png",
+      "references": [
+        "art-references/slender/turnaround/front.jpg",
+        "art-references/slender/turnaround/side.jpg",
+        "art-references/slender/turnaround/back.jpg",
+        "art-references/slender/details/details.jpg",
+        "assets/pet/poke_react/poke_react_238_02.png"
+      ],
+      "previousFrame": "assets/pet-slender/poke_react/poke_react_512_01.png",
+      "prompt": "第一张参考图是本帧唯一的比例权威：约六至七头身的修长少女比例：全身总高约等于 6.5 个头高，四肢修长。请严格照抄它的头身比，不要改成更成熟或更修长的体型。保持前四张参考图确立的脸型、蓝色渐变长发、白色荷叶边女仆头饰、头两侧的鲸鱼耳鳍、围裙上的白色小鲸鱼图案、裙摆金色纹样、后腰白色蝴蝶结、长及小腿的深藏青女仆长裙、白色荷叶边长围裙、白色长袜与深蓝玛丽珍鞋，以及身后固定的分叉鲸尾。本帧视角为正面，动作是被戳到时的反应：身体一缩，露出惊讶表情的第 3/4 阶段。角色完整入画，不裁切头顶、双手、裙摆、鲸尾和双脚。"
+    },
+    {
+      "pack": "slender",
+      "clip": "poke",
+      "frameIndex": 3,
+      "output": "assets/pet-slender/poke_react/poke_react_512_03.png",
+      "references": [
+        "art-references/slender/turnaround/front.jpg",
+        "art-references/slender/turnaround/side.jpg",
+        "art-references/slender/turnaround/back.jpg",
+        "art-references/slender/details/details.jpg",
+        "assets/pet/poke_react/poke_react_238_03.png"
+      ],
+      "previousFrame": "assets/pet-slender/poke_react/poke_react_512_02.png",
+      "prompt": "第一张参考图是本帧唯一的比例权威：约六至七头身的修长少女比例：全身总高约等于 6.5 个头高，四肢修长。请严格照抄它的头身比，不要改成更成熟或更修长的体型。保持前四张参考图确立的脸型、蓝色渐变长发、白色荷叶边女仆头饰、头两侧的鲸鱼耳鳍、围裙上的白色小鲸鱼图案、裙摆金色纹样、后腰白色蝴蝶结、长及小腿的深藏青女仆长裙、白色荷叶边长围裙、白色长袜与深蓝玛丽珍鞋，以及身后固定的分叉鲸尾。本帧视角为正面，动作是被戳到时的反应：身体一缩，露出惊讶表情的第 4/4 阶段。角色完整入画，不裁切头顶、双手、裙摆、鲸尾和双脚。"
+    }
+  ]
+}

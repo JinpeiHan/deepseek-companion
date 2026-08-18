@@ -1,0 +1,470 @@
+{
+  "formatVersion": 1,
+  "designWidth": 960,
+  "references": [
+    {
+      "source": "角色设计1.png",
+      "pack": "chibi",
+      "purpose": "正视图母图：脸型、发型、服装与比例基准",
+      "output": "chibi/turnaround/front.jpg",
+      "cropRect": [
+        40,
+        50,
+        340,
+        385
+      ],
+      "size": [
+        300,
+        335
+      ]
+    },
+    {
+      "source": "角色设计1.png",
+      "pack": "chibi",
+      "purpose": "侧视图母图：厚度、尾巴根部与裙摆",
+      "output": "chibi/turnaround/side.jpg",
+      "cropRect": [
+        320,
+        50,
+        600,
+        385
+      ],
+      "size": [
+        280,
+        335
+      ]
+    },
+    {
+      "source": "角色设计1.png",
+      "pack": "chibi",
+      "purpose": "背视图母图：后腰蝴蝶结与发尾渐变",
+      "output": "chibi/turnaround/back.jpg",
+      "cropRect": [
+        610,
+        50,
+        870,
+        385
+      ],
+      "size": [
+        260,
+        335
+      ]
+    },
+    {
+      "source": "角色设计1.png",
+      "pack": "chibi",
+      "purpose": "表情参考：开心、悲伤、生气、惊讶、害怕、疑惑、害羞、得意",
+      "output": "chibi/expressions/expressions.jpg",
+      "cropRect": [
+        25,
+        480,
+        935,
+        630
+      ],
+      "size": [
+        910,
+        150
+      ]
+    },
+    {
+      "source": "角色设计2.png",
+      "pack": "standard",
+      "purpose": "正视图母图：脸型、发型、服装与比例基准",
+      "output": "standard/turnaround/front.jpg",
+      "cropRect": [
+        35,
+        45,
+        325,
+        430
+      ],
+      "size": [
+        290,
+        385
+      ]
+    },
+    {
+      "source": "角色设计2.png",
+      "pack": "standard",
+      "purpose": "侧视图母图：厚度、尾巴根部与裙摆",
+      "output": "standard/turnaround/side.jpg",
+      "cropRect": [
+        315,
+        45,
+        600,
+        430
+      ],
+      "size": [
+        285,
+        385
+      ]
+    },
+    {
+      "source": "角色设计2.png",
+      "pack": "standard",
+      "purpose": "背视图母图：后腰蝴蝶结与发尾渐变",
+      "output": "standard/turnaround/back.jpg",
+      "cropRect": [
+        595,
+        45,
+        870,
+        430
+      ],
+      "size": [
+        275,
+        385
+      ]
+    },
+    {
+      "source": "角色设计2.png",
+      "pack": "standard",
+      "purpose": "细节参考：领结、头饰、围裙鲸鱼图案、裙摆纹样、鞋、尾鳍",
+      "output": "standard/details/details.jpg",
+      "cropRect": [
+        20,
+        490,
+        940,
+        625
+      ],
+      "size": [
+        920,
+        135
+      ]
+    },
+    {
+      "source": "角色设计3.png",
+      "pack": "standard",
+      "purpose": "表情参考：开心、悲伤、生气、惊讶、害怕、疑惑、害羞、得意",
+      "output": "standard/expressions/expressions.jpg",
+      "cropRect": [
+        25,
+        480,
+        935,
+        630
+      ],
+      "size": [
+        910,
+        150
+      ]
+    },
+    {
+      "source": "角色设计5.png",
+      "pack": "slender",
+      "purpose": "正视图母图：脸型、发型、服装与比例基准",
+      "output": "slender/turnaround/front.jpg",
+      "cropRect": [
+        20,
+        45,
+        320,
+        462
+      ],
+      "size": [
+        300,
+        417
+      ]
+    },
+    {
+      "source": "角色设计5.png",
+      "pack": "slender",
+      "purpose": "侧视图母图：厚度、尾巴根部与裙摆",
+      "output": "slender/turnaround/side.jpg",
+      "cropRect": [
+        315,
+        45,
+        605,
+        462
+      ],
+      "size": [
+        290,
+        417
+      ]
+    },
+    {
+      "source": "角色设计5.png",
+      "pack": "slender",
+      "purpose": "背视图母图：后腰蝴蝶结与发尾渐变",
+      "output": "slender/turnaround/back.jpg",
+      "cropRect": [
+        600,
+        45,
+        880,
+        462
+      ],
+      "size": [
+        280,
+        417
+      ]
+    },
+    {
+      "source": "角色设计5.png",
+      "pack": "slender",
+      "purpose": "细节参考：领结、头饰、围裙鲸鱼图案、裙摆纹样、鞋、尾鳍",
+      "output": "slender/details/details.jpg",
+      "cropRect": [
+        20,
+        500,
+        940,
+        630
+      ],
+      "size": [
+        920,
+        130
+      ]
+    },
+    {
+      "source": "角色设计6.png",
+      "pack": "slender",
+      "purpose": "表情参考：开心、悲伤、生气、惊讶、害怕、疑惑、害羞、得意",
+      "output": "slender/expressions/expressions.jpg",
+      "cropRect": [
+        25,
+        490,
+        935,
+        635
+      ],
+      "size": [
+        910,
+        145
+      ]
+    },
+    {
+      "source": "2026-08-17 223742.png",
+      "pack": "chibi",
+      "purpose": "Q版动作与表情参考：只提供动作、视角和表情",
+      "output": "chibi/poses/2026-08-17 223742.jpg",
+      "cropRect": [
+        0,
+        0,
+        960,
+        961
+      ],
+      "size": [
+        960,
+        961
+      ]
+    },
+    {
+      "source": "2026-08-18 101608.png",
+      "pack": "chibi",
+      "purpose": "Q版动作与表情参考：只提供动作、视角和表情",
+      "output": "chibi/poses/2026-08-18 101608.jpg",
+      "cropRect": [
+        0,
+        0,
+        960,
+        950
+      ],
+      "size": [
+        960,
+        950
+      ]
+    },
+    {
+      "source": "2026-08-18 101611.png",
+      "pack": "chibi",
+      "purpose": "Q版动作与表情参考：只提供动作、视角和表情",
+      "output": "chibi/poses/2026-08-18 101611.jpg",
+      "cropRect": [
+        0,
+        0,
+        960,
+        952
+      ],
+      "size": [
+        960,
+        952
+      ]
+    },
+    {
+      "source": "2026-08-18 101614.png",
+      "pack": "chibi",
+      "purpose": "Q版动作与表情参考：只提供动作、视角和表情",
+      "output": "chibi/poses/2026-08-18 101614.jpg",
+      "cropRect": [
+        0,
+        0,
+        960,
+        952
+      ],
+      "size": [
+        960,
+        952
+      ]
+    },
+    {
+      "source": "2026-08-18 101617.png",
+      "pack": "chibi",
+      "purpose": "Q版动作与表情参考：只提供动作、视角和表情",
+      "output": "chibi/poses/2026-08-18 101617.jpg",
+      "cropRect": [
+        0,
+        0,
+        960,
+        955
+      ],
+      "size": [
+        960,
+        955
+      ]
+    },
+    {
+      "source": "2026-08-18 101621.png",
+      "pack": "chibi",
+      "purpose": "Q版动作与表情参考：只提供动作、视角和表情",
+      "output": "chibi/poses/2026-08-18 101621.jpg",
+      "cropRect": [
+        0,
+        0,
+        960,
+        931
+      ],
+      "size": [
+        960,
+        931
+      ]
+    },
+    {
+      "source": "2026-08-18 101623.png",
+      "pack": "chibi",
+      "purpose": "Q版动作与表情参考：只提供动作、视角和表情",
+      "output": "chibi/poses/2026-08-18 101623.jpg",
+      "cropRect": [
+        0,
+        0,
+        960,
+        951
+      ],
+      "size": [
+        960,
+        951
+      ]
+    },
+    {
+      "source": "2026-08-18 101629.png",
+      "pack": "chibi",
+      "purpose": "Q版动作与表情参考：只提供动作、视角和表情",
+      "output": "chibi/poses/2026-08-18 101629.jpg",
+      "cropRect": [
+        0,
+        0,
+        960,
+        951
+      ],
+      "size": [
+        960,
+        951
+      ]
+    },
+    {
+      "source": "2026-08-18 101632.png",
+      "pack": "chibi",
+      "purpose": "Q版动作与表情参考：只提供动作、视角和表情",
+      "output": "chibi/poses/2026-08-18 101632.jpg",
+      "cropRect": [
+        0,
+        0,
+        960,
+        944
+      ],
+      "size": [
+        960,
+        944
+      ]
+    },
+    {
+      "source": "2026-08-18 101635.png",
+      "pack": "chibi",
+      "purpose": "Q版动作与表情参考：只提供动作、视角和表情",
+      "output": "chibi/poses/2026-08-18 101635.jpg",
+      "cropRect": [
+        0,
+        0,
+        960,
+        944
+      ],
+      "size": [
+        960,
+        944
+      ]
+    },
+    {
+      "source": "2026-08-18 101638.png",
+      "pack": "chibi",
+      "purpose": "Q版动作与表情参考：只提供动作、视角和表情",
+      "output": "chibi/poses/2026-08-18 101638.jpg",
+      "cropRect": [
+        0,
+        0,
+        960,
+        947
+      ],
+      "size": [
+        960,
+        947
+      ]
+    },
+    {
+      "source": "2026-08-18 101640.png",
+      "pack": "chibi",
+      "purpose": "Q版动作与表情参考：只提供动作、视角和表情",
+      "output": "chibi/poses/2026-08-18 101640.jpg",
+      "cropRect": [
+        0,
+        0,
+        960,
+        947
+      ],
+      "size": [
+        960,
+        947
+      ]
+    },
+    {
+      "source": "2026-08-18 101643.png",
+      "pack": "chibi",
+      "purpose": "Q版动作与表情参考：只提供动作、视角和表情",
+      "output": "chibi/poses/2026-08-18 101643.jpg",
+      "cropRect": [
+        0,
+        0,
+        960,
+        951
+      ],
+      "size": [
+        960,
+        951
+      ]
+    },
+    {
+      "source": "2026-08-18 101646.png",
+      "pack": "chibi",
+      "purpose": "Q版动作与表情参考：只提供动作、视角和表情",
+      "output": "chibi/poses/2026-08-18 101646.jpg",
+      "cropRect": [
+        0,
+        0,
+        960,
+        965
+      ],
+      "size": [
+        960,
+        965
+      ]
+    },
+    {
+      "source": "偷吃Token.png",
+      "pack": "chibi",
+      "purpose": "Q版动作与表情参考：只提供动作、视角和表情",
+      "output": "chibi/poses/偷吃Token.jpg",
+      "cropRect": [
+        0,
+        0,
+        960,
+        944
+      ],
+      "size": [
+        960,
+        944
+      ]
+    }
+  ]
+}

@@ -1,0 +1,135 @@
+{
+  "formatVersion": 2,
+  "characterId": "whale-girl-slender",
+  "sourceWidth": 512,
+  "sourceHeight": 512,
+  "maxFrameWidth": 512,
+  "maxFrameHeight": 512,
+  "logicalWidth": 260,
+  "logicalHeight": 260,
+  "footAnchor": [
+    0.5,
+    0.97
+  ],
+  "bubbleAnchor": [
+    0.5,
+    0.04
+  ],
+  "stateMap": {
+    "IDLE": "idle",
+    "THINKING": "thinking",
+    "WORKING": "working",
+    "WAITING": "waiting",
+    "SUCCESS": "success",
+    "ERROR": "error",
+    "DISCONNECTED": "idle"
+  },
+  "workingActivityMap": {
+    "searching": "working",
+    "commanding": "working",
+    "editing": "working",
+    "testing": "working",
+    "using-tool": "working"
+  },
+  "idleMicroClips": [
+    "blink"
+  ],
+  "clips": {
+    "idle": {
+      "frames": [
+        "idle_front/idle_front_512.png"
+      ],
+      "frameMs": 180,
+      "loop": true,
+      "motion": "breathe"
+    },
+    "thinking": {
+      "frames": [
+        "idle_think/idle_think_512.png"
+      ],
+      "frameMs": 180,
+      "loop": true,
+      "motion": "think"
+    },
+    "working": {
+      "frames": [
+        "sweep/sweep_512.png"
+      ],
+      "frameMs": 180,
+      "loop": true,
+      "motion": "work"
+    },
+    "waiting": {
+      "frames": [
+        "talk/talk_512.png"
+      ],
+      "frameMs": 180,
+      "loop": true,
+      "motion": "wait"
+    },
+    "success": {
+      "frames": [
+        "happy/happy_512.png"
+      ],
+      "frameMs": 180,
+      "loop": true,
+      "motion": "bounce"
+    },
+    "error": {
+      "frames": [
+        "angry/angry_512.png"
+      ],
+      "frameMs": 180,
+      "loop": true,
+      "motion": "shake"
+    },
+    "error_dizzy": {
+      "frames": [
+        "dizzy/dizzy_512.png"
+      ],
+      "frameMs": 180,
+      "loop": true,
+      "motion": "dizzy"
+    },
+    "dragging": {
+      "frames": [
+        "dragging/dragging_512.png"
+      ],
+      "frameMs": 180,
+      "loop": true
+    },
+    "blink": {
+      "frames": [
+        "idle_blink/idle_blink_512_00.png",
+        "idle_blink/idle_blink_512_01.png",
+        "idle_blink/idle_blink_512_02.png",
+        "idle_blink/idle_blink_512_03.png",
+        "idle_blink/idle_blink_512_04.png"
+      ],
+      "frameMs": 100,
+      "loop": false
+    },
+    "head_pat": {
+      "frames": [
+        "head_pat/head_pat_512_00.png",
+        "head_pat/head_pat_512_01.png",
+        "head_pat/head_pat_512_02.png",
+        "head_pat/head_pat_512_03.png",
+        "head_pat/head_pat_512_04.png",
+        "head_pat/head_pat_512_05.png"
+      ],
+      "frameMs": 180,
+      "loop": false
+    },
+    "poke": {
+      "frames": [
+        "poke_react/poke_react_512_00.png",
+        "poke_react/poke_react_512_01.png",
+        "poke_react/poke_react_512_02.png",
+        "poke_react/poke_react_512_03.png"
+      ],
+      "frameMs": 170,
+      "loop": false
+    }
+  }
+}
