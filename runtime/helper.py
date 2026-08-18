@@ -21,9 +21,11 @@ from typing import Any, TextIO
 try:
     from .animation_model import AnimationModel, crossfade_duration
     from .layout_store import default_layout_path, load_layout, save_layout
+    from .persona_copy import interaction_copy, load_persona_copy
 except ImportError:
     from animation_model import AnimationModel, crossfade_duration
     from layout_store import default_layout_path, load_layout, save_layout
+    from persona_copy import interaction_copy, load_persona_copy
 
 
 PROTOCOL_VERSION = 1
@@ -134,6 +136,7 @@ def run_visual(recorder: EventRecorder, snapshot_path: Path | None = None) -> in
         print(f"Unable to load BigFish asset manifest: {error}", file=sys.stderr)
         recorder.close()
         return 2
+    persona_copy = load_persona_copy(bundle_root() / "assets" / "persona-copy.zh-CN.json")
 
     class CompanionWindow(QWidget):
         LABELS = {
@@ -226,7 +229,8 @@ def run_visual(recorder: EventRecorder, snapshot_path: Path | None = None) -> in
             if not self.reduced_motion:
                 self._schedule_micro()
             self.snapshot_saved = False
-            self.setWindowTitle("DSH 大肥鱼")
+            self.interaction_seed = 0
+            self.setWindowTitle("DSH 小鲸鱼")
             self.setWindowFlags(
                 Qt.WindowType.FramelessWindowHint
                 | Qt.WindowType.WindowStaysOnTopHint
@@ -935,24 +939,29 @@ def run_visual(recorder: EventRecorder, snapshot_path: Path | None = None) -> in
             self.pet_origin = None
             self.dragging = False
 
+        def _interaction_copy(self, group: str) -> str:
+            message = interaction_copy(persona_copy, group, self.interaction_seed)
+            self.interaction_seed += 1
+            return message
+
         def _play_click_interaction(self, x: float, y: float) -> None:
             pet_x, pet_y, pet_width, pet_height = self._pet_rect()
             relative_x = max(0.0, x - pet_x)
             relative_y = max(0.0, y - pet_y)
             if relative_y < pet_height * 0.45:
                 self._play_model_overlay("head_pat")
-                self._show_overlay("摸摸也不能让我少干活哦~", self.status_detail, self.status_state, 1800)
+                self._show_overlay(self._interaction_copy("headPat"), self.status_detail, self.status_state, 1800)
             elif relative_x > pet_width * 0.72:
                 self._play_model_overlay("tail")
-                self._show_overlay("尾巴不是进度条啦！", self.status_detail, self.status_state, 1500)
+                self._show_overlay(self._interaction_copy("tail"), self.status_detail, self.status_state, 1500)
             else:
                 self._play_model_overlay("poke")
-                self._show_overlay("戳我干嘛，任务还在跑呢", self.status_detail, self.status_state, 1500)
+                self._show_overlay(self._interaction_copy("poke"), self.status_detail, self.status_state, 1500)
 
         def mouseDoubleClickEvent(self, event: QMouseEvent) -> None:
             if event.button() == Qt.MouseButton.LeftButton:
                 self._play_model_overlay("head_pat")
-                self._show_overlay("好啦好啦，知道你喜欢我~", self.status_detail, self.status_state, 1800)
+                self._show_overlay(self._interaction_copy("doubleClick"), self.status_detail, self.status_state, 1800)
 
         def contextMenuEvent(self, event: Any) -> None:
             menu = QMenu(self)
