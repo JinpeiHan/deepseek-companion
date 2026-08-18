@@ -47,3 +47,13 @@ Date: 2026-08-14
   explicit `ready` handshake and allows 60 seconds before treating startup as failed.
 
 These measurements are a local alpha baseline, not a cross-machine performance guarantee.
+
+## 小鲸鱼人格文案
+
+Date: 2026-08-18
+
+- 状态与互动使用 `assets/persona-copy.zh-CN.json` 作为唯一文案源。
+- 工作文案不频繁称“主人”，等待、成功与互动可偶尔称呼。
+- 项目、阶段、待办、进度、错误与审批事实保持原样。
+- 设置卡和窗口标题使用“小鲸鱼”；内部包名仍为 `dsh-dafeiyu`。
+- `pnpm test` 与 `pnpm run test:python` 均通过。
