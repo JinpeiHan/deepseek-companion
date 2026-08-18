@@ -31,7 +31,7 @@ try {
   const dialog = page.getByRole('dialog', { name: '设置' })
   await dialog.waitFor({ timeout: 10_000 })
   await dialog.getByRole('button', { name: '插件', exact: true }).click()
-  await dialog.getByText('大肥鱼桌面伴侣', { exact: true }).waitFor({ timeout: 10_000 })
+  await dialog.getByText('小鲸鱼桌面伴侣', { exact: true }).waitFor({ timeout: 10_000 })
   const card = dialog.getByTestId('dsh-dafeiyu-settings')
   await card.screenshot({ path: screenshot })
   const checkboxes = card.getByRole('checkbox')
@@ -43,7 +43,7 @@ try {
   await page.waitForTimeout(2_000)
   const reenabled = await checkboxes.nth(0).isChecked()
   console.log(JSON.stringify({
-    title: await card.getByText('大肥鱼桌面伴侣', { exact: true }).innerText(),
+    title: await card.getByText('小鲸鱼桌面伴侣', { exact: true }).innerText(),
     initialEnabled,
     disabled,
     reenabled,

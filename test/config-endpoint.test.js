@@ -71,3 +71,9 @@ test('package publishes the shared persona copy and loader', async () => {
   assert.ok(pkg.files.includes('assets/persona-copy.zh-CN.json'))
   assert.ok(pkg.files.includes('runtime/persona_copy.py'))
 })
+
+test('ui acceptance fixture expects the card title 小鲸鱼桌面伴侣 in both assertions', async () => {
+  const source = await readFile(new URL('./fixtures/ui-acceptance.js', import.meta.url), 'utf8')
+  assert.equal(source.match(/小鲸鱼桌面伴侣/gu)?.length, 2)
+  assert.doesNotMatch(source, /大肥鱼桌面伴侣/u)
+})
