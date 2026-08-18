@@ -30,3 +30,8 @@ art-references/rig/*/10-masks/
 art-references/rig/*/20-visible/
 art-references/rig/*/40-chains/
 art-references/rig/*/rig-records.jsonl
+
+# Rig extraction intermediates
+art-references/rig/*/masks/
+art-references/rig/*/filled/
+art-references/rig/*/state.json

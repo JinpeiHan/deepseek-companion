@@ -90,6 +90,13 @@ const main = async () => {
 
   for (const [packId, entry] of Object.entries(registry.packs)) {
     const manifest = await readJson(`assets/${entry.manifest}`)
+    // Rig packs deform a single layered master; they declare no frame lists, so
+    // scale pop and dead frames are meaningless for them. validate-rig.mjs owns
+    // their contract instead.
+    if (manifest.renderer === 'rig') {
+      console.log(`${packId}: rig pack, skipped (see validate-rig.mjs)`)
+      continue
+    }
     const packRoot = resolve(ROOT, 'assets', entry.root)
     let checked = 0
     let skipped = 0

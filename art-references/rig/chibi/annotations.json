@@ -1,0 +1,218 @@
+{
+  "pack": "chibi",
+  "characterId": "whale-girl-chibi-rig",
+  "master": "art-references/rig/chibi/master.png",
+  "axisX": 247,
+  "minComponentPx": 1400,
+  "note": "Hand-authored cut for the 2-head-tall Q proportion. The master is the RealESRGAN upscale in art-references/rig/chibi/master.png, not the 195x260 runtime frame: a rig rotates and shears its layers, and the shipped frame has no resolution to spare. Chibi has no visible neck at all, so the neck part is almost entirely synthetic -- which is exactly why it matters more here than on the standard proportion.",
+  "mirrorPartners": {
+    "arm_l": "arm_r",
+    "arm_r": "arm_l",
+    "cheek_l": "cheek_r",
+    "cheek_r": "cheek_l",
+    "eye_l": "eye_r",
+    "eye_r": "eye_l"
+  },
+  "bonePivots": {
+    "root": [250, 492],
+    "body": [250, 430],
+    "neck": [247, 292],
+    "head": [247, 288],
+    "arm_l": [186, 334],
+    "arm_r": [308, 334],
+    "tail_b0": [326, 382],
+    "tail_b1": [340, 380],
+    "tail_b2": [352, 378],
+    "tail_b3": [364, 380]
+  },
+  "partPivots": {
+    "head": [247, 288],
+    "hair_back": [247, 268],
+    "hair_front": [247, 250],
+    "headdress": [247, 220],
+    "neck": [247, 292],
+    "eye_l_lid": [216, 212],
+    "eye_r_lid": [284, 212],
+    "mouth": [238, 262],
+    "tail_0": [326, 382],
+    "tail_1": [340, 380],
+    "tail_2": [352, 378],
+    "tail_3": [364, 380]
+  },
+  "regions": {
+    "headdress": {
+      "include": [
+        ["rect", 128, 56, 244, 64],
+        ["poly", [[132, 108], [178, 108], [178, 194], [132, 194]]],
+        ["poly", [[328, 108], [374, 108], [374, 196], [328, 196]]],
+        ["poly", [[330, 202], [400, 202], [400, 260], [330, 260]]],
+        ["poly", [[92, 202], [162, 202], [162, 260], [92, 260]]]
+      ],
+      "gate": ["white"],
+      "grow": 2
+    },
+    "hair_front": {
+      "include": [
+        ["rect", 150, 38, 200, 204],
+        ["poly", [[86, 198], [152, 198], [152, 258], [86, 258]]],
+        ["poly", [[348, 198], [426, 198], [426, 258], [348, 258]]]
+      ],
+      "exclude": [["rect", 190, 214, 52, 46], ["rect", 258, 214, 52, 46]],
+      "gate": ["hair"],
+      "grow": 2
+    },
+    "mouth": {"include": [["rect", 230, 262, 18, 14]], "grow": 2},
+    "eye_l": {"include": [["ellipse", 216, 236, 25, 20]], "grow": 2},
+    "eye_r": {"include": [["ellipse", 284, 236, 25, 20]], "grow": 2},
+    "cheek_l": {"include": [["ellipse", 197, 261, 12, 7]], "grow": 2},
+    "cheek_r": {"include": [["ellipse", 297, 261, 12, 7]], "grow": 2},
+    "eye_l_lid": {
+      "include": [],
+      "occlude": [["ellipse", 216, 239, 28, 25]],
+      "base": [250, 255],
+      "baseRamp": 10,
+      "mirror": false,
+      "stamp": [{"fromPart": "eye_l", "gate": ["dark"], "topRows": 4, "offset": [0, 20]}],
+      "grow": 0
+    },
+    "eye_r_lid": {
+      "include": [],
+      "occlude": [["ellipse", 284, 239, 28, 25]],
+      "base": [250, 255],
+      "baseRamp": 10,
+      "mirror": false,
+      "stamp": [{"fromPart": "eye_r", "gate": ["dark"], "topRows": 4, "offset": [0, 20]}],
+      "grow": 0
+    },
+    "neck": {
+      "include": [["rect", 222, 284, 52, 12]],
+      "gate": ["skin"],
+      "occludeParts": ["head", "body", "hair_front", "hair_back", "headdress"],
+      "occludeClip": [["rect", 210, 274, 76, 40]],
+      "occludeGrow": 3,
+      "base": [247, 283],
+      "baseRamp": 12,
+      "grow": 2
+    },
+    "head": {
+      "include": [["ellipse", 247, 248, 66, 50]],
+      "occludeParts": ["hair_front", "headdress"],
+      "occludeClip": [["ellipse", 247, 240, 70, 72]],
+      "occludeGrow": 3,
+      "base": [247, 283],
+      "baseRamp": 18,
+      "grow": 2
+    },
+    "tail_3": {"include": [["rect", 356, 348, 46, 70]], "grow": 10},
+    "tail_2": {"include": [["rect", 346, 358, 22, 36]], "grow": 10},
+    "tail_1": {"include": [["rect", 334, 368, 20, 26]], "grow": 10},
+    "tail_0": {
+      "include": [["rect", 322, 372, 20, 24]],
+      "occludeParts": ["body", "apron", "arm_r"],
+      "occludeClip": [["rect", 296, 362, 36, 40]],
+      "occludeGrow": 3,
+      "base": [340, 390],
+      "baseRamp": 12,
+      "mirror": false,
+      "grow": 10
+    },
+    "arm_l": {
+      "include": [["poly", [[166, 324], [194, 324], [196, 352], [190, 372], [178, 388], [156, 388], [150, 362], [154, 340]]]],
+      "occludeParts": ["hair_back", "hair_front", "body", "headdress"],
+      "occludeClip": [["rect", 156, 316, 46, 22]],
+      "occludeGrow": 3,
+      "base": [165, 345],
+      "baseRamp": 10,
+      "grow": 2
+    },
+    "arm_r": {
+      "include": [["poly", [[328, 324], [300, 324], [298, 352], [304, 372], [316, 388], [338, 388], [344, 362], [340, 340]]]],
+      "occludeParts": ["hair_back", "hair_front", "body", "headdress"],
+      "occludeClip": [["rect", 292, 316, 46, 22]],
+      "occludeGrow": 3,
+      "base": [330, 345],
+      "baseRamp": 10,
+      "grow": 2
+    },
+    "apron": {
+      "include": [
+        [
+          "poly",
+          [
+            [204, 344],
+            [292, 344],
+            [300, 368],
+            [300, 398],
+            [288, 416],
+            [248, 426],
+            [208, 416],
+            [196, 398],
+            [196, 368]
+          ]
+        ]
+      ],
+      "occludeParts": ["arm_l", "arm_r"],
+      "occludeClip": [
+        [
+          "poly",
+          [
+            [196, 338],
+            [300, 338],
+            [310, 372],
+            [306, 404],
+            [292, 422],
+            [248, 432],
+            [204, 422],
+            [190, 404],
+            [186, 372]
+          ]
+        ]
+      ],
+      "occludeGrow": 3,
+      "base": [260, 400],
+      "baseRamp": 10,
+      "grow": 3
+    },
+    "body": {
+      "include": [
+        [
+          "poly",
+          [
+            [206, 282],
+            [290, 282],
+            [300, 320],
+            [306, 360],
+            [318, 396],
+            [330, 430],
+            [326, 450],
+            [290, 452],
+            [292, 494],
+            [204, 494],
+            [206, 452],
+            [168, 450],
+            [164, 430],
+            [176, 396],
+            [188, 360],
+            [194, 320]
+          ]
+        ]
+      ],
+      "occludeParts": ["apron", "arm_l", "arm_r", "neck"],
+      "occludeClip": [["poly", [[194, 278], [302, 278], [312, 320], [318, 366], [332, 434], [162, 434], [176, 366], [182, 320]]]],
+      "occludeGrow": 4,
+      "base": [290, 395],
+      "baseRamp": 14,
+      "grow": 2
+    },
+    "hair_back": {
+      "include": [["rect", 85, 56, 340, 380]],
+      "occludeParts": ["head", "neck", "hair_front", "headdress", "eye_l", "eye_r", "cheek_l", "cheek_r", "mouth"],
+      "occludeClip": [["rect", 148, 56, 204, 250]],
+      "occludeGrow": 4,
+      "base": [250, 180],
+      "baseRamp": 18,
+      "grow": 2
+    }
+  },
+  "partZ": {"tail_0": 11, "tail_1": 12, "tail_2": 13, "tail_3": 14}
+}

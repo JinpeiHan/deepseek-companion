@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable
 
-PACK_IDS = frozenset({"chibi", "standard", "slender"})
+PACK_IDS = frozenset({"chibi", "standard", "slender", "standard-rig", "chibi-rig"})
 SUPPORTED_FORMAT_VERSIONS = frozenset({1, 2, 3})
 RENDERERS = frozenset({"frames", "rig"})
 

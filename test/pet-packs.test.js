@@ -8,10 +8,20 @@ const MANIFESTS = ['../assets/pet-standard-manifest.json', '../assets/pet-slende
 
 const readJson = async (relative) => JSON.parse(await readFile(new URL(relative, import.meta.url), 'utf8'))
 
-test('registry declares three stable proportion packs', async () => {
+test('registry declares the frame packs plus the rig packs', async () => {
   const registry = await readJson('../assets/pet-packs.json')
   assert.equal(registry.defaultPack, 'chibi')
-  assert.deepEqual(Object.keys(registry.packs), ['chibi', 'standard', 'slender'])
+  assert.deepEqual(Object.keys(registry.packs), [
+    'chibi',
+    'standard',
+    'slender',
+    'standard-rig',
+    'chibi-rig',
+  ])
+  // The default must stay a frame pack: a rig pack is only reachable by an
+  // explicit choice, so a broken rig can never be what a new user first sees.
+  const defaultManifest = await readJson(`../assets/${registry.packs[registry.defaultPack].manifest}`)
+  assert.notEqual(defaultManifest.renderer, 'rig')
 })
 
 test('new manifests declare the funded keyframe subset symmetrically', async () => {

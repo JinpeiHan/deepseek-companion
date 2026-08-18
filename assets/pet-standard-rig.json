@@ -1,0 +1,484 @@
+{
+  "formatVersion": 3,
+  "renderer": "rig",
+  "characterId": "whale-girl-standard-rig",
+  "sourceWidth": 512,
+  "sourceHeight": 512,
+  "maxFrameWidth": 512,
+  "maxFrameHeight": 512,
+  "logicalWidth": 260,
+  "logicalHeight": 260,
+  "footAnchor": [0.5, 0.97],
+  "bubbleAnchor": [0.5, 0.04],
+  "overflow": {"left": 113, "top": 35, "right": 70, "bottom": 27},
+  "params": {
+    "headAngleX": {"min": -14, "max": 14, "default": 0},
+    "headAngleY": {"min": -18, "max": 18, "default": 0},
+    "headAngleZ": {"min": -18, "max": 18, "default": 0},
+    "bodyAngleY": {"min": -4, "max": 4, "default": 0},
+    "bodyAngleZ": {"min": -4, "max": 4, "default": 0},
+    "eyeBallX": {"min": -1, "max": 1, "default": 0},
+    "eyeBallY": {"min": -1, "max": 1, "default": 0},
+    "rootLeanZ": {"min": -5, "max": 5, "default": 0},
+    "rootBobY": {"min": -6, "max": 6, "default": 0},
+    "breath": {"min": -1, "max": 1, "default": 0},
+    "eyeOpen": {"min": 0, "max": 1, "default": 1},
+    "mouthOpen": {"min": 0, "max": 1, "default": 0},
+    "cheekSquash": {"min": 0, "max": 1, "default": 0},
+    "armSwingL": {"min": -14, "max": 14, "default": 0},
+    "armSwingR": {"min": -14, "max": 14, "default": 0},
+    "hairSway": {"min": -6, "max": 6, "default": 0},
+    "tail0": {"min": -10, "max": 10, "default": 0},
+    "tail1": {"min": -10, "max": 10, "default": 0},
+    "tail2": {"min": -10, "max": 10, "default": 0},
+    "tail3": {"min": -10, "max": 10, "default": 0}
+  },
+  "bones": [
+    {"id": "root", "parent": null, "pivot": [237, 496]},
+    {"id": "body", "parent": "root", "pivot": [237, 400]},
+    {"id": "neck", "parent": "body", "pivot": [233, 215]},
+    {"id": "head", "parent": "neck", "pivot": [233, 208]},
+    {"id": "arm_l", "parent": "body", "pivot": [190, 206]},
+    {"id": "arm_r", "parent": "body", "pivot": [300, 206]},
+    {"id": "tail_b0", "parent": "body", "pivot": [306, 338], "chain": "tail", "chainIndex": 0},
+    {"id": "tail_b1", "parent": "tail_b0", "pivot": [326, 342], "chain": "tail", "chainIndex": 1},
+    {"id": "tail_b2", "parent": "tail_b1", "pivot": [344, 348], "chain": "tail", "chainIndex": 2},
+    {"id": "tail_b3", "parent": "tail_b2", "pivot": [360, 356], "chain": "tail", "chainIndex": 3}
+  ],
+  "chains": {
+    "tail": {
+      "driver": "tailSwing",
+      "amplitudeDeg": 11.0,
+      "distribution": [1.0, 0.85, 0.7, 0.55],
+      "spring": {"stiffness": 84.0, "dampingRatio": 0.42, "lagPerSegmentMs": 26.0, "maxDeg": 10.0},
+      "deform": "strips",
+      "bones": ["tail_b0", "tail_b1", "tail_b2", "tail_b3"],
+      "segmentParams": ["tail0", "tail1", "tail2", "tail3"]
+    }
+  },
+  "parts": [
+    {
+      "id": "tail_0",
+      "file": "parts/tail_0.png",
+      "z": 5,
+      "bone": "tail_b0",
+      "rect": [272, 316, 60, 52],
+      "pivot": [306.0, 338.0],
+      "hitGroup": "tail"
+    },
+    {
+      "id": "tail_1",
+      "file": "parts/tail_1.png",
+      "z": 6,
+      "bone": "tail_b1",
+      "rect": [308, 330, 38, 53],
+      "pivot": [326.0, 342.0],
+      "hitGroup": "tail"
+    },
+    {
+      "id": "tail_2",
+      "file": "parts/tail_2.png",
+      "z": 7,
+      "bone": "tail_b2",
+      "rect": [318, 340, 42, 49],
+      "pivot": [344.0, 348.0],
+      "hitGroup": "tail"
+    },
+    {
+      "id": "tail_3",
+      "file": "parts/tail_3.png",
+      "z": 8,
+      "bone": "tail_b3",
+      "rect": [339, 306, 54, 92],
+      "pivot": [360.0, 356.0],
+      "hitGroup": "tail",
+      "strips": 6,
+      "stripBones": ["tail_b2", "tail_b3"]
+    },
+    {
+      "id": "hair_back",
+      "file": "parts/hair_back.png",
+      "z": 10,
+      "bone": "head",
+      "rect": [119, 66, 232, 235],
+      "pivot": [233.0, 205.0],
+      "hitGroup": "hair"
+    },
+    {
+      "id": "neck",
+      "file": "parts/neck.png",
+      "z": 18,
+      "bone": "neck",
+      "rect": [204, 186, 60, 40],
+      "pivot": [233.0, 215.0],
+      "hitGroup": "body"
+    },
+    {
+      "id": "body",
+      "file": "parts/body.png",
+      "z": 20,
+      "bone": "body",
+      "rect": [136, 194, 197, 303],
+      "pivot": [234.5, 345.5],
+      "hitGroup": "body"
+    },
+    {
+      "id": "apron",
+      "file": "parts/apron.png",
+      "z": 24,
+      "bone": "body",
+      "rect": [178, 258, 125, 136],
+      "pivot": [240.5, 326.0],
+      "hitGroup": "body"
+    },
+    {
+      "id": "arm_l",
+      "file": "parts/arm_l.png",
+      "z": 30,
+      "bone": "arm_l",
+      "rect": [152, 184, 58, 153],
+      "pivot": [181.0, 260.5],
+      "hitGroup": "arm"
+    },
+    {
+      "id": "arm_r",
+      "file": "parts/arm_r.png",
+      "z": 31,
+      "bone": "arm_r",
+      "rect": [262, 184, 61, 153],
+      "pivot": [292.5, 260.5],
+      "hitGroup": "arm"
+    },
+    {
+      "id": "head",
+      "file": "parts/head.png",
+      "z": 40,
+      "bone": "head",
+      "rect": [177, 112, 113, 103],
+      "pivot": [233.0, 208.0],
+      "hitGroup": "head"
+    },
+    {
+      "id": "cheek_l",
+      "file": "parts/cheek_l.png",
+      "z": 42,
+      "bone": "head",
+      "rect": [190, 179, 24, 17],
+      "pivot": [202.0, 187.5],
+      "hitGroup": "cheek"
+    },
+    {
+      "id": "cheek_r",
+      "file": "parts/cheek_r.png",
+      "z": 43,
+      "bone": "head",
+      "rect": [252, 179, 26, 17],
+      "pivot": [265.0, 187.5],
+      "hitGroup": "cheek"
+    },
+    {
+      "id": "eye_l",
+      "file": "parts/eye_l.png",
+      "z": 44,
+      "bone": "head",
+      "rect": [191, 154, 37, 33],
+      "pivot": [209.5, 170.5],
+      "hitGroup": "head"
+    },
+    {
+      "id": "eye_r",
+      "file": "parts/eye_r.png",
+      "z": 45,
+      "bone": "head",
+      "rect": [239, 154, 37, 33],
+      "pivot": [257.5, 170.5],
+      "hitGroup": "head"
+    },
+    {
+      "id": "eye_l_lid",
+      "file": "parts/eye_l_lid.png",
+      "z": 46,
+      "bone": "head",
+      "rect": [191, 154, 37, 33],
+      "pivot": [209.0, 154.0],
+      "hitGroup": "head"
+    },
+    {
+      "id": "eye_r_lid",
+      "file": "parts/eye_r_lid.png",
+      "z": 47,
+      "bone": "head",
+      "rect": [239, 154, 37, 33],
+      "pivot": [257.0, 154.0],
+      "hitGroup": "head"
+    },
+    {
+      "id": "mouth",
+      "file": "parts/mouth.png",
+      "z": 48,
+      "bone": "head",
+      "rect": [224, 182, 20, 15],
+      "pivot": [234.0, 184.0],
+      "hitGroup": "head"
+    },
+    {
+      "id": "hair_front",
+      "file": "parts/hair_front.png",
+      "z": 50,
+      "bone": "head",
+      "rect": [140, 83, 193, 124],
+      "pivot": [233.0, 200.0],
+      "hitGroup": "hair"
+    },
+    {
+      "id": "headdress",
+      "file": "parts/headdress.png",
+      "z": 55,
+      "bone": "head",
+      "rect": [166, 52, 135, 92],
+      "pivot": [233.0, 190.0],
+      "hitGroup": "head"
+    }
+  ],
+  "bindings": [
+    {"param": "headAngleZ", "bone": "head", "channel": "rotate", "gain": 1.0},
+    {"param": "headAngleY", "bone": "head", "channel": "rotate", "gain": 0.16},
+    {"param": "headAngleY", "bone": "head", "channel": "translateX", "gain": 0.22},
+    {"param": "headAngleY", "bone": "body", "channel": "rotate", "gain": -0.05},
+    {"param": "headAngleX", "bone": "head", "channel": "translateY", "gain": 0.3},
+    {"param": "bodyAngleY", "bone": "body", "channel": "rotate", "gain": 0.5},
+    {"param": "bodyAngleZ", "bone": "body", "channel": "rotate", "gain": 1.0},
+    {"param": "rootLeanZ", "bone": "root", "channel": "rotate", "gain": 1.0},
+    {"param": "rootBobY", "bone": "root", "channel": "translateY", "gain": 1.0},
+    {"param": "breath", "bone": "body", "channel": "scaleY", "gain": 0.012, "bias": 1.0},
+    {"param": "breath", "bone": "head", "channel": "translateY", "gain": 0.8},
+    {"param": "hairSway", "part": "hair_back", "channel": "rotate", "gain": 1.0},
+    {"param": "armSwingL", "bone": "arm_l", "channel": "rotate", "gain": 1.0},
+    {"param": "armSwingR", "bone": "arm_r", "channel": "rotate", "gain": 1.0},
+    {"param": "eyeBallX", "part": "eye_l", "channel": "translateX", "gain": 2.2},
+    {"param": "eyeBallX", "part": "eye_r", "channel": "translateX", "gain": 2.2},
+    {"param": "eyeBallY", "part": "eye_l", "channel": "translateY", "gain": 1.6},
+    {"param": "eyeBallY", "part": "eye_r", "channel": "translateY", "gain": 1.6},
+    {"param": "eyeOpen", "part": "eye_l_lid", "channel": "scaleY", "curve": [[0.0, 1.0], [1.0, 0.0]]},
+    {"param": "eyeOpen", "part": "eye_r_lid", "channel": "scaleY", "curve": [[0.0, 1.0], [1.0, 0.0]]},
+    {"param": "mouthOpen", "part": "mouth", "channel": "scaleY", "curve": [[0.0, 1.0], [0.5, 1.6], [1.0, 2.3]]},
+    {"param": "cheekSquash", "part": "cheek_l", "channel": "scaleX", "gain": 0.25, "bias": 1.0},
+    {"param": "cheekSquash", "part": "cheek_l", "channel": "scaleY", "gain": -0.2, "bias": 1.0},
+    {"param": "cheekSquash", "part": "cheek_r", "channel": "scaleX", "gain": 0.25, "bias": 1.0},
+    {"param": "cheekSquash", "part": "cheek_r", "channel": "scaleY", "gain": -0.2, "bias": 1.0},
+    {"param": "tail0", "bone": "tail_b0", "channel": "rotate", "gain": 1.0},
+    {"param": "tail1", "bone": "tail_b1", "channel": "rotate", "gain": 1.0},
+    {"param": "tail2", "bone": "tail_b2", "channel": "rotate", "gain": 1.0},
+    {"param": "tail3", "bone": "tail_b3", "channel": "rotate", "gain": 1.0}
+  ],
+  "clips": {
+    "idle": {
+      "loop": true,
+      "motion": "breathe",
+      "oscillators": [
+        {"param": "breath", "wave": "sin", "periodMs": 3600, "amplitude": 0.6},
+        {"param": "tailSwing", "wave": "sin", "periodMs": 2600, "amplitude": 0.5}
+      ]
+    },
+    "thinking": {
+      "loop": true,
+      "motion": "think",
+      "oscillators": [
+        {"param": "breath", "wave": "sin", "periodMs": 2800, "amplitude": 0.5},
+        {"param": "tailSwing", "wave": "sin", "periodMs": 3000, "amplitude": 0.35},
+        {"param": "headAngleZ", "wave": "sin", "periodMs": 5200, "amplitude": 3.5}
+      ]
+    },
+    "working": {
+      "loop": true,
+      "motion": "work",
+      "oscillators": [
+        {"param": "breath", "wave": "sin", "periodMs": 1900, "amplitude": 0.8},
+        {"param": "tailSwing", "wave": "sin", "periodMs": 2000, "amplitude": 0.7},
+        {"param": "armSwingL", "wave": "sin", "periodMs": 1200, "amplitude": 6.0},
+        {"param": "armSwingR", "wave": "sin", "periodMs": 1200, "amplitude": -6.0}
+      ]
+    },
+    "working_search": {
+      "loop": true,
+      "motion": "work",
+      "oscillators": [
+        {"param": "breath", "wave": "sin", "periodMs": 2100, "amplitude": 0.6},
+        {"param": "tailSwing", "wave": "sin", "periodMs": 2400, "amplitude": 0.5},
+        {"param": "headAngleY", "wave": "sin", "periodMs": 2600, "amplitude": 7.0}
+      ]
+    },
+    "working_command": {
+      "loop": true,
+      "motion": "work",
+      "oscillators": [
+        {"param": "breath", "wave": "sin", "periodMs": 1700, "amplitude": 0.9},
+        {"param": "tailSwing", "wave": "sin", "periodMs": 1800, "amplitude": 0.8},
+        {"param": "armSwingR", "wave": "triangle", "periodMs": 900, "amplitude": 9.0}
+      ]
+    },
+    "waiting": {
+      "loop": true,
+      "oscillators": [
+        {"param": "breath", "wave": "sin", "periodMs": 3000, "amplitude": 0.5},
+        {"param": "tailSwing", "wave": "sin", "periodMs": 3400, "amplitude": 0.3}
+      ]
+    },
+    "success": {
+      "loop": true,
+      "oscillators": [
+        {"param": "breath", "wave": "sin", "periodMs": 900, "amplitude": 1.0},
+        {"param": "tailSwing", "wave": "sin", "periodMs": 900, "amplitude": 1.0},
+        {"param": "rootBobY", "wave": "sin", "periodMs": 900, "amplitude": 3.0}
+      ]
+    },
+    "error": {
+      "loop": true,
+      "oscillators": [
+        {"param": "breath", "wave": "sin", "periodMs": 2600, "amplitude": 0.4},
+        {"param": "headAngleZ", "wave": "sin", "periodMs": 320, "amplitude": 2.5}
+      ]
+    },
+    "error_dizzy": {
+      "loop": true,
+      "oscillators": [
+        {"param": "breath", "wave": "sin", "periodMs": 2200, "amplitude": 0.4},
+        {"param": "headAngleZ", "wave": "sin", "periodMs": 1400, "amplitude": 9.0},
+        {"param": "headAngleY", "wave": "cos", "periodMs": 1400, "amplitude": 7.0}
+      ]
+    },
+    "dragging": {
+      "loop": true,
+      "oscillators": [
+        {"param": "breath", "wave": "sin", "periodMs": 2400, "amplitude": 0.5},
+        {"param": "tailSwing", "wave": "sin", "periodMs": 1500, "amplitude": 0.9}
+      ]
+    },
+    "blink": {
+      "loop": false,
+      "durationMs": 240,
+      "envelope": {"attackMs": 60, "holdMs": 40, "decayMs": 120},
+      "tracks": [
+        {
+          "param": "eyeOpen",
+          "blend": "override",
+          "interp": "linear",
+          "keys": [[0, 1.0], [90, 0.0], [140, 0.0], [240, 1.0]]
+        }
+      ]
+    },
+    "glance": {
+      "loop": false,
+      "durationMs": 900,
+      "envelope": {"attackMs": 160, "holdMs": 260, "decayMs": 320},
+      "tracks": [
+        {
+          "param": "eyeBallX",
+          "blend": "add",
+          "interp": "smooth",
+          "keys": [[0, 0.0], [260, 0.7], [620, 0.7], [900, 0.0]]
+        },
+        {
+          "param": "headAngleY",
+          "blend": "add",
+          "interp": "smooth",
+          "keys": [[0, 0.0], [300, 4.0], [620, 4.0], [900, 0.0]]
+        }
+      ]
+    },
+    "head_pat": {
+      "loop": false,
+      "durationMs": 520,
+      "envelope": {"attackMs": 90, "holdMs": 120, "decayMs": 200},
+      "tracks": [
+        {
+          "param": "headAngleZ",
+          "blend": "add",
+          "interp": "smooth",
+          "keys": [[0, 0.0], [180, -5.0], [340, 3.0], [520, 0.0]]
+        },
+        {
+          "param": "eyeOpen",
+          "blend": "override",
+          "interp": "linear",
+          "keys": [[0, 1.0], [160, 0.2], [380, 0.2], [520, 1.0]]
+        },
+        {"param": "mouthOpen", "blend": "add", "interp": "smooth", "keys": [[0, 0.0], [200, 0.45], [520, 0.0]]}
+      ]
+    },
+    "poke": {
+      "loop": false,
+      "durationMs": 360,
+      "envelope": {"attackMs": 60, "holdMs": 60, "decayMs": 180},
+      "tracks": [
+        {"param": "cheekSquash", "blend": "add", "interp": "smooth", "keys": [[0, 0.0], [110, 0.85], [360, 0.0]]},
+        {"param": "mouthOpen", "blend": "add", "interp": "smooth", "keys": [[0, 0.0], [110, 0.6], [360, 0.0]]},
+        {"param": "headAngleX", "blend": "add", "interp": "smooth", "keys": [[0, 0.0], [110, -3.0], [360, 0.0]]}
+      ]
+    },
+    "tail": {
+      "loop": false,
+      "durationMs": 420,
+      "envelope": {"attackMs": 50, "holdMs": 60, "decayMs": 260},
+      "tracks": [
+        {
+          "param": "tail3",
+          "blend": "add",
+          "interp": "smooth",
+          "keys": [[0, 0.0], [120, 10.0], [260, -6.0], [420, 0.0]]
+        },
+        {
+          "param": "tail2",
+          "blend": "add",
+          "interp": "smooth",
+          "keys": [[0, 0.0], [140, 6.0], [280, -3.0], [420, 0.0]]
+        },
+        {
+          "param": "eyeOpen",
+          "blend": "override",
+          "interp": "linear",
+          "keys": [[0, 1.0], [120, 0.35], [300, 0.35], [420, 1.0]]
+        }
+      ]
+    }
+  },
+  "stateMap": {
+    "IDLE": "idle",
+    "THINKING": "thinking",
+    "WORKING": "working",
+    "WAITING": "waiting",
+    "SUCCESS": "success",
+    "ERROR": "error",
+    "DISCONNECTED": "idle"
+  },
+  "workingActivityMap": {
+    "searching": "working_search",
+    "commanding": "working_command",
+    "editing": "working",
+    "testing": "working_command",
+    "using-tool": "working"
+  },
+  "idleMicroClips": ["blink", "glance"],
+  "hitGroups": {
+    "head": ["head", "eye_l", "eye_r", "eye_l_lid", "eye_r_lid", "mouth", "headdress"],
+    "hair": ["hair_front", "hair_back"],
+    "cheek": ["cheek_l", "cheek_r"],
+    "arm": ["arm_l", "arm_r"],
+    "body": ["body", "apron", "neck"],
+    "tail": ["tail_0", "tail_1", "tail_2", "tail_3"]
+  },
+  "interactions": {
+    "head": {"clip": "head_pat", "copy": "head_pat", "impulse": {"param": "headAngleZ", "angularVel": 36.0}},
+    "hair": {"clip": "head_pat", "copy": "head_pat", "impulse": {"param": "hairSway", "angularVel": 44.0}},
+    "cheek": {"clip": "poke", "copy": "poke", "impulse": {"param": "cheekSquash", "squashVel": 3.0}},
+    "arm": {"clip": "poke", "copy": "poke", "impulse": {"param": "armSwingL", "angularVel": 30.0}},
+    "body": {"clip": "poke", "copy": "poke", "impulse": {"param": "bodyAngleZ", "angularVel": 22.0}},
+    "tail": {"clip": "tail", "copy": "tail", "impulse": {"chain": "tail", "chainAngularVel": 180.0}}
+  },
+  "qa": {
+    "master": "assets/pet-standard/idle_front/idle_front_512.png",
+    "masterSha256": "14400ff63c6c27b33a5bd30990272b8d752ca1d68c70edb3cd1e83a0a53b8a5d",
+    "restHiddenParts": ["eye_l_lid", "eye_r_lid"],
+    "axisX": 235
+  }
+}
