@@ -24,3 +24,9 @@ art-references/openai-generation-records.jsonl
 
 # Local API credentials (never commit)
 .env
+
+# Rig extraction intermediates (masks, cuts, chains); masters and QA are kept
+art-references/rig/*/10-masks/
+art-references/rig/*/20-visible/
+art-references/rig/*/40-chains/
+art-references/rig/*/rig-records.jsonl
