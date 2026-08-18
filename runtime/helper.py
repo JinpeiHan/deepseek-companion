@@ -16,7 +16,7 @@ import sys
 import threading
 import time
 from pathlib import Path
-from typing import Any, Callable, NamedTuple, TextIO
+from typing import Any, Callable, Mapping, NamedTuple, TextIO
 
 try:
     from .animation_model import AnimationModel, crossfade_duration
@@ -24,6 +24,7 @@ try:
     from .layout_store import default_layout_path, load_layout, save_layout
     from .persona_copy import interaction_copy, load_persona_copy
     from .rig_driver import RigDriver
+    from .rig_model import hit_test
     from .rig_pack import animation_manifest_from_rig, load_rig
 except ImportError:
     from animation_model import AnimationModel, crossfade_duration
@@ -31,12 +32,341 @@ except ImportError:
     from layout_store import default_layout_path, load_layout, save_layout
     from persona_copy import interaction_copy, load_persona_copy
     from rig_driver import RigDriver
+    from rig_model import hit_test
     from rig_pack import animation_manifest_from_rig, load_rig
 
 
 PROTOCOL_VERSION = 1
 STATES = {"IDLE", "THINKING", "WORKING", "WAITING", "SUCCESS", "ERROR", "DISCONNECTED"}
 PACK_LOAD_ERRORS = (OSError, ValueError, KeyError, json.JSONDecodeError)
+
+
+# --------------------------------------------------------------------------- #
+# Interaction maths
+# --------------------------------------------------------------------------- #
+#
+# Everything in this section is deliberately Qt-free and stateless-per-call so
+# it can be unit tested without a display server. The window methods further
+# down are then thin enough that reading them is enough to see what they do.
+
+#: Vertical fraction of the pet box the pointer is measured against. The pet
+#: looks at the cursor with its *head*, not its centroid -- aiming at the
+#: middle of the box makes a tall character read as staring at its own feet.
+POINTER_ATTENTION_Y = 0.38
+
+#: Follow saturates this many pet-boxes away from the attention point. Wide
+#: enough that a cursor still on the pet barely moves the head, narrow enough
+#: that the pet is fully turned long before the far edge of a 4K screen.
+POINTER_SPAN_FACTOR = 2.5
+
+#: Distance falloff for a poke, as a multiplier on the declared impulse.
+#: Clamped at both ends: a click on a part's pivot must still register, and no
+#: click anywhere may exceed the maximum, however large the part is.
+IMPULSE_SCALE_MIN = 0.35
+IMPULSE_SCALE_MAX = 1.6
+
+#: Ticker interval a rig pack degrades to while the window is being dragged.
+RIG_DRAG_TICK_MS = 33
+
+#: Anchor-velocity low-pass. Mouse move events are irregularly spaced, so a raw
+#: ``delta / dt`` spikes on a short interval and reads as a stall on a long
+#: one. Smoothing is what makes the lean usable and its derivative -- which the
+#: driver differentiates back out to shake the chains -- usable at all.
+ANCHOR_VELOCITY_ALPHA = 0.35
+#: Intervals below this are noise-dominated; the sample is folded into the next.
+ANCHOR_VELOCITY_MIN_DT_MS = 4.0
+#: Pixels per second. The driver clamps its own outputs, but an unbounded input
+#: still poisons the acceleration term it takes from this.
+ANCHOR_VELOCITY_MAX = 4000.0
+#: No move event for this long means the drag has stalled, not that the pet is
+#: still travelling at the last measured speed.
+ANCHOR_VELOCITY_STALE_MS = 250.0
+
+#: The shipped rectangle zone heuristic, as (clip, persona copy group, ttl_ms).
+FRAME_CLICK_HEAD = ("head_pat", "headPat", 1800)
+FRAME_CLICK_TAIL = ("tail", "tail", 1500)
+FRAME_CLICK_POKE = ("poke", "poke", 1500)
+
+#: Fallback bubble lifetime for a rig interaction that declares no ``ttlMs``.
+RIG_INTERACTION_TTL_MS = 1600
+
+
+def _clamp_unit(value: float) -> float:
+    return min(1.0, max(-1.0, float(value)))
+
+
+def _clamp_speed(value: float) -> float:
+    return min(ANCHOR_VELOCITY_MAX, max(-ANCHOR_VELOCITY_MAX, float(value)))
+
+
+def pointer_offset(
+    cursor: tuple[float, float],
+    pet_rect: tuple[float, float, float, float],
+    *,
+    attention_y: float = POINTER_ATTENTION_Y,
+    span_factor: float = POINTER_SPAN_FACTOR,
+) -> tuple[float, float]:
+    """Normalise a global cursor position against the pet box.
+
+    Both arguments are in the same virtual-desktop space -- ``QCursor.pos()``
+    and ``pet_x``/``pet_y`` both derive from ``QScreen.availableGeometry()``,
+    which is what makes polling work with no focus and no pointer grab.
+
+    Returns a pair clamped to [-1, 1], and *exactly* ``(0.0, 0.0)`` when the
+    cursor sits on the attention point. That exactness matters: the dead zone
+    in :meth:`RigDriver.set_pointer` is a magnitude test, so a normalisation
+    that merely approached zero would leave the head permanently a hair off
+    centre.
+    """
+    cursor_x, cursor_y = cursor
+    pet_x, pet_y, pet_width, pet_height = pet_rect
+    if pet_width <= 0 or pet_height <= 0:
+        return (0.0, 0.0)
+    attention_point_x = pet_x + pet_width / 2.0
+    attention_point_y = pet_y + attention_y * pet_height
+    span_x = max(1.0, pet_width * span_factor)
+    span_y = max(1.0, pet_height * span_factor)
+    return (
+        _clamp_unit((cursor_x - attention_point_x) / span_x),
+        _clamp_unit((cursor_y - attention_point_y) / span_y),
+    )
+
+
+def pointer_target(
+    cursor: tuple[float, float],
+    pet_rect: tuple[float, float, float, float],
+    *,
+    reduced_motion: bool,
+    same_screen: bool,
+) -> tuple[float, float, bool]:
+    """``(dx, dy, present)`` to hand :meth:`RigDriver.set_pointer`.
+
+    The two degenerate cases are separated on purpose:
+
+    * **Reduced motion** reports *absent*. It is a promise, not a damping
+      factor -- no poll, no follow, and the driver snaps its pointer springs to
+      zero rather than easing them there.
+    * **A cursor on another monitor** reports *present but dead centre*. Under
+      per-monitor DPI the two positions are not points in one uniform space, so
+      their difference is not a distance; the pet looks straight ahead instead
+      of following a target skewed by the scale factor mismatch.
+    """
+    if reduced_motion:
+        return (0.0, 0.0, False)
+    if not same_screen:
+        return (0.0, 0.0, True)
+    offset_x, offset_y = pointer_offset(cursor, pet_rect)
+    return (offset_x, offset_y, True)
+
+
+def part_geometry(
+    rig: Mapping[str, Any], part_id: str | None
+) -> tuple[tuple[float, float, float, float], tuple[float, float]]:
+    """``(rect, pivot)`` of one part in rig source space.
+
+    The pivot defaults to the rect centre exactly as
+    :class:`~runtime.rig_model.RigModel` does, so the distance falloff below is
+    measured against the same point the part actually rotates about.
+    """
+    empty = (0.0, 0.0, 0.0, 0.0)
+    if not part_id:
+        return empty, (0.0, 0.0)
+    for entry in rig.get("parts", ()) or ():
+        if not isinstance(entry, Mapping) or entry.get("id") != part_id:
+            continue
+        raw_rect = entry.get("rect")
+        if isinstance(raw_rect, (list, tuple)) and len(raw_rect) >= 4:
+            rect = tuple(float(value) for value in raw_rect[:4])
+        else:
+            rect = empty
+        raw_pivot = entry.get("pivot")
+        if isinstance(raw_pivot, (list, tuple)) and len(raw_pivot) >= 2:
+            pivot = (float(raw_pivot[0]), float(raw_pivot[1]))
+        else:
+            pivot = (rect[0] + rect[2] / 2.0, rect[1] + rect[3] / 2.0)
+        return rect, pivot
+    return empty, (0.0, 0.0)
+
+
+def impulse_scale(
+    distance: float,
+    part_rect: tuple[float, float, float, float],
+    *,
+    minimum: float = IMPULSE_SCALE_MIN,
+    maximum: float = IMPULSE_SCALE_MAX,
+) -> float:
+    """Distance falloff for a poke, measured in the part's own source space.
+
+    The reference length is half the part's diagonal, so the result is a
+    property of the part's *size* rather than of the pack's pixel resolution --
+    a 512px rig and a 1024px rig of the same character whip identically.
+    Monotonic in ``distance`` and clamped at both ends, which is what makes
+    "poke the tail tip and it lashes, poke its root and it nudges" true without
+    letting a stray click on a huge part produce an absurd kick.
+    """
+    _, _, width, height = part_rect
+    reference = math.hypot(float(width), float(height)) / 2.0
+    if reference <= 0.0:
+        return minimum
+    ratio = max(0.0, float(distance)) / reference
+    return min(maximum, max(minimum, minimum + (maximum - minimum) * ratio))
+
+
+def hit_group_for_part(rig: Mapping[str, Any], part_id: str | None) -> str | None:
+    """Resolve a hit-tested part id to its declared hit group.
+
+    A part's own ``hitGroup`` wins over the ``hitGroups`` index, because that is
+    the field :class:`~runtime.rig_model.Part` carries and the one a rig author
+    edits next to the part they are naming.
+    """
+    if not part_id:
+        return None
+    for entry in rig.get("parts", ()) or ():
+        if isinstance(entry, Mapping) and entry.get("id") == part_id:
+            group = entry.get("hitGroup")
+            if isinstance(group, str) and group:
+                return group
+            break
+    groups = rig.get("hitGroups")
+    if isinstance(groups, Mapping):
+        for group, members in groups.items():
+            if isinstance(members, (list, tuple)) and part_id in members:
+                return str(group)
+    return None
+
+
+def rig_interaction_for_part(
+    rig: Mapping[str, Any], part_id: str | None
+) -> tuple[str, dict[str, Any]] | None:
+    """``(group, entry)`` for the part under the click, or ``None``.
+
+    ``None`` covers three cases that mean the same thing to the caller -- no
+    part, a part in no hit group, and a group with no ``interactions`` entry --
+    and the caller answers all three by doing nothing, which is what leaves the
+    press free to have started a window drag.
+    """
+    group = hit_group_for_part(rig, part_id)
+    if group is None:
+        return None
+    interactions = rig.get("interactions")
+    if not isinstance(interactions, Mapping):
+        return None
+    entry = interactions.get(group)
+    if not isinstance(entry, Mapping):
+        return None
+    return group, dict(entry)
+
+
+def interaction_copy_group(
+    entry: Mapping[str, Any], group: str, copy: Mapping[str, Any]
+) -> str:
+    """Persona copy group for a rig interaction, falling back to ``poke``.
+
+    A rig may declare hit groups the shipped persona file has never heard of
+    (``cheek``, say). Falling back keeps the whale talking rather than raising
+    a KeyError out of a mouse handler.
+    """
+    available = copy.get("interaction") if isinstance(copy, Mapping) else None
+    available = available if isinstance(available, Mapping) else {}
+    for candidate in (entry.get("copy"), group):
+        if isinstance(candidate, str) and candidate in available:
+            return candidate
+    return "poke"
+
+
+def frame_click_interaction(
+    x: float, y: float, pet_rect: tuple[float, float, float, float]
+) -> tuple[str, str, int]:
+    """The shipped rectangle zone heuristic, unchanged in behaviour.
+
+    Frame packs keep this forever: they have no parts to hit test against, and
+    chibi's behaviour is pinned by the snapshot hash. Lifted out of the mouse
+    handler only so it can be tested without a window.
+    """
+    pet_x, pet_y, pet_width, pet_height = pet_rect
+    relative_x = max(0.0, x - pet_x)
+    relative_y = max(0.0, y - pet_y)
+    if relative_y < pet_height * 0.45:
+        return FRAME_CLICK_HEAD
+    if relative_x > pet_width * 0.72:
+        return FRAME_CLICK_TAIL
+    return FRAME_CLICK_POKE
+
+
+def drag_tick_interval(renderer_tick_ms: int, is_rig: bool) -> int | None:
+    """Ticker interval to use during a drag; ``None`` means "stop the ticker".
+
+    Frame packs stop it, which is the shipped behaviour and, per
+    ``crossfade_duration``'s docstring, the reason it exists at all: it
+    suppresses Windows layered-window flicker while the window is moving. A
+    frame pack loses nothing by stopping, because it has nothing to integrate.
+
+    A rig does. Its springs must keep stepping through the drag or the hair and
+    tail would teleport into place on release instead of lagging behind the
+    throw and settling out of it -- which is the entire point of dragging a
+    rigged pet. The compromise is the degraded interval plus a pet-rect-only
+    repaint: the same load the renderer already degrades itself to under
+    sustained slow paints, rather than the full 16ms rate.
+    """
+    if not is_rig:
+        return None
+    return max(RIG_DRAG_TICK_MS, int(renderer_tick_ms))
+
+
+class AnchorVelocity:
+    """Low-passed pet-anchor velocity in pixels per second.
+
+    Fed from ``_move_to_pet`` -- i.e. from mouse move events, which arrive at
+    whatever irregular rate the platform feels like -- and read once per tick.
+    Sampling and reporting are separate calls precisely because those two rates
+    are unrelated.
+    """
+
+    def __init__(self, alpha: float = ANCHOR_VELOCITY_ALPHA) -> None:
+        self.alpha = float(alpha)
+        self.reset()
+
+    def reset(self) -> None:
+        self._x: float | None = None
+        self._y: float | None = None
+        self._t: float | None = None
+        self._vx = 0.0
+        self._vy = 0.0
+
+    @property
+    def value(self) -> tuple[float, float]:
+        return (self._vx, self._vy)
+
+    @property
+    def started(self) -> bool:
+        return self._t is not None
+
+    def update(self, x: float, y: float, now_ms: float) -> tuple[float, float]:
+        """Record an anchor position and fold it into the running estimate."""
+        if self._t is None:
+            self._x, self._y, self._t = float(x), float(y), float(now_ms)
+            return self.value
+        dt_ms = float(now_ms) - self._t
+        if dt_ms < ANCHOR_VELOCITY_MIN_DT_MS:
+            # Too short a baseline to differentiate. Keep the old anchor so the
+            # next sample measures across the *whole* gap instead of dividing a
+            # one-pixel move by a fraction of a millisecond.
+            return self.value
+        sample_x = _clamp_speed((float(x) - self._x) * 1000.0 / dt_ms)
+        sample_y = _clamp_speed((float(y) - self._y) * 1000.0 / dt_ms)
+        self._x, self._y, self._t = float(x), float(y), float(now_ms)
+        self._vx += self.alpha * (sample_x - self._vx)
+        self._vy += self.alpha * (sample_y - self._vy)
+        return self.value
+
+    def sample(self, now_ms: float) -> tuple[float, float]:
+        """Velocity to report this tick, zeroed when the drag has stalled."""
+        if self._t is None:
+            return (0.0, 0.0)
+        if float(now_ms) - self._t > ANCHOR_VELOCITY_STALE_MS:
+            self._vx = 0.0
+            self._vy = 0.0
+        return self.value
 
 
 class PackAssets(NamedTuple):
@@ -167,7 +497,17 @@ def run_headless(recorder: EventRecorder) -> int:
 def run_visual(recorder: EventRecorder, snapshot_path: Path | None = None) -> int:
     try:
         from PySide6.QtCore import QObject, QPoint, Qt, QTimer, QUrl, Signal
-        from PySide6.QtGui import QColor, QDesktopServices, QFont, QFontMetrics, QMouseEvent, QPainter, QPen, QPixmap
+        from PySide6.QtGui import (
+            QColor,
+            QCursor,
+            QDesktopServices,
+            QFont,
+            QFontMetrics,
+            QMouseEvent,
+            QPainter,
+            QPen,
+            QPixmap,
+        )
         from PySide6.QtWidgets import QApplication, QMenu, QWidget
 
         try:
@@ -274,6 +614,13 @@ def run_visual(recorder: EventRecorder, snapshot_path: Path | None = None) -> in
             else:
                 self.bubble_states = list(self.layout.get("bubbleStates", ["SUCCESS", "ERROR", "WAITING"]))
             self.model = AnimationModel(self.manifest)
+            # Set before the driver exists: ``_build_rig_driver`` solves one
+            # pose immediately, and that solve reads the pointer and the drag
+            # state through ``_advance_rig``.
+            self.pet_x = 0
+            self.pet_y = 0
+            self.dragging = False
+            self.anchor_velocity = AnchorVelocity()
             self._build_rig_driver()
 
             self.display_state = "IDLE"
@@ -293,9 +640,6 @@ def run_visual(recorder: EventRecorder, snapshot_path: Path | None = None) -> in
             self.shake_count = 0
             self.drag_origin: QPoint | None = None
             self.pet_origin: QPoint | None = None
-            self.pet_x = 0
-            self.pet_y = 0
-            self.dragging = False
             self.last_tick_ms = self._now_ms()
             self.fade_from_pixmap: QPixmap | None = None
             self.fade_started = 0.0
@@ -419,6 +763,20 @@ def run_visual(recorder: EventRecorder, snapshot_path: Path | None = None) -> in
                 self.model.overlay_clip_name,
                 now_ms,
             )
+            pointer_x, pointer_y, present = self._pointer_offset()
+            driver.set_pointer(pointer_x, pointer_y, present, now_ms)
+            if self.dragging:
+                vx, vy = self.anchor_velocity.sample(now_ms)
+                driver.set_root_motion(vx, vy, True)
+            elif driver.dragging:
+                # The release tick, and only the release tick: hand the final
+                # velocity over once and then stop reporting, because the
+                # driver's own release decay lives in the value we would
+                # otherwise overwrite. Keep pushing it every tick and the
+                # chains stay pinned at throw speed forever instead of
+                # overshooting once and settling.
+                driver.set_root_motion(*self.anchor_velocity.value, False)
+                self.anchor_velocity.reset()
             params = driver.advance(elapsed_ms, now_ms)
             self.rig_transforms = driver.model.solve(params)
 
@@ -472,6 +830,50 @@ def run_visual(recorder: EventRecorder, snapshot_path: Path | None = None) -> in
             top = max(pet_y, bubble_height)
             foot_x, foot_y = self.renderer.foot_fraction
             return (pet_x + foot_x * pet_width, top + foot_y * pet_height)
+
+        def _pointer_offset(self) -> tuple[float, float, bool]:
+            """Poll the global cursor and normalise it against the pet box.
+
+            Polled once per tick rather than tracked through events, because
+            ``setMouseTracking``/``enterEvent`` only fire while the pointer is
+            *over this widget* and the pet has to follow a cursor anywhere on
+            the desktop. ``QCursor.pos()`` is a cheap platform call returning
+            virtual-desktop coordinates in the same space as ``pet_x``/
+            ``pet_y``, and it needs no focus, no ``WA_Hover``, no pointer grab
+            and no global hook.
+            """
+            if self.reduced_motion:
+                return pointer_target(
+                    (0.0, 0.0), (0, 0, 0, 0), reduced_motion=True, same_screen=True
+                )
+            global_pos = QCursor.pos()
+            pet_width, pet_height = self._pet_size()
+            pet_screen = QApplication.screenAt(
+                QPoint(self.pet_x + pet_width // 2, self.pet_y + pet_height // 2)
+            )
+            cursor_screen = QApplication.screenAt(global_pos)
+            same_screen = (
+                pet_screen is None
+                or cursor_screen is None
+                or cursor_screen is pet_screen
+            )
+            return pointer_target(
+                (global_pos.x(), global_pos.y()),
+                (self.pet_x, self.pet_y, pet_width, pet_height),
+                reduced_motion=False,
+                same_screen=same_screen,
+            )
+
+        def _record_anchor_velocity(self) -> None:
+            """Feed the current anchor into the low-pass, mid-drag only.
+
+            Called from ``_move_to_pet`` because that is where the anchor
+            actually changes, and only while dragging because a programmatic
+            move (screen change, restore) is a teleport, not a throw.
+            """
+            if self.rig is None or not self.dragging:
+                return
+            self.anchor_velocity.update(self.pet_x, self.pet_y, self._now_ms())
 
         def _switch_pack(self, pack_id: str) -> bool:
             """Swap the proportion pack in place.
@@ -574,8 +976,14 @@ def run_visual(recorder: EventRecorder, snapshot_path: Path | None = None) -> in
             card_key = (self._bubble_visible(), self._current_card())
             if card_key != self.card_key:
                 self.card_key = card_key
-                self.update()
-                return
+                # A rig keeps ticking through a drag (see ``drag_tick_interval``)
+                # but must not start issuing full-window repaints while the
+                # window is moving -- that is exactly the layered-window flicker
+                # the frame-pack timer stop was introduced to avoid.
+                # ``_finish_drag`` repaints the whole window once on release.
+                if not (self.dragging and self.rig is not None):
+                    self.update()
+                    return
             self.update(*self._pet_repaint_rect())
 
         def _play_idle_micro(self) -> None:
@@ -626,7 +1034,15 @@ def run_visual(recorder: EventRecorder, snapshot_path: Path | None = None) -> in
             if self.dragging:
                 return
             self.dragging = True
-            self.animation_timer.stop()
+            interval = drag_tick_interval(
+                self.renderer.tick_ms(self.reduced_motion), self.rig is not None
+            )
+            if interval is None:
+                self.animation_timer.stop()
+            else:
+                self.animation_timer.setInterval(interval)
+                self.anchor_velocity.reset()
+                self.anchor_velocity.update(self.pet_x, self.pet_y, self._now_ms())
             self.micro_timer.stop()
             self._play_model_overlay("dragging", allow_fade=False, repaint=False)
 
@@ -642,7 +1058,19 @@ def run_visual(recorder: EventRecorder, snapshot_path: Path | None = None) -> in
             self._sync_frame_transition(previous_frame, previous_clip, allow_fade=False)
             self.dragging = False
             self.last_tick_ms = now_ms
-            self.animation_timer.start(self.renderer.tick_ms(self.reduced_motion))
+            if self.rig is None:
+                self.animation_timer.start(self.renderer.tick_ms(self.reduced_motion))
+            else:
+                # Never stopped, so restore the rate rather than restarting --
+                # restarting would drop the settle's first frame. The next tick
+                # sees ``dragging`` false while the driver still thinks it is
+                # dragging, which is what hands the throw velocity over.
+                self.animation_timer.setInterval(
+                    self.renderer.tick_ms(self.reduced_motion)
+                )
+                # The pet-rect-only repaints during the drag may have left a
+                # stale card, so repaint the whole window once on release.
+                self.update()
             if not self.reduced_motion:
                 self._schedule_micro()
 
@@ -720,6 +1148,7 @@ def run_visual(recorder: EventRecorder, snapshot_path: Path | None = None) -> in
                     pet_x - (self.width() - pet_width) // 2,
                     pet_y - (self.height() - pet_height - self._pet_bottom_slack()),
                 )
+                self._record_anchor_velocity()
                 self.update()
                 return
 
@@ -738,6 +1167,7 @@ def run_visual(recorder: EventRecorder, snapshot_path: Path | None = None) -> in
             self.pet_y = window_y + top_offset_y
 
             self.move(window_x, window_y)
+            self._record_anchor_velocity()
             self.update()
 
         def _pet_offset_x(self, pet_width: int) -> int:
@@ -1162,19 +1592,76 @@ def run_visual(recorder: EventRecorder, snapshot_path: Path | None = None) -> in
             self.interaction_seed += 1
             return message
 
+        def _rig_hit(self, x: float, y: float) -> tuple[str | None, tuple[float, float]]:
+            """Topmost part under a widget point, plus the point in rig source space.
+
+            Uses ``_rig_anchor`` -- the same origin ``paintEvent`` just painted
+            with -- and ``rig_transforms``, the pose the last tick solved. Hit
+            testing therefore sees exactly the pixels that are on screen: a
+            tail swung far out of its rest rect is pokeable where it *looks*,
+            not where it started.
+            """
+            anchor_x, anchor_y = self._rig_anchor(self._bubble_height())
+            source = self.renderer.to_source(
+                x, y, anchor_x=anchor_x, anchor_y=anchor_y, scale=self.scale
+            )
+            part_id = hit_test(
+                self.rig_transforms or (),
+                self.renderer.alpha_masks(),
+                source[0],
+                source[1],
+            )
+            return part_id, source
+
+        def _play_rig_click(self, x: float, y: float) -> bool:
+            """Route a click through per-part hit testing. True if it landed.
+
+            A miss returns False and does nothing at all. That is deliberate:
+            the press has already armed the window drag, and clicking the
+            transparent margin to move the pet is an affordance this window has
+            always had. Click-through would need ``WS_EX_TRANSPARENT``, which
+            would take the drag with it.
+            """
+            part_id, source = self._rig_hit(x, y)
+            resolved = rig_interaction_for_part(self.rig, part_id)
+            if resolved is None:
+                return False
+            group, entry = resolved
+
+            impulse = entry.get("impulse")
+            if isinstance(impulse, Mapping) and self.rig_driver is not None:
+                rect, pivot = part_geometry(self.rig, part_id)
+                spec = dict(impulse)
+                # Distance falloff multiplies whatever the rig declared rather
+                # than replacing it, so a rig author still controls the ceiling.
+                spec["scale"] = float(spec.get("scale", 1.0)) * impulse_scale(
+                    math.dist(source, pivot), rect
+                )
+                self.rig_driver.apply_impulse(spec)
+
+            clip = entry.get("clip")
+            if isinstance(clip, str) and clip:
+                self._play_model_overlay(clip)
+            ttl = entry.get("ttlMs")
+            self._show_overlay(
+                self._interaction_copy(
+                    interaction_copy_group(entry, group, persona_copy)
+                ),
+                self.status_detail,
+                self.status_state,
+                int(ttl) if isinstance(ttl, (int, float)) else RIG_INTERACTION_TTL_MS,
+            )
+            return True
+
         def _play_click_interaction(self, x: float, y: float) -> None:
-            pet_x, pet_y, pet_width, pet_height = self._pet_rect()
-            relative_x = max(0.0, x - pet_x)
-            relative_y = max(0.0, y - pet_y)
-            if relative_y < pet_height * 0.45:
-                self._play_model_overlay("head_pat")
-                self._show_overlay(self._interaction_copy("headPat"), self.status_detail, self.status_state, 1800)
-            elif relative_x > pet_width * 0.72:
-                self._play_model_overlay("tail")
-                self._show_overlay(self._interaction_copy("tail"), self.status_detail, self.status_state, 1500)
-            else:
-                self._play_model_overlay("poke")
-                self._show_overlay(self._interaction_copy("poke"), self.status_detail, self.status_state, 1500)
+            if self.rig is not None:
+                self._play_rig_click(x, y)
+                return
+            clip, copy_group, ttl = frame_click_interaction(x, y, self._pet_rect())
+            self._play_model_overlay(clip)
+            self._show_overlay(
+                self._interaction_copy(copy_group), self.status_detail, self.status_state, ttl
+            )
 
         def mouseDoubleClickEvent(self, event: QMouseEvent) -> None:
             if event.button() == Qt.MouseButton.LeftButton:
