@@ -21,10 +21,3 @@ art-references/openai-generation-records.jsonl
 # Agent worktrees
 .claude/worktrees/
 
-# Generated clip previews (regenerate with: pnpm run art:preview)
-docs/images/chibi-*.webp
-docs/images/chibi-*.gif
-docs/images/standard-*.webp
-docs/images/standard-*.gif
-docs/images/slender-*.webp
-docs/images/slender-*.gif
