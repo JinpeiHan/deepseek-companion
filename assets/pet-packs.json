@@ -1,0 +1,9 @@
+{
+  "formatVersion": 1,
+  "defaultPack": "chibi",
+  "packs": {
+    "chibi": { "manifest": "pet-manifest.json", "root": "pet" },
+    "standard": { "manifest": "pet-standard-manifest.json", "root": "pet-standard" },
+    "slender": { "manifest": "pet-slender-manifest.json", "root": "pet-slender" }
+  }
+}
