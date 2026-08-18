@@ -136,7 +136,12 @@ def run_visual(recorder: EventRecorder, snapshot_path: Path | None = None) -> in
         print(f"Unable to load BigFish asset manifest: {error}", file=sys.stderr)
         recorder.close()
         return 2
-    persona_copy = load_persona_copy(bundle_root() / "assets" / "persona-copy.zh-CN.json")
+    try:
+        persona_copy = load_persona_copy(bundle_root() / "assets" / "persona-copy.zh-CN.json")
+    except (OSError, ValueError) as error:
+        print(f"Unable to load whale persona copy: {error}", file=sys.stderr)
+        recorder.close()
+        return 2
 
     class CompanionWindow(QWidget):
         LABELS = {
