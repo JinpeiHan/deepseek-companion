@@ -96,7 +96,11 @@ function hasPySide6() {
 async function makeBundleWithBrokenStandardPack(directory) {
   await mkdir(join(directory, 'runtime'), { recursive: true })
   await mkdir(join(directory, 'assets'), { recursive: true })
-  for (const name of ['helper.py', 'animation_model.py', 'asset_pack.py', 'frame_renderer.py', 'layout_store.py', 'persona_copy.py']) {
+  // Every module helper.py imports at load time, including the rig ones it
+  // imports unconditionally so PyInstaller can follow them: a bundle missing
+  // one fails at import, which would make this fallback test pass for the
+  // wrong reason (the helper never gets far enough to fall back).
+  for (const name of ['helper.py', 'animation_model.py', 'asset_pack.py', 'frame_renderer.py', 'layout_store.py', 'persona_copy.py', 'rig_model.py', 'rig_driver.py', 'rig_pack.py', 'rig_renderer.py']) {
     await cp(join(repoRoot, 'runtime', name), join(directory, 'runtime', name))
   }
   await cp(join(repoRoot, 'assets', 'pet-manifest.json'), join(directory, 'assets', 'pet-manifest.json'))
