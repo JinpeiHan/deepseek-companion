@@ -21,6 +21,11 @@ export const inject = ['sessions', 'settings']
 export const CONFIG_ENDPOINT = '/plugins/dsh-dafeiyu/config'
 export const Config = Schema.object({
   enabled: Schema.boolean().default(true).description('启用桌面小鲸鱼'),
+  characterProportion: Schema.union([
+    Schema.const('chibi').description('Q版'),
+    Schema.const('standard').description('标准'),
+    Schema.const('slender').description('修长'),
+  ]).default('chibi').description('角色形态'),
   scale: Schema.number().min(0.7).max(1.4).step(0.05).default(1).role('slider').description('角色大小'),
   bubbleScale: Schema.number().min(0.8).max(1.2).step(0.05).default(1).role('slider').description('气泡大小'),
   activityLevel: Schema.union([
@@ -40,6 +45,7 @@ export const Config = Schema.object({
 
 const defaults = Object.freeze({
   enabled: true,
+  characterProportion: 'chibi',
   scale: 1,
   bubbleScale: 1,
   activityLevel: 'normal',
@@ -52,6 +58,7 @@ const defaults = Object.freeze({
 function publicConfig(config = {}) {
   return {
     enabled: config.enabled ?? defaults.enabled,
+    characterProportion: config.characterProportion ?? defaults.characterProportion,
     scale: config.scale ?? defaults.scale,
     bubbleScale: config.bubbleScale ?? defaults.bubbleScale,
     activityLevel: config.activityLevel ?? defaults.activityLevel,
@@ -156,6 +163,7 @@ function mount(ctx, config = {}, eventCtx = ctx) {
   const applyLiveSettings = (next) => {
     for (const message of reducer.setIncludeSubagents(next.includeSubagents === true)) bridge.send(message)
     bridge.send(createMessage(CompanionMessageKind.CONFIG, {
+      characterProportion: next.characterProportion ?? defaults.characterProportion,
       scale: next.scale ?? defaults.scale,
       bubbleScale: next.bubbleScale ?? defaults.bubbleScale,
       activityLevel: next.activityLevel ?? defaults.activityLevel,
@@ -184,6 +192,7 @@ function mount(ctx, config = {}, eventCtx = ctx) {
       ...helperConfig,
       env: {
         ...helperConfig.env,
+        DSH_DAFEIYU_PROPORTION: String(resolved.characterProportion ?? defaults.characterProportion),
         DSH_DAFEIYU_SCALE: String(resolved.scale ?? defaults.scale),
         DSH_DAFEIYU_BUBBLE_SCALE: String(resolved.bubbleScale ?? defaults.bubbleScale),
         DSH_DAFEIYU_ACTIVITY_LEVEL: String(resolved.activityLevel ?? defaults.activityLevel),

@@ -5,6 +5,7 @@ import { join } from 'node:path'
 import { createRequire } from 'node:module'
 import test from 'node:test'
 import { apply, inject } from '../src/index.js'
+import { HelperProcess } from '../src/helper-process.js'
 
 test('plugin declares the service dependencies it actually consumes', () => {
   assert.ok(inject.includes('settings'), 'settings is a real hard dependency for live config')
@@ -97,6 +98,7 @@ test('live settings keep the active project state without restarting the helper'
     activityLevel: 'normal',
     reducedMotion: false,
     includeSubagents: false,
+    characterProportion: 'chibi',
   }
   const settings = {
     get: () => ({ ...settingsValue }),
@@ -116,7 +118,17 @@ test('live settings keep the active project state without restarting the helper'
     },
   }
 
-  apply(ctx, { helper: { headless: true, eventLog } })
+  let helperOptions
+  const originalStart = HelperProcess.prototype.start
+  HelperProcess.prototype.start = function (...args) {
+    helperOptions = this.options
+    return originalStart.apply(this, args)
+  }
+  try {
+    apply(ctx, { helper: { headless: true, eventLog } })
+  } finally {
+    HelperProcess.prototype.start = originalStart
+  }
   const activeSession = { header: { id: 'live-settings', cwd: 'D:\\work\\active-project' } }
   listeners.get('session/event')(activeSession, { type: 'turn/start', seq: 1, data: { turn: 1 } })
   listeners.get('session/event')(activeSession, {
@@ -124,7 +136,7 @@ test('live settings keep the active project state without restarting the helper'
     seq: 2,
     data: { todos: [{ content: '继续保留这个任务', status: 'in_progress' }] },
   })
-  settingsValue = { ...settingsValue, scale: 0.9, bubbleScale: 0.8 }
+  settingsValue = { ...settingsValue, scale: 0.9, bubbleScale: 0.8, characterProportion: 'standard' }
   settingsListener(settingsValue)
   listeners.get('session/event')(activeSession, {
     type: 'tool/call',
@@ -144,8 +156,11 @@ test('live settings keep the active project state without restarting the helper'
   const messages = (await readFile(eventLog, 'utf8')).trim().split(/\r?\n/).map(JSON.parse)
   assert.equal(messages.filter((message) => message.kind === 'hello').length, 1)
   assert.equal(messages.filter((message) => message.kind === 'config').length, 1)
+  const configMessage = messages.find((message) => message.kind === 'config')
+  assert.equal(configMessage.characterProportion, 'standard')
   const working = messages.findLast((message) => message.state === 'WORKING')
   assert.equal(working.project, 'active-project')
   assert.equal(working.task, '继续保留这个任务')
+  assert.equal(helperOptions.env.DSH_DAFEIYU_PROPORTION, 'chibi')
   await rm(directory, { recursive: true, force: true })
 })

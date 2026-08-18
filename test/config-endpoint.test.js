@@ -5,7 +5,7 @@ import test from 'node:test'
 import { createConfigHandler } from '../src/index.js'
 
 function settingsFixture() {
-  let value = { enabled: true, scale: 1, bubbleScale: 1, activityLevel: 'normal', reducedMotion: false, includeSubagents: false }
+  let value = { enabled: true, scale: 1, bubbleScale: 1, activityLevel: 'normal', reducedMotion: false, includeSubagents: false, characterProportion: 'chibi' }
   return {
     get: () => ({ ...value }),
     update: async (patch) => { value = { ...value, ...patch } },
@@ -50,6 +50,26 @@ test('local config endpoint rejects remote, cross-origin, and unknown writes', a
   assert.equal((await request(handler, { address: '192.168.1.8' })).status, 403)
   assert.equal((await request(handler, { origin: 'https://example.com' })).status, 403)
   assert.equal((await request(handler, { method: 'PATCH', body: '{"surprise":true}' })).status, 400)
+})
+
+test('character proportion is an allowed live setting', async () => {
+  const settings = settingsFixture()
+  const handler = createConfigHandler(settings)
+  const changed = await request(handler, {
+    method: 'PATCH',
+    body: JSON.stringify({ characterProportion: 'standard' }),
+  })
+  assert.equal(changed.status, 200)
+  assert.equal(changed.body.characterProportion, 'standard')
+})
+
+test('settings client exposes three character proportions before size', async () => {
+  const source = await readFile(new URL('../lib/client.js', import.meta.url), 'utf8')
+  assert.match(source, /label: '角色形态'/u)
+  assert.match(source, /value: 'chibi'/u)
+  assert.match(source, /value: 'standard'/u)
+  assert.match(source, /value: 'slender'/u)
+  assert.ok(source.indexOf("label: '角色形态'") < source.indexOf("label: '角色大小'"))
 })
 
 test('settings client debounces each slider independently', async () => {

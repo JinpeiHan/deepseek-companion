@@ -28,6 +28,7 @@ class LayoutStoreTests(unittest.TestCase):
                 "reducedMotion": True,
                 "bubbleMode": "always",
                 "bubbleStates": ["SUCCESS", "ERROR", "WAITING"],
+                "characterProportion": "chibi",
             })
             self.assertEqual(json.loads(path.read_text(encoding="utf-8"))["scale"], 1.4)
             self.assertEqual(list(path.parent.glob("*.tmp")), [])
@@ -45,6 +46,12 @@ class LayoutStoreTests(unittest.TestCase):
         self.assertEqual(normalise_layout({"bubbleScale": 9})["bubbleScale"], 1.2)
         self.assertEqual(normalise_layout({"bubbleScale": 0.1})["bubbleScale"], 0.8)
         self.assertEqual(normalise_layout({})["bubbleScale"], 1.0)
+
+    def test_character_proportion_is_persisted_and_normalised(self) -> None:
+        self.assertEqual(normalise_layout({"characterProportion": "standard"})["characterProportion"], "standard")
+        self.assertEqual(normalise_layout({"characterProportion": "slender"})["characterProportion"], "slender")
+        self.assertEqual(normalise_layout({"characterProportion": "invalid"})["characterProportion"], "chibi")
+        self.assertEqual(normalise_layout({"characterProportion": True})["characterProportion"], "chibi")
 
 
 if __name__ == "__main__":

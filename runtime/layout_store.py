@@ -15,6 +15,7 @@ DEFAULT_LAYOUT: dict[str, Any] = {
     "y": None,
     "petX": None,
     "petY": None,
+    "characterProportion": "chibi",
     "scale": 1.0,
     "bubbleScale": 1.0,
     "reducedMotion": False,
@@ -44,6 +45,8 @@ def normalise_layout(value: Any) -> dict[str, Any]:
         coordinate = value.get(key)
         if isinstance(coordinate, int) and not isinstance(coordinate, bool):
             layout[key] = coordinate
+    if value.get("characterProportion") in {"chibi", "standard", "slender"}:
+        layout["characterProportion"] = value["characterProportion"]
     scale = value.get("scale")
     if isinstance(scale, (int, float)) and not isinstance(scale, bool):
         layout["scale"] = min(1.4, max(0.7, float(scale)))
