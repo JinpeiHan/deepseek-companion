@@ -21,6 +21,10 @@
     "chibi-rig": {
       "manifest": "pet-chibi-rig.json",
       "root": "pet-chibi-rig"
+    },
+    "slender-rig": {
+      "manifest": "pet-slender-rig.json",
+      "root": "pet-slender-rig"
     }
   }
 }

@@ -47,11 +47,24 @@ PACKS = {
         "proportion": "a super-deformed two-head-tall chibi anime maid girl with a hugely oversized head and a tiny body",
         "upscale": True,
     },
-    "slender-rig": {
+    # slender is played older and gentler on purpose: same character, further
+    # along. The tone words sit in the proportion string because they have to
+    # reach every clip -- a calm reading of "angry" is a different drawing, not
+    # the same drawing at a different size.
+    "slender": {
         "frames": "assets/pet-slender",
         "suffix": "_512",
-        "proportion": "a six-and-a-half-head-tall slender anime maid girl with long legs and a mature silhouette",
+        "proportion": (
+            "a six-and-a-half-head-tall slender young woman with long legs and a mature silhouette, "
+            "an elegant and composed grown-up maid with a gentle, kind, softly smiling demeanour, "
+            "calm and unhurried in every movement, poised rather than childish or exaggerated"
+        ),
         "upscale": False,
+        "tone": (
+            "Play the action calmly and gracefully rather than energetically: smaller, slower, "
+            "more restrained motion, a warm and gentle expression, no chibi-style exaggeration, "
+            "no super-deformed proportions."
+        ),
     },
 }
 
@@ -82,12 +95,42 @@ CLIPS: dict[str, tuple[str | None, str]] = {
 }
 
 
+# Emoji actions. Their first frame is a prepared sticker under
+# art-references/emoji-first/, already matted and padded so the feet cannot be
+# pushed out of frame, rather than a frame from the pack -- the pack has no
+# pose for any of these.
+EMOJI_CLIPS: dict[str, tuple[str, str]] = {
+    "taunt_token_jab": ("taunt-token-jab", "jabs a finger at the viewer with a smug grin, taunting, other hand on her hip"),
+    "smug_zako": ("smug-zako", "covers her mouth with one hand and smirks mockingly, leaning forward slightly"),
+    "slack_off": ("slack-off", "slumps on the floor having given up, limbs sprawled, face blank"),
+    "love_heart_hands": ("love-heart-hands", "makes a heart shape with both hands, eyes closed happily, hearts floating around her"),
+    "dash_run": ("dash-run", "sprints forward at full speed, arms pumping, hair and tail streaming behind"),
+    "sulk_pout": ("sulk-pout", "pouts and sulks, brow furrowed, arms drawn in close, looking away"),
+    "soul_leaving": ("soul-leaving", "slumps exhausted as a little ghost drifts out of her mouth"),
+    "salute_roger": ("salute-roger", "snaps a crisp salute, standing straight, bright confident expression"),
+    "plead_kneel": ("plead-kneel", "kneels with both hands clasped, pleading upward with teary eyes"),
+    "confused_question": ("confused-question", "tilts her head in confusion, finger to her chin, question marks above her"),
+    "relax_armchair": ("relax-armchair", "sits back relaxed holding a warm mug, sipping contentedly"),
+    "cry_wail": ("cry-wail", "wails with her eyes squeezed shut, tears streaming, arms down"),
+    "idea_lightbulb": ("idea-lightbulb", "raises one finger as an idea strikes, eyes lighting up"),
+}
+
+
 def run(cmd: list[str], **kwargs) -> subprocess.CompletedProcess:
     return subprocess.run(cmd, cwd=ROOT, text=True, capture_output=True, **kwargs)
 
 
 def first_frame_for(pack: str, clip: str, work: Path) -> Path:
     meta = PACKS[pack]
+    if clip in EMOJI_CLIPS:
+        stem, _ = EMOJI_CLIPS[clip]
+        prepared = ROOT / "art-references" / "emoji-first" / f"{stem}.png"
+        if not prepared.exists():
+            # RuntimeError, not SystemExit: SystemExit derives from
+            # BaseException and slips past the per-clip guard, so one missing
+            # file would abandon every clip after it.
+            raise RuntimeError(f"no prepared first frame at {prepared}")
+        return prepared
     directory, _ = CLIPS[clip]
     frames_root = ROOT / meta["frames"]
     candidate = None
@@ -98,7 +141,7 @@ def first_frame_for(pack: str, clip: str, work: Path) -> Path:
     if candidate is None:
         fallback = sorted((frames_root / "idle_front").glob("*.png"))
         if not fallback:
-            raise SystemExit(f"{pack}: no idle_front frame to fall back on")
+            raise RuntimeError(f"{pack}: no idle_front frame to fall back on")
         candidate = fallback[0]
     if not meta["upscale"]:
         return candidate
@@ -106,7 +149,7 @@ def first_frame_for(pack: str, clip: str, work: Path) -> Path:
     if not upscaled.exists():
         result = run([ART_PYTHON, "scripts/upscale-rig-master.py", "--input", str(candidate), "--output", str(upscaled)])
         if result.returncode != 0:
-            raise SystemExit(f"upscale failed for {pack}/{clip}:\n{result.stderr[-800:]}")
+            raise RuntimeError(f"upscale failed: {result.stderr[-500:]}")
     return upscaled
 
 
@@ -133,8 +176,9 @@ def main() -> int:
 
     work = Path(args.work)
     work.mkdir(parents=True, exist_ok=True)
-    wanted = [c.strip() for c in args.clips.split(",") if c.strip()] or list(CLIPS)
-    unknown = [c for c in wanted if c not in CLIPS]
+    all_clips = {**CLIPS, **{k: (None, v[1]) for k, v in EMOJI_CLIPS.items()}}
+    wanted = [c.strip() for c in args.clips.split(",") if c.strip()] or list(all_clips)
+    unknown = [c for c in wanted if c not in all_clips]
     if unknown:
         raise SystemExit(f"unknown clip(s): {', '.join(unknown)}")
 
@@ -157,12 +201,12 @@ def main() -> int:
     failures: list[str] = []
     for index, (pack, clip) in enumerate(todo, start=1):
         meta = PACKS[pack]
-        _, action = CLIPS[clip]
+        _, action = all_clips[clip]
         prompt = (
             f"{meta['proportion']} with {IDENTITY}. She {action}. "
             "Keep the exact head-to-body proportion of the reference. Full body, feet visible, "
             "character stays centred and the same size throughout, consistent character design, "
-            "simple plain background."
+            "simple plain background. " + meta.get("tone", "")
         )
         raw = work / f"{pack}-{clip}"
         small = work / f"{pack}-{clip}-16"

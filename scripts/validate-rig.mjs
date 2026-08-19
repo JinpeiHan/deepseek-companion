@@ -20,7 +20,7 @@ import { fileURLToPath } from 'node:url'
 import { decodeRgba, readHeader, assertDecodable, confine } from './lib/png.mjs'
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
-const PACKS = ['standard', 'chibi']
+const PACKS = ['standard', 'chibi', 'slender']
 const CANVAS = 512
 const ALPHA_FLOOR = 8
 

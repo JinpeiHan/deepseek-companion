@@ -17,6 +17,7 @@ test('registry declares the frame packs plus the rig packs', async () => {
     'slender',
     'standard-rig',
     'chibi-rig',
+    'slender-rig',
   ])
   // The default must stay a frame pack: a rig pack is only reachable by an
   // explicit choice, so a broken rig can never be what a new user first sees.

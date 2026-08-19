@@ -8,7 +8,7 @@ import { promisify } from 'node:util'
 
 const run = promisify(execFile)
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
-const PACKS = ['standard', 'chibi']
+const PACKS = ['standard', 'chibi', 'slender']
 
 const manifestOf = async (pack) =>
   JSON.parse(await readFile(join(repositoryRoot, 'assets', `pet-${pack}-rig.json`), 'utf8'))
@@ -23,7 +23,7 @@ test('validate-rig passes for every rig pack', async () => {
   for (const pack of PACKS) {
     assert.match(stdout, new RegExp(`pet-${pack}-rig: 20 parts`), `${pack} was not validated`)
   }
-  assert.match(stdout, /OK: 2 rig pack\(s\) validated\./)
+  assert.match(stdout, new RegExp(`OK: ${PACKS.length} rig pack\\(s\\) validated\\.`))
 })
 
 test('rig manifests declare the shape the runtime loader requires', async () => {

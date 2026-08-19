@@ -1,0 +1,873 @@
+{
+  "pack": "slender",
+  "characterId": "whale-girl-slender-rig",
+  "master": "assets/pet-slender/idle_front/idle_front_512.png",
+  "axisX": 235,
+  "note": "Hand-authored cut for the slender proportion. Coordinates are master pixels on the 512x512 canvas. Slender is 6.5 heads to standard's 4, so nothing here is a scaled copy of the standard cut: the head is ~68px instead of ~110, the neck is actually visible rather than a seam-filler, the torso runs long under a full-length skirt, and the tail hangs beside the hip rather than behind the waist. Shapes are generous where a colour gate can make the precise cut (the hairline: bangs are saturated blue, the forehead under them is skin) and tight where none can, because the navy dress and the navy hair share a palette. Grow is 1px rather than standard's 2: slender is the same 445px tall but 6.5 heads instead of 4, so its outlines and limbs are proportionally much finer and a 2px grow pushed every part a visible step over its neighbour. The sleeve polygons stop at x=198 rather than 206: the white apron and bodice begin there, and a wider arm claimed them, which alone was half the rest-recomposite error.",
+  "mirrorPartners": {
+    "arm_l": "arm_r",
+    "arm_r": "arm_l",
+    "cheek_l": "cheek_r",
+    "cheek_r": "cheek_l",
+    "eye_l": "eye_r",
+    "eye_r": "eye_l"
+  },
+  "bonePivots": {
+    "root": [
+      235,
+      496
+    ],
+    "body": [
+      235,
+      300
+    ],
+    "neck": [
+      235,
+      140
+    ],
+    "head": [
+      235,
+      132
+    ],
+    "arm_l": [
+      202,
+      152
+    ],
+    "arm_r": [
+      270,
+      152
+    ],
+    "tail_b0": [
+      292,
+      300
+    ],
+    "tail_b1": [
+      316,
+      306
+    ],
+    "tail_b2": [
+      338,
+      316
+    ],
+    "tail_b3": [
+      358,
+      330
+    ]
+  },
+  "partPivots": {
+    "head": [
+      235,
+      132
+    ],
+    "hair_back": [
+      235,
+      128
+    ],
+    "hair_front": [
+      235,
+      124
+    ],
+    "headdress": [
+      235,
+      116
+    ],
+    "neck": [
+      235,
+      140
+    ],
+    "eye_l_lid": [
+      221,
+      104
+    ],
+    "eye_r_lid": [
+      250,
+      104
+    ],
+    "mouth": [
+      236,
+      122
+    ],
+    "tail_0": [
+      292,
+      300
+    ],
+    "tail_1": [
+      316,
+      306
+    ],
+    "tail_2": [
+      338,
+      316
+    ],
+    "tail_3": [
+      358,
+      330
+    ]
+  },
+  "minComponentPx": 1400,
+  "regions": {
+    "headdress": {
+      "include": [
+        [
+          "rect",
+          196,
+          52,
+          80,
+          30
+        ],
+        [
+          "poly",
+          [
+            [
+              192,
+              74
+            ],
+            [
+              212,
+              74
+            ],
+            [
+              212,
+              100
+            ],
+            [
+              192,
+              100
+            ]
+          ]
+        ],
+        [
+          "poly",
+          [
+            [
+              258,
+              74
+            ],
+            [
+              280,
+              74
+            ],
+            [
+              280,
+              100
+            ],
+            [
+              258,
+              100
+            ]
+          ]
+        ]
+      ],
+      "gate": [
+        "white"
+      ],
+      "grow": 1
+    },
+    "hair_front": {
+      "include": [
+        [
+          "rect",
+          194,
+          58,
+          84,
+          64
+        ]
+      ],
+      "exclude": [
+        [
+          "rect",
+          210,
+          94,
+          24,
+          20
+        ],
+        [
+          "rect",
+          240,
+          94,
+          24,
+          20
+        ]
+      ],
+      "gate": [
+        "hair"
+      ],
+      "grow": 1
+    },
+    "hair_back": {
+      "include": [
+        [
+          "rect",
+          140,
+          58,
+          220,
+          190
+        ]
+      ],
+      "base": [
+        236,
+        110
+      ],
+      "baseRamp": 16,
+      "grow": 1,
+      "occludeParts": [
+        "head",
+        "neck",
+        "hair_front",
+        "headdress",
+        "eye_l",
+        "eye_r",
+        "cheek_l",
+        "cheek_r",
+        "mouth"
+      ],
+      "occludeClip": [
+        [
+          "rect",
+          180,
+          58,
+          116,
+          110
+        ]
+      ],
+      "occludeGrow": 3
+    },
+    "head": {
+      "include": [
+        [
+          "ellipse",
+          235,
+          104,
+          32,
+          26
+        ]
+      ],
+      "base": [
+        236,
+        108
+      ],
+      "baseRamp": 14,
+      "grow": 1,
+      "occludeParts": [
+        "hair_front",
+        "headdress"
+      ],
+      "occludeClip": [
+        [
+          "ellipse",
+          235,
+          100,
+          38,
+          38
+        ]
+      ],
+      "occludeGrow": 3
+    },
+    "eye_l": {
+      "include": [
+        [
+          "ellipse",
+          221,
+          104,
+          10,
+          9
+        ]
+      ],
+      "grow": 1
+    },
+    "eye_r": {
+      "include": [
+        [
+          "ellipse",
+          250,
+          104,
+          10,
+          9
+        ]
+      ],
+      "grow": 1
+    },
+    "eye_l_lid": {
+      "include": [],
+      "occlude": [
+        [
+          "ellipse",
+          221,
+          104,
+          11,
+          10
+        ]
+      ],
+      "base": [
+        221,
+        110
+      ],
+      "baseRamp": 6,
+      "mirror": false,
+      "stamp": [
+        {
+          "fromPart": "eye_l",
+          "gate": [
+            "dark"
+          ],
+          "topRows": 4,
+          "offset": [
+            0,
+            8
+          ]
+        }
+      ],
+      "grow": 0
+    },
+    "eye_r_lid": {
+      "include": [],
+      "occlude": [
+        [
+          "ellipse",
+          250,
+          104,
+          11,
+          10
+        ]
+      ],
+      "base": [
+        250,
+        110
+      ],
+      "baseRamp": 6,
+      "mirror": false,
+      "stamp": [
+        {
+          "fromPart": "eye_r",
+          "gate": [
+            "dark"
+          ],
+          "topRows": 4,
+          "offset": [
+            0,
+            8
+          ]
+        }
+      ],
+      "grow": 0
+    },
+    "mouth": {
+      "include": [
+        [
+          "rect",
+          229,
+          117,
+          14,
+          8
+        ]
+      ],
+      "grow": 1
+    },
+    "cheek_l": {
+      "include": [
+        [
+          "ellipse",
+          213,
+          113,
+          8,
+          5
+        ]
+      ],
+      "grow": 1
+    },
+    "cheek_r": {
+      "include": [
+        [
+          "ellipse",
+          258,
+          113,
+          8,
+          5
+        ]
+      ],
+      "grow": 1
+    },
+    "neck": {
+      "include": [
+        [
+          "rect",
+          224,
+          124,
+          22,
+          13
+        ]
+      ],
+      "base": [
+        235,
+        132
+      ],
+      "baseRamp": 8,
+      "grow": 1,
+      "occludeParts": [
+        "head",
+        "body",
+        "hair_front",
+        "hair_back",
+        "headdress"
+      ],
+      "occludeClip": [
+        [
+          "rect",
+          214,
+          118,
+          42,
+          28
+        ]
+      ],
+      "occludeGrow": 3,
+      "gate": [
+        "skin"
+      ]
+    },
+    "arm_l": {
+      "include": [
+        [
+          "poly",
+          [
+            [
+              172,
+              142
+            ],
+            [
+              200,
+              142
+            ],
+            [
+              200,
+              230
+            ],
+            [
+              196,
+              236
+            ],
+            [
+              172,
+              236
+            ],
+            [
+              168,
+              190
+            ]
+          ]
+        ],
+        [
+          "poly",
+          [
+            [
+              166,
+              236
+            ],
+            [
+              198,
+              236
+            ],
+            [
+              196,
+              258
+            ],
+            [
+              188,
+              278
+            ],
+            [
+              170,
+              276
+            ],
+            [
+              162,
+              254
+            ]
+          ]
+        ]
+      ],
+      "base": [
+        184,
+        196
+      ],
+      "baseRamp": 10,
+      "grow": 1,
+      "occludeParts": [
+        "hair_back",
+        "apron"
+      ],
+      "occludeClip": [
+        [
+          "rect",
+          158,
+          138,
+          46,
+          146
+        ]
+      ],
+      "occludeGrow": 3
+    },
+    "arm_r": {
+      "include": [
+        [
+          "poly",
+          [
+            [
+              302,
+              190
+            ],
+            [
+              298,
+              236
+            ],
+            [
+              274,
+              236
+            ],
+            [
+              270,
+              230
+            ],
+            [
+              270,
+              142
+            ],
+            [
+              298,
+              142
+            ]
+          ]
+        ],
+        [
+          "poly",
+          [
+            [
+              308,
+              254
+            ],
+            [
+              300,
+              276
+            ],
+            [
+              282,
+              278
+            ],
+            [
+              274,
+              258
+            ],
+            [
+              272,
+              236
+            ],
+            [
+              304,
+              236
+            ]
+          ]
+        ]
+      ],
+      "base": [
+        286,
+        196
+      ],
+      "baseRamp": 10,
+      "grow": 1,
+      "occludeParts": [
+        "hair_back",
+        "apron"
+      ],
+      "occludeClip": [
+        [
+          "rect",
+          266,
+          138,
+          46,
+          146
+        ]
+      ],
+      "occludeGrow": 3
+    },
+    "apron": {
+      "include": [
+        [
+          "poly",
+          [
+            [
+              204,
+              186
+            ],
+            [
+              268,
+              186
+            ],
+            [
+              280,
+              214
+            ],
+            [
+              286,
+              262
+            ],
+            [
+              280,
+              306
+            ],
+            [
+              264,
+              326
+            ],
+            [
+              236,
+              334
+            ],
+            [
+              208,
+              326
+            ],
+            [
+              192,
+              306
+            ],
+            [
+              186,
+              262
+            ],
+            [
+              192,
+              214
+            ]
+          ]
+        ]
+      ],
+      "grow": 1,
+      "occludeParts": [
+        "arm_l",
+        "arm_r"
+      ],
+      "occludeClip": [
+        [
+          "poly",
+          [
+            [
+              186,
+              182
+            ],
+            [
+              286,
+              182
+            ],
+            [
+              286,
+              338
+            ],
+            [
+              186,
+              338
+            ]
+          ]
+        ]
+      ],
+      "occludeGrow": 3
+    },
+    "body": {
+      "include": [
+        [
+          "poly",
+          [
+            [
+              204,
+              142
+            ],
+            [
+              268,
+              142
+            ],
+            [
+              276,
+              190
+            ],
+            [
+              284,
+              250
+            ],
+            [
+              296,
+              300
+            ],
+            [
+              308,
+              352
+            ],
+            [
+              316,
+              400
+            ],
+            [
+              312,
+              414
+            ],
+            [
+              268,
+              416
+            ],
+            [
+              266,
+              470
+            ],
+            [
+              252,
+              496
+            ],
+            [
+              218,
+              496
+            ],
+            [
+              204,
+              470
+            ],
+            [
+              202,
+              416
+            ],
+            [
+              158,
+              414
+            ],
+            [
+              154,
+              400
+            ],
+            [
+              162,
+              352
+            ],
+            [
+              174,
+              300
+            ],
+            [
+              186,
+              250
+            ],
+            [
+              196,
+              190
+            ]
+          ]
+        ]
+      ],
+      "base": [
+        235,
+        300
+      ],
+      "baseRamp": 18,
+      "grow": 1,
+      "occludeParts": [
+        "apron",
+        "arm_l",
+        "arm_r",
+        "tail_0",
+        "tail_1"
+      ],
+      "occludeClip": [
+        [
+          "rect",
+          150,
+          140,
+          180,
+          360
+        ]
+      ],
+      "occludeGrow": 3
+    },
+    "tail_0": {
+      "include": [
+        [
+          "rect",
+          280,
+          282,
+          28,
+          34
+        ]
+      ],
+      "base": [
+        352,
+        318
+      ],
+      "baseRamp": 12,
+      "mirror": false,
+      "grow": 10,
+      "occludeParts": [
+        "body",
+        "apron",
+        "arm_r"
+      ],
+      "occludeClip": [
+        [
+          "rect",
+          252,
+          272,
+          44,
+          54
+        ]
+      ],
+      "occludeGrow": 3
+    },
+    "tail_1": {
+      "include": [
+        [
+          "rect",
+          304,
+          286,
+          28,
+          36
+        ]
+      ],
+      "base": [
+        352,
+        320
+      ],
+      "baseRamp": 12,
+      "mirror": false,
+      "grow": 8
+    },
+    "tail_2": {
+      "include": [
+        [
+          "rect",
+          326,
+          290,
+          28,
+          40
+        ]
+      ],
+      "base": [
+        354,
+        324
+      ],
+      "baseRamp": 12,
+      "mirror": false,
+      "grow": 8
+    },
+    "tail_3": {
+      "include": [
+        [
+          "rect",
+          348,
+          268,
+          36,
+          92
+        ]
+      ],
+      "base": [
+        358,
+        330
+      ],
+      "baseRamp": 12,
+      "mirror": false,
+      "grow": 6
+    }
+  }
+}
