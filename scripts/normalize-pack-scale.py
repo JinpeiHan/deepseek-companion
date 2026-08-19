@@ -43,7 +43,7 @@ from PIL import Image
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from remove_image_background_lib import cut_alpha, new_matting_session  # noqa: E402
+from remove_image_background_lib import bleed_edges, cut_alpha, new_matting_session  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 TARGET = (512, 512)
@@ -70,13 +70,15 @@ def is_plate(image: Image.Image) -> bool:
 
 
 def place(image: Image.Image, box: tuple[int, int, int, int], scale: float) -> Image.Image:
-    character = image.crop(box)
+    character = bleed_edges(image.crop(box))
     size = (max(1, round(character.width * scale)), max(1, round(character.height * scale)))
     character = character.resize(size, Image.Resampling.LANCZOS)
     canvas = Image.new("RGBA", TARGET, (0, 0, 0, 0))
     left = max(0, (TARGET[0] - size[0]) // 2)
     top = max(0, min(round(TARGET[1] * FOOT_ANCHOR_Y) - size[1], TARGET[1] - size[1]))
-    canvas.paste(character, (left, top), character)
+    # Straight copy: see fit() in remove_image_background_lib for why using the
+    # image as its own mask darkens every semi-transparent edge pixel.
+    canvas.paste(character, (left, top))
     return canvas
 
 
