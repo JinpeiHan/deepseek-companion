@@ -147,10 +147,25 @@ export function createConfigHandler(settings) {
 // state, leaving the web UI as the place to answer -- which is the honest
 // outcome, because a card with no usable choice would hide the bubble's normal
 // content and give the user nothing to click.
+/**
+ * Read an optional service without tripping cordis's inject guard.
+ *
+ * cordis throws `cannot get property "x" without inject` on a plain property
+ * read of a service the plugin has not declared, so probing for one that is
+ * deliberately optional has to go through get(). A host without get() is a
+ * plain object -- a test double -- where the property read is the only option.
+ */
+function optionalService(ctx, name) {
+  if (typeof ctx?.get === 'function') return ctx.get(name)
+  return ctx?.[name]
+}
+
 function mount(ctx, config = {}, eventCtx = ctx) {
   const logger = ctx.logger ?? console
   const base = publicConfig(config)
-  const settings = ctx.settings?.register?.('dsh-dafeiyu', Config, {
+  // settings is optional so the command-line DSH, which has none, can mount.
+  const settingsService = optionalService(ctx, 'settings')
+  const settings = settingsService?.register?.('dsh-dafeiyu', Config, {
     base,
     applies: 'live',
   }) ?? localSettingsScope(base)
@@ -307,7 +322,8 @@ function mount(ctx, config = {}, eventCtx = ctx) {
   // rather than failing to mount.
   let offProvider
   try {
-    offProvider = ctx.userQuestions?.registerProvider?.(askProvider)
+    const questions = optionalService(ctx, 'userQuestions')
+    offProvider = questions?.registerProvider?.(askProvider)
     if (offProvider) logger.info?.('dsh-dafeiyu: answering questions in the pet bubble')
   } catch (error) {
     logger.warn?.(`dsh-dafeiyu: another user-questions provider is active; questions stay in that UI (${error?.message ?? error})`)
@@ -381,7 +397,7 @@ export function apply(ctx, config = {}) {
   // the pet unmounted on the command line just as surely as declaring it in
   // `inject` did -- mount() has handled its absence all along. Only wait for it
   // when the host actually has it.
-  if (typeof ctx.inject === 'function' && ctx.settings !== undefined) {
+  if (typeof ctx.inject === 'function' && optionalService(ctx, 'settings') !== undefined) {
     ctx.inject(['settings'], (settingsCtx) => mount(settingsCtx, config, ctx))
     return
   }

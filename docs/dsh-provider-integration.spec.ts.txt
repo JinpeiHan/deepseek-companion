@@ -1,0 +1,43 @@
+import { describe, expect, it } from 'vitest'
+import { Context } from '@deepseek-ai/cordis'
+import UserQuestionService from '@deepseek-ai/dsh-user-questions'
+
+const PET = '/home/jinpei/PycharmProjects/deepseek-companion/src/index.js'
+
+describe('desktop pet as a user-questions provider', () => {
+  it('shows the question and returns the answer the tool expects', async () => {
+    const { apply, HelperProcess } = await import(PET)
+    const sent: any[] = []
+    let onAnswer: any
+    const send = HelperProcess.prototype.send
+    const start = HelperProcess.prototype.start
+    HelperProcess.prototype.send = function (m: any) { sent.push(m) }
+    HelperProcess.prototype.start = function (this: any) { onAnswer = this.onAnswer }
+    try {
+      const ctx = new Context()
+      await ctx.plugin(UserQuestionService)
+      await ctx.plugin({ name: 'pet', apply: (c: any) => apply(c, { helper: { headless: true } }) })
+
+      const pending = ctx.userQuestions.ask({
+        questions: [{
+          id: 'q1',
+          question: '用哪种方案？',
+          options: [{ label: '方案 A', description: '更快' }, { label: '方案 B' }],
+        }],
+      })
+      await new Promise((r) => setTimeout(r, 50))
+
+      const ask = sent.find((m) => m.kind === 'ask')
+      expect(ask, 'the pet received the question').toBeTruthy()
+      expect(ask.options).toEqual([{ label: '方案 A', description: '更快' }, { label: '方案 B' }])
+      expect(typeof onAnswer).toBe('function')
+
+      onAnswer({ id: 'q1', value: '方案 A' })
+      await expect(pending).resolves.toEqual({ answers: [{ id: 'q1', selected: ['方案 A'] }] })
+      expect(sent.some((m) => m.kind === 'ask-clear')).toBe(true)
+    } finally {
+      HelperProcess.prototype.send = send
+      HelperProcess.prototype.start = start
+    }
+  })
+})
