@@ -648,6 +648,7 @@ def run_visual(recorder: EventRecorder, snapshot_path: Path | None = None) -> in
             self.shake_origin: QPoint | None = None
             self.shake_count = 0
             self.drag_origin: QPoint | None = None
+            self.interrupted_overlay: tuple[str, int, int] | None = None
             self.pet_origin: QPoint | None = None
             self.last_tick_ms = self._now_ms()
             self.fade_from_pixmap: QPixmap | None = None
@@ -1053,7 +1054,42 @@ def run_visual(recorder: EventRecorder, snapshot_path: Path | None = None) -> in
                 self.anchor_velocity.reset()
                 self.anchor_velocity.update(self.pet_x, self.pet_y, self._now_ms())
             self.micro_timer.stop()
+            # Remember what the drag is interrupting so the drop can put it
+            # back. clear_overlay() returns to the *underlay*, so without this a
+            # one-shot that was mid-play -- a head pat, a poke, one of the
+            # emoji performances -- is silently discarded when the pet is picked
+            # up. A looping clip needs nothing: it is the underlay already.
+            self.interrupted_overlay = None
+            overlay = self.model.overlay_clip_name
+            if overlay is not None and overlay != "dragging":
+                clip = self.model.clips.get(overlay)
+                if clip is not None and not clip.loop:
+                    self.interrupted_overlay = (
+                        overlay,
+                        self.model.frame_index,
+                        self.model.frame_elapsed_ms,
+                    )
             self._play_model_overlay("dragging", allow_fade=False, repaint=False)
+
+        def _resume_interrupted_overlay(self) -> bool:
+            """Put back the one-shot the drag interrupted, at the frame it reached.
+
+            Resuming rather than restarting matters for the longer performances:
+            restarting a 16-frame clip after a two-second drag replays the whole
+            thing, which reads as the pet forgetting what it was doing and
+            starting over.
+            """
+            pending = getattr(self, "interrupted_overlay", None)
+            self.interrupted_overlay = None
+            if pending is None:
+                return False
+            name, index, elapsed = pending
+            if not self.model.play_overlay(name):
+                return False
+            frames = len(self.model.active_clip.frames)
+            self.model.frame_index = max(0, min(index, frames - 1))
+            self.model.frame_elapsed_ms = max(0, elapsed)
+            return True
 
         def _finish_drag(self) -> None:
             if not self.dragging:
@@ -1064,7 +1100,10 @@ def run_visual(recorder: EventRecorder, snapshot_path: Path | None = None) -> in
             # Expire an underlying pulse before revealing it after a long drag.
             self.model.advance(0, now_ms)
             self.model.clear_overlay()
-            self._sync_frame_transition(previous_frame, previous_clip, allow_fade=False)
+            resumed = self._resume_interrupted_overlay()
+            self._sync_frame_transition(
+                previous_frame, previous_clip, allow_fade=not resumed
+            )
             self.dragging = False
             self.last_tick_ms = now_ms
             if self.rig is None:

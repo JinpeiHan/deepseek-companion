@@ -51,7 +51,7 @@ PACKS = {
     # along. The tone words sit in the proportion string because they have to
     # reach every clip -- a calm reading of "angry" is a different drawing, not
     # the same drawing at a different size.
-    "slender": {
+    "slender-rig": {
         "frames": "assets/pet-slender",
         "suffix": "_512",
         "proportion": (
@@ -60,6 +60,7 @@ PACKS = {
             "calm and unhurried in every movement, poised rather than childish or exaggerated"
         ),
         "upscale": False,
+        "emojiFrames": "slender",
         "tone": (
             "Play the action calmly and gracefully rather than energetically: smaller, slower, "
             "more restrained motion, a warm and gentle expression, no chibi-style exaggeration, "
@@ -124,7 +125,14 @@ def first_frame_for(pack: str, clip: str, work: Path) -> Path:
     meta = PACKS[pack]
     if clip in EMOJI_CLIPS:
         stem, _ = EMOJI_CLIPS[clip]
-        prepared = ROOT / "art-references" / "emoji-first" / f"{stem}.png"
+        # The stickers are drawn at roughly four-head proportions, and
+        # image-to-video matches the proportion of the frame it is pinned to --
+        # the prompt asking for six and a half heads does not override it. A
+        # slender-specific redraw of each pose therefore has its own directory;
+        # generating slender from the shared frames produced a clip whose every
+        # frame measured 0.61 wide-to-tall against slender's own 0.55.
+        emoji_dir = "emoji-first-slender" if meta.get("emojiFrames") == "slender" else "emoji-first"
+        prepared = ROOT / "art-references" / emoji_dir / f"{stem}.png"
         if not prepared.exists():
             # RuntimeError, not SystemExit: SystemExit derives from
             # BaseException and slips past the per-clip guard, so one missing
@@ -206,7 +214,7 @@ def main() -> int:
             f"{meta['proportion']} with {IDENTITY}. She {action}. "
             "Keep the exact head-to-body proportion of the reference. Full body, feet visible, "
             "character stays centred and the same size throughout, consistent character design, "
-            "simple plain background. " + meta.get("tone", "")
+            "simple plain background. The character stays fully visible and fully opaque in every single frame: no fade to black, no dissolve, no cut away, no camera transition, and she never leaves the frame. " + meta.get("tone", "")
         )
         raw = work / f"{pack}-{clip}"
         small = work / f"{pack}-{clip}-16"

@@ -690,3 +690,77 @@ class RigHitSeamTests(unittest.TestCase):
 
 if __name__ == "__main__":  # pragma: no cover
     unittest.main()
+
+
+class DragInterruptResumeTests(unittest.TestCase):
+    """A drag interrupts the current one-shot and the drop puts it back.
+
+    Exercised against a real AnimationModel rather than the Qt window, which
+    lives inside run_visual's closure. The window methods are thin wrappers over
+    exactly these calls, so the sequence here is the sequence they make.
+    """
+
+    def _model(self):
+        from runtime.animation_model import AnimationModel
+
+        manifest = {
+            "clips": {
+                "idle": {"frames": ["idle.png"], "frameMs": 120, "loop": True},
+                "dragging": {"frames": ["drag.png"], "frameMs": 120, "loop": True},
+                "salute": {
+                    "frames": [f"s{i}.png" for i in range(16)],
+                    "frameMs": 110,
+                    "loop": False,
+                },
+            },
+            "stateMap": {s: "idle" for s in
+                         ("IDLE", "THINKING", "WORKING", "WAITING", "SUCCESS", "ERROR", "DISCONNECTED")},
+        }
+        model = AnimationModel(manifest)
+        model.apply_state("IDLE")
+        return model
+
+    def test_one_shot_resumes_at_the_frame_it_reached(self):
+        model = self._model()
+        model.play_overlay("salute")
+        model.advance(110 * 6, 6)          # six frames in
+        self.assertEqual(model.active_clip_name, "salute")
+        interrupted = (model.overlay_clip_name, model.frame_index, model.frame_elapsed_ms)
+        self.assertEqual(interrupted[0], "salute")
+        self.assertGreater(interrupted[1], 0)
+
+        model.play_overlay("dragging")
+        model.advance(500, 10)
+        self.assertEqual(model.active_clip_name, "dragging")
+
+        # What _finish_drag does: clear, then put the interrupted clip back.
+        model.clear_overlay()
+        self.assertEqual(model.active_clip_name, "idle")
+        self.assertTrue(model.play_overlay(interrupted[0]))
+        model.frame_index = interrupted[1]
+        model.frame_elapsed_ms = interrupted[2]
+
+        self.assertEqual(model.active_clip_name, "salute")
+        self.assertEqual(model.frame_index, interrupted[1],
+                         "resuming must not restart the clip from frame 0")
+
+    def test_resumed_clip_still_finishes_and_returns_to_idle(self):
+        model = self._model()
+        model.play_overlay("salute")
+        model.advance(110 * 6, 6)
+        index = model.frame_index
+        model.play_overlay("dragging")
+        model.clear_overlay()
+        model.play_overlay("salute")
+        model.frame_index = index
+        model.advance(110 * 20, 40)
+        self.assertEqual(model.active_clip_name, "idle",
+                         "a resumed one-shot must still end and hand back to the base clip")
+
+    def test_a_looping_clip_needs_no_resume(self):
+        model = self._model()
+        self.assertEqual(model.active_clip_name, "idle")
+        model.play_overlay("dragging")
+        model.clear_overlay()
+        # The base clip is the underlay, so clear_overlay already restored it.
+        self.assertEqual(model.active_clip_name, "idle")

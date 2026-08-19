@@ -105,6 +105,20 @@ def main() -> int:
         if box is None:
             raise SystemExit(f"{source.name}: frame is fully transparent")
         heights.append(box[3] - box[1])
+    # A frame whose character all but vanished is a generation failure, not a
+    # drift: MiniMax-H3 faded the chibi cry_wail clip to black through its
+    # middle, leaving only the tear highlights, and every surviving frame was
+    # ~2px tall. Reported as drift, that reads as a tuning problem and sends
+    # you to the wrong fix.
+    median_height = sorted(heights)[len(heights) // 2]
+    vanished = [i for i, h in enumerate(heights) if h < median_height * 0.5]
+    if vanished:
+        raise SystemExit(
+            f"the character vanishes in {len(vanished)} of {len(heights)} frames "
+            f"(heights {[heights[i] for i in vanished[:6]]} against a median of {median_height}); "
+            "the clip faded out or lost its subject and needs regenerating, not reprocessing"
+        )
+
     spread = max(heights) - min(heights)
     # Guard the DRIFT, not the spread. Height is not constant in a good
     # performance -- the character should get shorter crouching in poke and
