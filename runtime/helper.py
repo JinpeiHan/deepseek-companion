@@ -443,6 +443,44 @@ def parse_message(line: str) -> dict[str, Any]:
     return message
 
 
+def ask_hit(
+    rects: "list[tuple[int, int, int, int, str]]", x: float, y: float
+) -> str | None:
+    """Which approval choice, if any, the point falls on.
+
+    Module level and pure so it can be tested without a window: CompanionWindow
+    lives inside run_visual's closure. The rects come from the paint pass rather
+    than being recomputed, so the click tests exactly what was drawn.
+    """
+    for left, top, width, height, value in rects:
+        if left <= x <= left + width and top <= y <= top + height:
+            return value
+    return None
+
+
+def ask_from_message(message: "dict[str, Any]") -> "dict[str, Any] | None":
+    """Validate an ask message, or None if it cannot be answered.
+
+    A question with no answerable option would take over the bubble and leave
+    no way out of it, so it is dropped rather than shown.
+    """
+    question = str(message.get("question", "")).strip()
+    identifier = str(message.get("id", "")).strip()
+    options = [
+        {"value": str(o["value"]), "label": str(o["label"])}
+        for o in (message.get("options") or [])
+        if isinstance(o, dict) and str(o.get("value", "")).strip() and str(o.get("label", "")).strip()
+    ]
+    if not question or not identifier or not options:
+        return None
+    return {
+        "id": identifier,
+        "question": question,
+        "detail": str(message.get("detail", "")),
+        "options": options[:4],
+    }
+
+
 def emit_reply(kind: str, **payload: Any) -> None:
     print(
         json.dumps(
@@ -649,6 +687,11 @@ def run_visual(recorder: EventRecorder, snapshot_path: Path | None = None) -> in
             self.shake_count = 0
             self.drag_origin: QPoint | None = None
             self.interrupted_overlay: tuple[str, int, int] | None = None
+            # A pending approval, drawn as choices in the bubble so it can be
+            # answered here instead of in the web UI.
+            self.ask: dict[str, Any] | None = None
+            self.ask_hit_rects: list[tuple[int, int, int, int, str]] = []
+            self.ask_hover: int | None = None
             self.pet_origin: QPoint | None = None
             self.last_tick_ms = self._now_ms()
             self.fade_from_pixmap: QPixmap | None = None
@@ -672,6 +715,10 @@ def run_visual(recorder: EventRecorder, snapshot_path: Path | None = None) -> in
                 | Qt.WindowType.Tool
             )
             self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, True)
+            # Needed for hover feedback on the approval choices. Unrelated to the
+            # cursor-follow, which polls QCursor.pos() because it has to work
+            # when the pointer is nowhere near this window.
+            self.setMouseTracking(True)
             self._apply_window_size()
             QTimer.singleShot(0, self._restore_visible_position)
 
@@ -680,6 +727,21 @@ def run_visual(recorder: EventRecorder, snapshot_path: Path | None = None) -> in
             kind = message.get("kind")
             if kind == "shutdown":
                 QApplication.quit()
+                return
+            if kind == "ask":
+                pending = ask_from_message(message)
+                if pending is not None:
+                    self.ask = pending
+                    self.ask_hover = None
+                    self._apply_window_size()
+                    self.update()
+                return
+            if kind == "ask-clear":
+                if self.ask is not None:
+                    self.ask = None
+                    self.ask_hit_rects = []
+                    self._apply_window_size()
+                    self.update()
                 return
             previous_frame = self.model.frame
             previous_clip = self.model.active_clip_name
@@ -1135,6 +1197,10 @@ def run_visual(recorder: EventRecorder, snapshot_path: Path | None = None) -> in
             self.micro_timer.start(random.randint(lower, upper))
 
         def _bubble_visible(self) -> bool:
+            # A pending approval overrides the bubble mode: hiding the bubble
+            # would hide the only way to answer it.
+            if self.ask is not None:
+                return True
             if self.bubble_mode == "hidden":
                 return False
             if self.bubble_mode == "always":
@@ -1401,10 +1467,75 @@ def run_visual(recorder: EventRecorder, snapshot_path: Path | None = None) -> in
                 painter.drawEllipse(center_x - 5, center_y - 5, 10, 10)
 
         def _card_height(self) -> int:
+            if self.ask is not None:
+                rows = len(self.ask["options"])
+                return round((60 + rows * 34) * self.bubble_scale)
             if len(self.tasks) >= 2:
                 rows = min(len(self.tasks), 3)
                 return round((58 + rows * 26) * self.bubble_scale)
             return round(84 * self.bubble_scale)
+
+        def _draw_ask_card(
+            self,
+            painter: QPainter,
+            card_x: int,
+            card_y: int,
+            card_width: int,
+            card_height: int,
+            s: float,
+        ) -> None:
+            """Draw the pending question and its choices, and record hit rects.
+
+            The rects are stored rather than recomputed on click: the click has
+            to test exactly the rectangles that were drawn, and recomputing them
+            from the same inputs is one refactor away from disagreeing.
+            """
+            assert self.ask is not None
+            self.ask_hit_rects = []
+            pad = round(20 * s)
+            title_font = QFont(self.font())
+            title_font.setPointSizeF(max(8.0, 10.5 * s))
+            title_font.setBold(True)
+            painter.setFont(title_font)
+            painter.setPen(QColor("#111827"))
+            text_width = card_width - pad * 2
+            painter.drawText(
+                card_x + pad,
+                card_y + round(12 * s),
+                text_width,
+                round(24 * s),
+                Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter,
+                QFontMetrics(title_font).elidedText(
+                    self.ask["question"], Qt.TextElideMode.ElideRight, text_width
+                ),
+            )
+
+            option_font = QFont(self.font())
+            option_font.setPointSizeF(max(7.5, 9.5 * s))
+            painter.setFont(option_font)
+            metrics = QFontMetrics(option_font)
+            top = card_y + round(40 * s)
+            height = round(28 * s)
+            gap = round(6 * s)
+            for index, option in enumerate(self.ask["options"]):
+                y = top + index * (height + gap)
+                rect = (card_x + pad, y, text_width, height)
+                hovered = self.ask_hover == index
+                painter.setPen(Qt.PenStyle.NoPen)
+                painter.setBrush(QColor("#E8F0FE") if hovered else QColor("#F3F4F6"))
+                painter.drawRoundedRect(*rect, round(8 * s), round(8 * s))
+                painter.setPen(QColor("#1F5C96") if hovered else QColor("#374151"))
+                painter.drawText(
+                    rect[0] + round(12 * s),
+                    y,
+                    text_width - round(24 * s),
+                    height,
+                    Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter,
+                    metrics.elidedText(
+                        option["label"], Qt.TextElideMode.ElideRight, text_width - round(24 * s)
+                    ),
+                )
+                self.ask_hit_rects.append((*rect, option["value"]))
 
         def _draw_card_background(
             self,
@@ -1532,7 +1663,11 @@ def run_visual(recorder: EventRecorder, snapshot_path: Path | None = None) -> in
             s = self.bubble_scale
             corner_radius = round(30 * s)
 
-            if len(self.tasks) >= 2 and self._bubble_visible():
+            if self.ask is not None:
+                bubble_height = card_y + card_height + 19
+                self._draw_card_background(painter, card_x, card_y, card_width, card_height, corner_radius, s)
+                self._draw_ask_card(painter, card_x, card_y, card_width, card_height, s)
+            elif len(self.tasks) >= 2 and self._bubble_visible():
                 bubble_height = card_y + card_height + 19
                 self._draw_card_background(painter, card_x, card_y, card_width, card_height, corner_radius, s)
                 self._draw_multi_task_card(painter, card_x, card_y, card_width, card_height, s)
@@ -1620,13 +1755,47 @@ def run_visual(recorder: EventRecorder, snapshot_path: Path | None = None) -> in
             else:
                 self.renderer.paint(painter, self, bubble_height)
 
+        def _answer_at(self, x: float, y: float) -> bool:
+            """Answer the pending question if the point is on one of its choices.
+
+            Checked before the drag gesture starts: an option sits inside the
+            bubble, and without this the click would begin a window drag and the
+            answer would never be sent.
+            """
+            if self.ask is None:
+                return False
+            value = ask_hit(self.ask_hit_rects, x, y)
+            if value is None:
+                return False
+            emit_reply("answer", id=self.ask["id"], value=value)
+            self.ask = None
+            self.ask_hit_rects = []
+            self.ask_hover = None
+            self._apply_window_size()
+            self.update()
+            return True
+
         def mousePressEvent(self, event: QMouseEvent) -> None:
+            if event.button() == Qt.MouseButton.LeftButton and self._answer_at(
+                event.position().x(), event.position().y()
+            ):
+                return
             if event.button() == Qt.MouseButton.LeftButton:
                 self.drag_origin = event.globalPosition().toPoint()
                 self.pet_origin = QPoint(self.pet_x, self.pet_y)
                 self.dragging = False
 
         def mouseMoveEvent(self, event: QMouseEvent) -> None:
+            if self.ask is not None and self.drag_origin is None:
+                x, y = event.position().x(), event.position().y()
+                hover = None
+                for index, (left, top, width, height, _) in enumerate(self.ask_hit_rects):
+                    if left <= x <= left + width and top <= y <= top + height:
+                        hover = index
+                        break
+                if hover != self.ask_hover:
+                    self.ask_hover = hover
+                    self.update()
             if self.drag_origin is not None and self.pet_origin is not None:
                 if not self.dragging and (event.globalPosition().toPoint() - self.drag_origin).manhattanLength() > 5:
                     self._begin_drag()

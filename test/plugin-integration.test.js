@@ -190,3 +190,55 @@ test('live settings keep the active project state without restarting the helper'
   assert.equal(helperOptions.env.DSH_DAFEIYU_PROPORTION, 'chibi')
   await rm(directory, { recursive: true, force: true })
 })
+
+test('an approval becomes a card the pet can answer, and a decision takes it down', () => {
+  const listeners = new Map()
+  const sent = []
+  let onAnswer
+  let dispose
+  const decided = []
+  const session = {
+    header: { id: 's1' },
+    decideApproval: (id, value) => decided.push([id, value]),
+  }
+  const ctx = {
+    logger: { debug() {}, info() {}, warn() {}, error() {} },
+    on(name, callback) { listeners.set(name, callback) },
+    effect(setup) { dispose = setup() },
+  }
+
+  // Capture what the plugin hands the helper without spawning one.
+  const originalSend = HelperProcess.prototype.send
+  const originalStart = HelperProcess.prototype.start
+  HelperProcess.prototype.send = function (message) { sent.push(message) }
+  HelperProcess.prototype.start = function () { onAnswer = this.onAnswer }
+  try {
+    apply(ctx, { helper: { headless: true } })
+    listeners.get('session/event')(session, {
+      type: 'approval/asked',
+      seq: 1,
+      data: { id: 'ap-1', toolName: 'bash', options: [{ value: 'y', label: '允许' }] },
+    })
+    const ask = sent.find((m) => m.kind === 'ask')
+    assert.ok(ask, 'the approval reaches the pet as an ask')
+    assert.equal(ask.id, 'ap-1')
+    assert.deepEqual(ask.options, [{ value: 'y', label: '允许' }])
+
+    // The pet answers.
+    assert.equal(typeof onAnswer, 'function', 'the bridge exposes an answer callback')
+    onAnswer({ id: 'ap-1', value: 'y' })
+    assert.deepEqual(decided, [['ap-1', 'y']], 'the answer goes back to the session that asked')
+
+    // A decision made elsewhere clears the card.
+    listeners.get('session/event')(session, {
+      type: 'approval/decided',
+      seq: 2,
+      data: { id: 'ap-1' },
+    })
+    assert.ok(sent.some((m) => m.kind === 'ask-clear'), 'a decision elsewhere takes the card down')
+  } finally {
+    HelperProcess.prototype.send = originalSend
+    HelperProcess.prototype.start = originalStart
+    if (typeof dispose === 'function') dispose()
+  }
+})

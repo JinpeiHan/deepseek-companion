@@ -113,6 +113,8 @@ export class HelperProcess {
   constructor(options = {}, logger = console) {
     this.options = options
     this.logger = logger
+    /** Called when the pet answers a pending approval. */
+    this.onAnswer = options.onAnswer
     this.child = undefined
     this.queue = []
     this.snapshot = new Map()
@@ -296,6 +298,13 @@ export class HelperProcess {
       }
       if (reply?.protocolVersion === 1 && reply.kind === CompanionMessageKind.CLOSED) {
         this.restartSuppressed = true
+        return
+      }
+      // The pet answering an approval. Requires an id: the answer is
+      // meaningless without knowing which approval it belongs to, and
+      // forwarding one without it would decide the wrong thing.
+      if (reply?.protocolVersion === 1 && reply.kind === 'answer' && reply.id) {
+        this.onAnswer?.({ id: String(reply.id), value: String(reply.value ?? '') })
         return
       }
     } catch {

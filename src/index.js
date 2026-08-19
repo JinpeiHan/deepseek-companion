@@ -5,6 +5,7 @@ import { HelperProcess } from './helper-process.js'
 import {
   CompanionMessageKind,
   CompanionState,
+  createAsk,
   createMessage,
 } from './protocol.js'
 import { characterName, statusCopy } from './status-copy.js'
@@ -139,6 +140,38 @@ export function createConfigHandler(settings) {
   }
 }
 
+
+// DSH names an approval's choices differently depending on the tool that asked,
+// so the shapes are tried in order rather than assuming one. A tool that offers
+// nothing selectable falls through to `null` and the pet just shows the waiting
+// state, leaving the web UI as the place to answer -- which is the honest
+// outcome, because a card with no usable choice would hide the bubble's normal
+// content and give the user nothing to click.
+export function askFromApproval(event) {
+  const data = event?.data ?? {}
+  const id = String(data.id ?? '')
+  if (!id) return null
+  const raw =
+    (Array.isArray(data.options) && data.options)
+    || (Array.isArray(data.choices) && data.choices)
+    || (Array.isArray(data.actions) && data.actions)
+    || null
+  const options = raw
+    ? raw
+    : [
+        { value: 'approve', label: '允许' },
+        { value: 'deny', label: '拒绝' },
+      ]
+  const question =
+    String(data.question ?? data.prompt ?? data.title ?? '').trim()
+    || `是否允许 ${String(data.toolName ?? 'this tool')}？`
+  try {
+    return createAsk({ id, question, options, detail: String(data.detail ?? data.toolName ?? '') })
+  } catch {
+    return null
+  }
+}
+
 function mount(ctx, config = {}, eventCtx = ctx) {
   const logger = ctx.logger ?? console
   const base = publicConfig(config)
@@ -150,6 +183,39 @@ function mount(ctx, config = {}, eventCtx = ctx) {
   let bridge
   let reducer
   let restartTimer
+  // Which session each pending approval belongs to, so an answer goes back to
+  // the session that asked rather than to whichever one is current.
+  const pendingApprovals = new Map()
+
+  const submitAnswer = ({ id, value }) => {
+    const session = pendingApprovals.get(id)
+    pendingApprovals.delete(id)
+    if (!session) {
+      logger.warn?.(`dsh-dafeiyu: answer for unknown approval ${id}`)
+      return
+    }
+    // The host decides approvals; the shape of that call is DSH's, not this
+    // plugin's, so the known spellings are tried and anything else is reported
+    // rather than silently swallowed. A dropped answer leaves the agent
+    // blocked, which is worse than a loud log.
+    const decide =
+      session.decideApproval?.bind(session)
+      ?? session.resolveApproval?.bind(session)
+      ?? session.approvals?.decide?.bind(session.approvals)
+      ?? ctx.sessions?.decideApproval?.bind(ctx.sessions)
+    if (typeof decide !== 'function') {
+      logger.error?.(
+        'dsh-dafeiyu: the pet answered an approval but this DSH build exposes no way to submit it; '
+        + 'answer it in the web UI instead',
+      )
+      return
+    }
+    try {
+      decide(id, value)
+    } catch (error) {
+      logger.error?.('dsh-dafeiyu failed to submit an approval answer', error)
+    }
+  }
 
   const stopRuntime = (reason = 'settings-change') => {
     bridge?.stop(reason)
@@ -192,6 +258,7 @@ function mount(ctx, config = {}, eventCtx = ctx) {
     const helperConfig = config.helper ?? {}
     bridge = new HelperProcess({
       ...helperConfig,
+      onAnswer: submitAnswer,
       env: {
         ...helperConfig.env,
         DSH_DAFEIYU_PROPORTION: String(resolved.characterProportion ?? defaults.characterProportion),
@@ -235,6 +302,19 @@ function mount(ctx, config = {}, eventCtx = ctx) {
     if (!bridge || !reducer) return
     try {
       for (const message of reducer.handle(session, event)) bridge.send(message)
+      if (event?.type === 'approval/asked') {
+        const ask = askFromApproval(event)
+        if (ask) {
+          pendingApprovals.set(ask.id, session)
+          bridge.send(createMessage(CompanionMessageKind.ASK, ask))
+        }
+      } else if (event?.type === 'approval/decided') {
+        // Decided elsewhere -- the web UI, the CLI, a timeout. Take the card
+        // down rather than leaving a question the agent has already moved past.
+        const id = String(event.data?.id ?? '')
+        if (id) pendingApprovals.delete(id)
+        bridge.send(createMessage(CompanionMessageKind.ASK_CLEAR, { id }))
+      }
     } catch (error) {
       logger.error?.('dsh-dafeiyu failed to handle session event', error)
     }
