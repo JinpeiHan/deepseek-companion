@@ -808,44 +808,48 @@
     "idle": {
       "loop": true,
       "motion": "breathe",
-      "oscillators": [
-        {
-          "param": "breath",
-          "wave": "sin",
-          "periodMs": 3600,
-          "amplitude": 0.6
-        },
-        {
-          "param": "tailSwing",
-          "wave": "sin",
-          "periodMs": 2600,
-          "amplitude": 0.5
-        }
-      ]
+      "frames": [
+        "baked/idle/idle_00.png",
+        "baked/idle/idle_01.png",
+        "baked/idle/idle_02.png",
+        "baked/idle/idle_03.png",
+        "baked/idle/idle_04.png",
+        "baked/idle/idle_05.png",
+        "baked/idle/idle_06.png",
+        "baked/idle/idle_07.png",
+        "baked/idle/idle_08.png",
+        "baked/idle/idle_09.png",
+        "baked/idle/idle_10.png",
+        "baked/idle/idle_11.png",
+        "baked/idle/idle_12.png",
+        "baked/idle/idle_13.png",
+        "baked/idle/idle_14.png",
+        "baked/idle/idle_15.png"
+      ],
+      "frameMs": 110
     },
     "thinking": {
       "loop": true,
       "motion": "think",
-      "oscillators": [
-        {
-          "param": "breath",
-          "wave": "sin",
-          "periodMs": 2800,
-          "amplitude": 0.5
-        },
-        {
-          "param": "tailSwing",
-          "wave": "sin",
-          "periodMs": 3000,
-          "amplitude": 0.35
-        },
-        {
-          "param": "headAngleZ",
-          "wave": "sin",
-          "periodMs": 5200,
-          "amplitude": 3.5
-        }
-      ]
+      "frames": [
+        "baked/thinking/thinking_00.png",
+        "baked/thinking/thinking_01.png",
+        "baked/thinking/thinking_02.png",
+        "baked/thinking/thinking_03.png",
+        "baked/thinking/thinking_04.png",
+        "baked/thinking/thinking_05.png",
+        "baked/thinking/thinking_06.png",
+        "baked/thinking/thinking_07.png",
+        "baked/thinking/thinking_08.png",
+        "baked/thinking/thinking_09.png",
+        "baked/thinking/thinking_10.png",
+        "baked/thinking/thinking_11.png",
+        "baked/thinking/thinking_12.png",
+        "baked/thinking/thinking_13.png",
+        "baked/thinking/thinking_14.png",
+        "baked/thinking/thinking_15.png"
+      ],
+      "frameMs": 110
     },
     "working": {
       "loop": true,
@@ -896,150 +900,161 @@
     "working_search": {
       "loop": true,
       "motion": "work",
-      "oscillators": [
-        {
-          "param": "breath",
-          "wave": "sin",
-          "periodMs": 2100,
-          "amplitude": 0.6
-        },
-        {
-          "param": "tailSwing",
-          "wave": "sin",
-          "periodMs": 2400,
-          "amplitude": 0.5
-        },
-        {
-          "param": "headAngleY",
-          "wave": "sin",
-          "periodMs": 2600,
-          "amplitude": 7.0
-        }
-      ]
+      "frames": [
+        "baked/working_search/working_search_00.png",
+        "baked/working_search/working_search_01.png",
+        "baked/working_search/working_search_02.png",
+        "baked/working_search/working_search_03.png",
+        "baked/working_search/working_search_04.png",
+        "baked/working_search/working_search_05.png",
+        "baked/working_search/working_search_06.png",
+        "baked/working_search/working_search_07.png",
+        "baked/working_search/working_search_08.png",
+        "baked/working_search/working_search_09.png",
+        "baked/working_search/working_search_10.png",
+        "baked/working_search/working_search_11.png",
+        "baked/working_search/working_search_12.png",
+        "baked/working_search/working_search_13.png",
+        "baked/working_search/working_search_14.png",
+        "baked/working_search/working_search_15.png"
+      ],
+      "frameMs": 110
     },
     "working_command": {
       "loop": true,
       "motion": "work",
-      "oscillators": [
-        {
-          "param": "breath",
-          "wave": "sin",
-          "periodMs": 1700,
-          "amplitude": 0.9
-        },
-        {
-          "param": "tailSwing",
-          "wave": "sin",
-          "periodMs": 1800,
-          "amplitude": 0.8
-        },
-        {
-          "param": "armSwingR",
-          "wave": "triangle",
-          "periodMs": 900,
-          "amplitude": 9.0
-        }
-      ]
+      "frames": [
+        "baked/working_command/working_command_00.png",
+        "baked/working_command/working_command_01.png",
+        "baked/working_command/working_command_02.png",
+        "baked/working_command/working_command_03.png",
+        "baked/working_command/working_command_04.png",
+        "baked/working_command/working_command_05.png",
+        "baked/working_command/working_command_06.png",
+        "baked/working_command/working_command_07.png",
+        "baked/working_command/working_command_08.png",
+        "baked/working_command/working_command_09.png",
+        "baked/working_command/working_command_10.png",
+        "baked/working_command/working_command_11.png",
+        "baked/working_command/working_command_12.png",
+        "baked/working_command/working_command_13.png",
+        "baked/working_command/working_command_14.png",
+        "baked/working_command/working_command_15.png"
+      ],
+      "frameMs": 110
     },
     "waiting": {
       "loop": true,
-      "oscillators": [
-        {
-          "param": "breath",
-          "wave": "sin",
-          "periodMs": 3000,
-          "amplitude": 0.5
-        },
-        {
-          "param": "tailSwing",
-          "wave": "sin",
-          "periodMs": 3400,
-          "amplitude": 0.3
-        }
-      ]
+      "frames": [
+        "baked/waiting/waiting_00.png",
+        "baked/waiting/waiting_01.png",
+        "baked/waiting/waiting_02.png",
+        "baked/waiting/waiting_03.png",
+        "baked/waiting/waiting_04.png",
+        "baked/waiting/waiting_05.png",
+        "baked/waiting/waiting_06.png",
+        "baked/waiting/waiting_07.png",
+        "baked/waiting/waiting_08.png",
+        "baked/waiting/waiting_09.png",
+        "baked/waiting/waiting_10.png",
+        "baked/waiting/waiting_11.png",
+        "baked/waiting/waiting_12.png",
+        "baked/waiting/waiting_13.png",
+        "baked/waiting/waiting_14.png",
+        "baked/waiting/waiting_15.png"
+      ],
+      "frameMs": 110
     },
     "success": {
       "loop": true,
-      "oscillators": [
-        {
-          "param": "breath",
-          "wave": "sin",
-          "periodMs": 900,
-          "amplitude": 1.0
-        },
-        {
-          "param": "tailSwing",
-          "wave": "sin",
-          "periodMs": 900,
-          "amplitude": 1.0
-        },
-        {
-          "param": "rootBobY",
-          "wave": "sin",
-          "periodMs": 900,
-          "amplitude": 3.0
-        }
-      ]
+      "frames": [
+        "baked/success/success_00.png",
+        "baked/success/success_01.png",
+        "baked/success/success_02.png",
+        "baked/success/success_03.png",
+        "baked/success/success_04.png",
+        "baked/success/success_05.png",
+        "baked/success/success_06.png",
+        "baked/success/success_07.png",
+        "baked/success/success_08.png",
+        "baked/success/success_09.png",
+        "baked/success/success_10.png",
+        "baked/success/success_11.png",
+        "baked/success/success_12.png",
+        "baked/success/success_13.png",
+        "baked/success/success_14.png",
+        "baked/success/success_15.png"
+      ],
+      "frameMs": 110
     },
     "error": {
       "loop": true,
-      "oscillators": [
-        {
-          "param": "breath",
-          "wave": "sin",
-          "periodMs": 2600,
-          "amplitude": 0.4
-        },
-        {
-          "param": "headAngleZ",
-          "wave": "sin",
-          "periodMs": 320,
-          "amplitude": 2.5
-        }
-      ]
+      "frames": [
+        "baked/error/error_00.png",
+        "baked/error/error_01.png",
+        "baked/error/error_02.png",
+        "baked/error/error_03.png",
+        "baked/error/error_04.png",
+        "baked/error/error_05.png",
+        "baked/error/error_06.png",
+        "baked/error/error_07.png",
+        "baked/error/error_08.png",
+        "baked/error/error_09.png",
+        "baked/error/error_10.png",
+        "baked/error/error_11.png",
+        "baked/error/error_12.png",
+        "baked/error/error_13.png",
+        "baked/error/error_14.png",
+        "baked/error/error_15.png"
+      ],
+      "frameMs": 110
     },
     "error_dizzy": {
       "loop": true,
-      "oscillators": [
-        {
-          "param": "breath",
-          "wave": "sin",
-          "periodMs": 2200,
-          "amplitude": 0.4
-        },
-        {
-          "param": "headAngleZ",
-          "wave": "sin",
-          "periodMs": 1400,
-          "amplitude": 9.0
-        },
-        {
-          "param": "headAngleY",
-          "wave": "cos",
-          "periodMs": 1400,
-          "amplitude": 7.0
-        }
-      ]
+      "frames": [
+        "baked/error_dizzy/error_dizzy_00.png",
+        "baked/error_dizzy/error_dizzy_01.png",
+        "baked/error_dizzy/error_dizzy_02.png",
+        "baked/error_dizzy/error_dizzy_03.png",
+        "baked/error_dizzy/error_dizzy_04.png",
+        "baked/error_dizzy/error_dizzy_05.png",
+        "baked/error_dizzy/error_dizzy_06.png",
+        "baked/error_dizzy/error_dizzy_07.png",
+        "baked/error_dizzy/error_dizzy_08.png",
+        "baked/error_dizzy/error_dizzy_09.png",
+        "baked/error_dizzy/error_dizzy_10.png",
+        "baked/error_dizzy/error_dizzy_11.png",
+        "baked/error_dizzy/error_dizzy_12.png",
+        "baked/error_dizzy/error_dizzy_13.png",
+        "baked/error_dizzy/error_dizzy_14.png",
+        "baked/error_dizzy/error_dizzy_15.png"
+      ],
+      "frameMs": 110
     },
     "dragging": {
       "loop": true,
-      "oscillators": [
-        {
-          "param": "breath",
-          "wave": "sin",
-          "periodMs": 2400,
-          "amplitude": 0.5
-        },
-        {
-          "param": "tailSwing",
-          "wave": "sin",
-          "periodMs": 1500,
-          "amplitude": 0.9
-        }
-      ]
+      "frames": [
+        "baked/dragging/dragging_00.png",
+        "baked/dragging/dragging_01.png",
+        "baked/dragging/dragging_02.png",
+        "baked/dragging/dragging_03.png",
+        "baked/dragging/dragging_04.png",
+        "baked/dragging/dragging_05.png",
+        "baked/dragging/dragging_06.png",
+        "baked/dragging/dragging_07.png",
+        "baked/dragging/dragging_08.png",
+        "baked/dragging/dragging_09.png",
+        "baked/dragging/dragging_10.png",
+        "baked/dragging/dragging_11.png",
+        "baked/dragging/dragging_12.png",
+        "baked/dragging/dragging_13.png",
+        "baked/dragging/dragging_14.png",
+        "baked/dragging/dragging_15.png"
+      ],
+      "frameMs": 110
     },
     "blink": {
-      "loop": false,
+      "loop": true,
       "durationMs": 240,
       "envelope": {
         "attackMs": 60,
@@ -1070,10 +1085,29 @@
             ]
           ]
         }
-      ]
+      ],
+      "frames": [
+        "baked/blink/blink_00.png",
+        "baked/blink/blink_01.png",
+        "baked/blink/blink_02.png",
+        "baked/blink/blink_03.png",
+        "baked/blink/blink_04.png",
+        "baked/blink/blink_05.png",
+        "baked/blink/blink_06.png",
+        "baked/blink/blink_07.png",
+        "baked/blink/blink_08.png",
+        "baked/blink/blink_09.png",
+        "baked/blink/blink_10.png",
+        "baked/blink/blink_11.png",
+        "baked/blink/blink_12.png",
+        "baked/blink/blink_13.png",
+        "baked/blink/blink_14.png",
+        "baked/blink/blink_15.png"
+      ],
+      "frameMs": 110
     },
     "glance": {
-      "loop": false,
+      "loop": true,
       "durationMs": 900,
       "envelope": {
         "attackMs": 160,
@@ -1127,10 +1161,29 @@
             ]
           ]
         }
-      ]
+      ],
+      "frames": [
+        "baked/glance/glance_00.png",
+        "baked/glance/glance_01.png",
+        "baked/glance/glance_02.png",
+        "baked/glance/glance_03.png",
+        "baked/glance/glance_04.png",
+        "baked/glance/glance_05.png",
+        "baked/glance/glance_06.png",
+        "baked/glance/glance_07.png",
+        "baked/glance/glance_08.png",
+        "baked/glance/glance_09.png",
+        "baked/glance/glance_10.png",
+        "baked/glance/glance_11.png",
+        "baked/glance/glance_12.png",
+        "baked/glance/glance_13.png",
+        "baked/glance/glance_14.png",
+        "baked/glance/glance_15.png"
+      ],
+      "frameMs": 110
     },
     "head_pat": {
-      "loop": false,
+      "loop": true,
       "durationMs": 520,
       "envelope": {
         "attackMs": 90,
@@ -1203,10 +1256,29 @@
             ]
           ]
         }
-      ]
+      ],
+      "frames": [
+        "baked/head_pat/head_pat_00.png",
+        "baked/head_pat/head_pat_01.png",
+        "baked/head_pat/head_pat_02.png",
+        "baked/head_pat/head_pat_03.png",
+        "baked/head_pat/head_pat_04.png",
+        "baked/head_pat/head_pat_05.png",
+        "baked/head_pat/head_pat_06.png",
+        "baked/head_pat/head_pat_07.png",
+        "baked/head_pat/head_pat_08.png",
+        "baked/head_pat/head_pat_09.png",
+        "baked/head_pat/head_pat_10.png",
+        "baked/head_pat/head_pat_11.png",
+        "baked/head_pat/head_pat_12.png",
+        "baked/head_pat/head_pat_13.png",
+        "baked/head_pat/head_pat_14.png",
+        "baked/head_pat/head_pat_15.png"
+      ],
+      "frameMs": 110
     },
     "poke": {
-      "loop": false,
+      "loop": true,
       "durationMs": 360,
       "envelope": {
         "attackMs": 60,
@@ -1271,10 +1343,29 @@
             ]
           ]
         }
-      ]
+      ],
+      "frames": [
+        "baked/poke/poke_00.png",
+        "baked/poke/poke_01.png",
+        "baked/poke/poke_02.png",
+        "baked/poke/poke_03.png",
+        "baked/poke/poke_04.png",
+        "baked/poke/poke_05.png",
+        "baked/poke/poke_06.png",
+        "baked/poke/poke_07.png",
+        "baked/poke/poke_08.png",
+        "baked/poke/poke_09.png",
+        "baked/poke/poke_10.png",
+        "baked/poke/poke_11.png",
+        "baked/poke/poke_12.png",
+        "baked/poke/poke_13.png",
+        "baked/poke/poke_14.png",
+        "baked/poke/poke_15.png"
+      ],
+      "frameMs": 110
     },
     "tail": {
-      "loop": false,
+      "loop": true,
       "durationMs": 420,
       "envelope": {
         "attackMs": 50,
@@ -1351,7 +1442,26 @@
             ]
           ]
         }
-      ]
+      ],
+      "frames": [
+        "baked/tail/tail_00.png",
+        "baked/tail/tail_01.png",
+        "baked/tail/tail_02.png",
+        "baked/tail/tail_03.png",
+        "baked/tail/tail_04.png",
+        "baked/tail/tail_05.png",
+        "baked/tail/tail_06.png",
+        "baked/tail/tail_07.png",
+        "baked/tail/tail_08.png",
+        "baked/tail/tail_09.png",
+        "baked/tail/tail_10.png",
+        "baked/tail/tail_11.png",
+        "baked/tail/tail_12.png",
+        "baked/tail/tail_13.png",
+        "baked/tail/tail_14.png",
+        "baked/tail/tail_15.png"
+      ],
+      "frameMs": 110
     }
   },
   "stateMap": {

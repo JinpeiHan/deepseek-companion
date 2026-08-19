@@ -35,13 +35,20 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Install a frame sequence into a rig pack as a baked clip")
     parser.add_argument("--pack", required=True, help="rig pack id, e.g. standard-rig")
     parser.add_argument("--clip", required=True, help="clip name in the rig manifest, e.g. working")
-    parser.add_argument("--frames", required=True, help="directory of matted 512x512 RGBA frames")
+    parser.add_argument("--frames", help="directory of matted 512x512 RGBA frames (required unless --unbake)")
     parser.add_argument("--frame-ms", type=int, default=110)
     parser.add_argument("--loop", action="store_true", default=True)
     parser.add_argument("--no-loop", dest="loop", action="store_false")
+    parser.add_argument(
+        "--unbake",
+        action="store_true",
+        help="restore the clip to solved geometry, dropping its baked frames",
+    )
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()
 
+    if not args.unbake and not args.frames:
+        raise SystemExit("--frames is required unless --unbake is given")
     registry = json.loads((ROOT / "assets" / "pet-packs.json").read_text(encoding="utf-8"))
     if args.pack not in registry["packs"]:
         raise SystemExit(f"{args.pack} is not registered in assets/pet-packs.json")
@@ -52,6 +59,37 @@ def main() -> int:
         raise SystemExit(f"{args.pack} is not a rig pack")
     if args.clip not in manifest["clips"]:
         raise SystemExit(f"{args.clip} is not a clip in {entry['manifest']}")
+
+    if args.unbake:
+        # Restoring interaction: a baked clip paints a picture, so the pointer
+        # follow, per-part squash and hair lag all stop being visible even
+        # though they are still solved. The oscillators come back from the
+        # shared template, which is the only definition of them.
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
+        from rig_template import CLIPS as TEMPLATE_CLIPS  # noqa: PLC0415
+
+        if args.clip not in TEMPLATE_CLIPS:
+            raise SystemExit(f"{args.clip} has no template definition to restore")
+        clip = manifest["clips"][args.clip]
+        removed = clip.pop("frames", None)
+        source = TEMPLATE_CLIPS[args.clip]
+        clip["loop"] = bool(source.get("loop", True))
+        if source.get("oscillators"):
+            clip["oscillators"] = source["oscillators"]
+        if source.get("motion"):
+            clip["motion"] = source["motion"]
+        clip.pop("frameMs", None)
+        if args.dry_run:
+            print(f"{args.pack}/{args.clip}: would drop {len(removed or [])} baked frames")
+            return 0
+        baked_dir = ROOT / "assets" / entry["root"] / f"baked/{args.clip}"
+        if baked_dir.exists():
+            shutil.rmtree(baked_dir)
+        temp = manifest_path.with_suffix(".tmp.json")
+        temp.write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+        temp.replace(manifest_path)
+        print(f"{args.pack}/{args.clip}: restored to solved geometry, {len(removed or [])} frames removed")
+        return 0
 
     sources = sorted(Path(args.frames).glob("*.png"))
     if not sources:

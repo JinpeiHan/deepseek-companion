@@ -52,6 +52,11 @@ def main() -> int:
     parser.add_argument("--output", required=True, help="output PNG file or directory")
     parser.add_argument("--model", default="isnet-anime", help="rembg model name (default: isnet-anime)")
     parser.add_argument(
+        "--preserve-vertical",
+        action="store_true",
+        help="keep each frame's height above the group's lowest foot instead of bottom-anchoring every frame",
+    )
+    parser.add_argument(
         "--group",
         default="pack",
         choices=("pack", "clip", "frame"),
@@ -77,6 +82,7 @@ def main() -> int:
         # Pass 1: matte once, remember every bounding box.
         boxes: dict[Path, tuple[int, int, int, int]] = {}
         groups: dict[str, list[Path]] = {}
+        group_of: dict[Path, str] = {}
         for index, (path, _) in enumerate(pairs):
             with Image.open(path) as handle:
                 cut = cut_alpha(handle.convert("RGBA"), session)
@@ -86,7 +92,9 @@ def main() -> int:
             staged = staging / f"{index:04d}.png"
             cut.save(staged, format="PNG")
             boxes[staged] = box
-            groups.setdefault(group_key(path, source_root, args.group), []).append(staged)
+            key = group_key(path, source_root, args.group)
+            groups.setdefault(key, []).append(staged)
+            group_of[staged] = key
             print(f"{path.name}: matted with {args.model}, bbox {box[2] - box[0]}x{box[3] - box[1]}")
 
         # One scale per group, driven by its tallest and widest frame, so relative
@@ -104,7 +112,13 @@ def main() -> int:
         for index, (path, destination) in enumerate(pairs):
             staged = staging / f"{index:04d}.png"
             with Image.open(staged) as handle:
-                fitted = fit(handle.convert("RGBA"), boxes[staged], scales[staged])
+                lift = 0.0
+                if args.preserve_vertical:
+                    # The group's lowest foot is the ground; everything else
+                    # keeps however far above it the model drew the character.
+                    ground = max(boxes[f][3] for f in groups[group_of[staged]])
+                    lift = (ground - boxes[staged][3]) * scales[staged]
+                fitted = fit(handle.convert("RGBA"), boxes[staged], scales[staged], lift)
             assert fitted.mode == "RGBA", f"{path.name}: expected RGBA, got {fitted.mode}"
             assert fitted.size == TARGET, f"{path.name}: expected {TARGET}, got {fitted.size}"
             low, _ = fitted.getchannel("A").getextrema()

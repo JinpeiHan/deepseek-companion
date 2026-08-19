@@ -89,14 +89,28 @@ def bleed_edges(image: Image.Image, iterations: int = 8) -> Image.Image:
     return Image.fromarray(rgba, "RGBA")
 
 
-def fit(image: Image.Image, box: tuple[int, int, int, int], scale: float) -> Image.Image:
-    """Place one character into a 512x512 frame using a shared scale factor."""
+def fit(
+    image: Image.Image,
+    box: tuple[int, int, int, int],
+    scale: float,
+    lift_px: float = 0.0,
+) -> Image.Image:
+    """Place one character into a 512x512 frame using a shared scale factor.
+
+    ``lift_px`` raises the character above the foot anchor, in output pixels.
+    Bottom-anchoring every frame is right for a frame pack -- the pet stands on
+    a point, and any bob is added procedurally at paint time -- but it destroys
+    vertical motion that belongs to the clip itself, which a baked clip has no
+    other way to express. A `dragging` clip mattes to a dead-flat foot line at
+    497 in all 16 frames without this.
+    """
     character = bleed_edges(image.crop(box))
     size = (max(1, round(character.width * scale)), max(1, round(character.height * scale)))
     character = character.resize(size, Image.Resampling.LANCZOS)
     canvas = Image.new("RGBA", TARGET, (0, 0, 0, 0))
     left = max(0, (TARGET[0] - size[0]) // 2)
-    top = max(0, min(round(TARGET[1] * FOOT_ANCHOR_Y) - size[1], TARGET[1] - size[1]))
+    top = round(TARGET[1] * FOOT_ANCHOR_Y) - size[1] - round(lift_px)
+    top = max(0, min(top, TARGET[1] - size[1]))
     # Straight copy, NOT paste(..., mask=character). Using the image as its own
     # mask composites it over the transparent black canvas, so every
     # semi-transparent pixel gets its RGB multiplied by alpha and its alpha
