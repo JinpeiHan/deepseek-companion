@@ -25,7 +25,7 @@ try:
     from .persona_copy import interaction_copy, load_persona_copy
     from .rig_driver import RigDriver
     from .rig_model import hit_test
-    from .rig_pack import animation_manifest_from_rig, load_rig
+    from .rig_pack import animation_manifest_from_rig, baked_frame_paths, load_rig
 except ImportError:
     from animation_model import AnimationModel, crossfade_duration
     from asset_pack import PackDescriptor, load_pack_descriptor, load_pack_pixmaps, normalise_pack_id
@@ -33,7 +33,7 @@ except ImportError:
     from persona_copy import interaction_copy, load_persona_copy
     from rig_driver import RigDriver
     from rig_model import hit_test
-    from rig_pack import animation_manifest_from_rig, load_rig
+    from rig_pack import animation_manifest_from_rig, baked_frame_paths, load_rig
 
 
 PROTOCOL_VERSION = 1
@@ -543,8 +543,17 @@ def run_visual(recorder: EventRecorder, snapshot_path: Path | None = None) -> in
             renderer = RigRenderer(descriptor, rig)
             renderer.part_pixmaps(QPixmap)
             renderer.alpha_masks()
+            # Baked clips are decoded here for the same reason the parts are:
+            # a frame that fails to load must fail the whole pack now, not
+            # inside paintEvent once the setting has already been changed.
+            baked: dict[str, Any] = {}
+            for name, path in baked_frame_paths(rig, descriptor.asset_root).items():
+                pixmap = QPixmap(str(path))
+                if pixmap.isNull():
+                    raise ValueError(f"baked clip frame unreadable: {name}")
+                baked[name] = pixmap
             return PackAssets(
-                descriptor, {}, animation_manifest_from_rig(rig), rig, renderer
+                descriptor, baked, animation_manifest_from_rig(rig), rig, renderer
             )
         pixmaps, missing = load_pack_pixmaps(descriptor, QPixmap, strict=False)
         if missing:
@@ -1541,13 +1550,23 @@ def run_visual(recorder: EventRecorder, snapshot_path: Path | None = None) -> in
 
             if self.rig is not None:
                 anchor_x, anchor_y = self._rig_anchor(bubble_height)
-                self.renderer.paint(
-                    painter,
-                    self.rig_transforms or (),
-                    anchor_x=anchor_x,
-                    anchor_y=anchor_y,
-                    scale=self.scale,
-                )
+                baked = self.pixmaps.get(self.model.frame)
+                if baked is not None:
+                    self.renderer.paint_baked(
+                        painter,
+                        baked,
+                        anchor_x=anchor_x,
+                        anchor_y=anchor_y,
+                        scale=self.scale,
+                    )
+                else:
+                    self.renderer.paint(
+                        painter,
+                        self.rig_transforms or (),
+                        anchor_x=anchor_x,
+                        anchor_y=anchor_y,
+                        scale=self.scale,
+                    )
                 if self.renderer.take_degradation_notice():
                     print(
                         "warning: rig paint averaged over "

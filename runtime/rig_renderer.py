@@ -306,6 +306,36 @@ class RigRenderer:
         self.last_paint_ms = (time.perf_counter() - started) * 1000.0
         self.record_paint_ms(self.last_paint_ms)
 
+    def paint_baked(
+        self,
+        painter: QPainter,
+        pixmap: QPixmap,
+        *,
+        anchor_x: float,
+        anchor_y: float,
+        scale: float,
+    ) -> None:
+        """Draw one pre-rendered frame through the rig's own world transform.
+
+        A baked clip is authored on the same 512 canvas as the rig master and
+        shares its foot anchor, so reusing world_transform is what keeps the
+        character from jumping when a baked clip starts or ends. Doing the
+        arithmetic separately here would drift the moment either side changed.
+        """
+        world = self.world_transform(anchor_x=anchor_x, anchor_y=anchor_y, scale=scale)
+        painter.save()
+        try:
+            painter.setRenderHint(QPainter.RenderHint.SmoothPixmapTransform, True)
+            painter.setOpacity(1.0)
+            painter.setTransform(world, False)
+            painter.drawPixmap(
+                QRectF(0.0, 0.0, float(self.source_width), float(self.source_height)),
+                pixmap,
+                QRectF(0.0, 0.0, float(pixmap.width()), float(pixmap.height())),
+            )
+        finally:
+            painter.restore()
+
     def _paint_strips(
         self,
         painter: QPainter,

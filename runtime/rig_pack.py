@@ -335,6 +335,20 @@ def synthetic_frame_count(clip: Mapping[str, Any]) -> int:
     return max(2, math.ceil(total / SYNTHETIC_FRAME_MS))
 
 
+def baked_frame_paths(rig: Mapping[str, Any], asset_root: Path) -> dict[str, Path]:
+    """Every real PNG a baked clip references, keyed by its manifest-relative name.
+
+    Confinement runs through the same resolver the part files use, so a baked
+    clip cannot reach outside the pack root either.
+    """
+    paths: dict[str, Path] = {}
+    for clip in _as_mapping(rig.get("clips")).values():
+        for frame in _string_list(_as_mapping(clip).get("frames")):
+            if frame not in paths:
+                paths[frame] = resolve_part_path(asset_root, frame)
+    return paths
+
+
 def animation_manifest_from_rig(rig: Mapping[str, Any]) -> dict[str, Any]:
     """Synthesise an :class:`AnimationModel`-compatible manifest for a rig.
 
@@ -347,6 +361,23 @@ def animation_manifest_from_rig(rig: Mapping[str, Any]) -> dict[str, Any]:
     for name, raw_clip in _as_mapping(rig.get("clips")).items():
         clip = _as_mapping(raw_clip)
         loop = bool(clip.get("loop", True))
+        baked = _string_list(clip.get("frames"))
+        if baked:
+            # A baked clip: real PNGs instead of solved geometry. A rig can only
+            # deform what its master contains, so an action that needs a prop --
+            # sweeping with a broom, eating a token -- has nothing to deform.
+            # Those ship as a frame sequence inside the rig pack and play through
+            # the same AnimationModel, so state routing and overlay timing are
+            # unchanged; only the paint path differs.
+            clips[name] = {
+                "frames": list(baked),
+                "frameMs": int(clip.get("frameMs", 120)),
+                "loop": loop,
+            }
+            motion = clip.get("motion")
+            if motion is not None:
+                clips[name]["motion"] = motion
+            continue
         token = rig_frame_token(name)
         frames = [token] if loop else [token] * synthetic_frame_count(clip)
         entry: dict[str, Any] = {

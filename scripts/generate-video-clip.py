@@ -143,7 +143,9 @@ def build_graph(args, uploaded: dict[str, str]) -> dict:
         for index, key in enumerate(sorted(k for k in uploaded if k.startswith("ref"))):
             slot = f"3{index}"
             graph[slot] = {"class_type": "LoadImage", "inputs": {"image": uploaded[key]}}
-            node_inputs[f"ref_image_{index + 1}"] = [slot, 0]
+            # The autogrow socket is namespaced and 0-indexed: the node rejects
+            # a bare "ref_image_1" with a TypeError on an unexpected kwarg.
+            node_inputs[f"ref_images.ref_image_{index}"] = [slot, 0]
 
     graph["4"] = {"class_type": MODES[args.mode]["node"], "inputs": node_inputs}
     return graph
