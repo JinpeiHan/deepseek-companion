@@ -49,3 +49,37 @@ test('missing bundled helper falls back to the configured Python', () => {
     args: [helperPath],
   })
 })
+
+test('macOS runs its own frozen helper, never the Windows one', () => {
+  const nativePath = '/package/runtime/bin/darwin-arm64/dsh-dafeiyu-helper'
+  const launch = resolve({
+    platform: 'darwin',
+    nativePath,
+    // Only the macOS binary is present; the Windows path must not be reached.
+    fileExists: (path) => path === nativePath,
+  })
+  assert.deepEqual(launch, { command: nativePath, args: [] })
+})
+
+test('macOS without a frozen helper falls back to python3, not to interop', () => {
+  const launch = resolve({
+    platform: 'darwin',
+    nativePath: '/package/runtime/bin/darwin-arm64/dsh-dafeiyu-helper',
+    fileExists: () => false,
+  })
+  // `py` is the Windows launcher and does not exist on macOS.
+  assert.equal(launch.command, 'python3')
+  assert.deepEqual(launch.args, [helperPath])
+})
+
+test('a macOS host never takes the WSL path', () => {
+  // isWsl() is linux-only by construction, but the launch resolver takes the
+  // flag as an argument, so assert the branch is guarded by platform too.
+  const launch = resolve({
+    platform: 'darwin',
+    isWslEnv: true,
+    nativePath: undefined,
+    fileExists: () => true,
+  })
+  assert.notEqual(launch.command, 'cmd.exe', 'macOS must never shell out to cmd.exe')
+})

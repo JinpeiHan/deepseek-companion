@@ -483,6 +483,28 @@ def ask_from_message(message: "dict[str, Any]") -> "dict[str, Any] | None":
     }
 
 
+def window_setup(platform: str) -> "dict[str, Any]":
+    """Window flags and attributes for one platform.
+
+    Pure and module level so the platform choice is testable from a machine
+    that is not that platform -- the whole point is that these branches cannot
+    all be exercised where the code is written.
+
+    ``Qt.Tool`` is what keeps the pet off the taskbar and above ordinary
+    windows, and on Windows and Linux that is all it does. On macOS a tool
+    window is an ``NSPanel``, and an NSPanel hides itself whenever its
+    application is deactivated -- so the pet would vanish the moment the user
+    clicked another app, which is exactly when a desktop companion should still
+    be there. ``WA_MacAlwaysShowToolWindow`` is Qt's opt-out from that
+    behaviour and exists for this case.
+    """
+    flags = ["FramelessWindowHint", "WindowStaysOnTopHint", "Tool"]
+    attributes = ["WA_TranslucentBackground"]
+    if platform == "darwin":
+        attributes.append("WA_MacAlwaysShowToolWindow")
+    return {"flags": flags, "attributes": attributes}
+
+
 def emit_reply(kind: str, **payload: Any) -> None:
     print(
         json.dumps(
@@ -711,12 +733,13 @@ def run_visual(recorder: EventRecorder, snapshot_path: Path | None = None) -> in
             self.interaction_seed = 0
             self.card_key: tuple[Any, ...] | None = None
             self.setWindowTitle("DSH 小鲸鱼")
-            self.setWindowFlags(
-                Qt.WindowType.FramelessWindowHint
-                | Qt.WindowType.WindowStaysOnTopHint
-                | Qt.WindowType.Tool
-            )
-            self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, True)
+            setup = window_setup(sys.platform)
+            flags = Qt.WindowType(0)
+            for flag in setup["flags"]:
+                flags |= getattr(Qt.WindowType, flag)
+            self.setWindowFlags(flags)
+            for attribute in setup["attributes"]:
+                self.setAttribute(getattr(Qt.WidgetAttribute, attribute), True)
             # Needed for hover feedback on the approval choices. Unrelated to the
             # cursor-follow, which polls QCursor.pos() because it has to work
             # when the pointer is nowhere near this window.

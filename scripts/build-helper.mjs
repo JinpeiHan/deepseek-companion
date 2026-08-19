@@ -5,14 +5,21 @@
 // The build was PowerShell-only and emitted into runtime/bin/win32-x64, so a
 // Linux or macOS user had no bundled helper at all and fell back to whatever
 // `python3` happened to be on PATH -- which works only if PySide6 is installed
-// system-wide. Nothing in the helper is Windows-specific: runtime/ contains no
-// sys.platform branch anywhere, so the only thing standing between it and a
-// native Linux build was the build script.
+// system-wide. Almost nothing in the helper is platform-specific -- the single
+// branch is window_setup(), which opts macOS out of hiding the pet whenever the
+// app deactivates -- so the build script was the only thing standing between it
+// and a native Linux or macOS build.
 //
 // PyInstaller cannot cross-compile. Each platform's binary has to be produced
 // on that platform, which is why the output directory is named after the host
-// rather than passed in: a build on Debian populates linux-x64, a build on
-// Windows populates win32-x64, and neither can pretend to be the other.
+// rather than passed in: a build on Debian populates linux-x64, a build on an
+// Apple Silicon Mac populates darwin-arm64, and neither can pretend to be the
+// other.
+//
+// On macOS the binary is unsigned, so Gatekeeper will quarantine it on another
+// machine. Shipping it means signing and notarising, or telling users to clear
+// the quarantine attribute themselves -- neither of which this script does or
+// can verify from here.
 
 import { spawnSync } from 'node:child_process'
 import { existsSync, mkdirSync } from 'node:fs'
