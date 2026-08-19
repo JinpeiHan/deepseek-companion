@@ -93,14 +93,18 @@ test('plugin forwards DSH-shaped session events and owns helper shutdown', async
   })
 
   const messages = (await readFile(eventLog, 'utf8')).trim().split(/\r?\n/).map(JSON.parse)
+  // The emote is a reaction layered over the state, not a replacement for it:
+  // the turn completed, so the states are unchanged and the pet also salutes.
   assert.deepEqual(messages.map((message) => message.kind), [
     'hello',
     'state',
     'state',
     'state',
     'pulse',
+    'emote',
     'shutdown',
   ])
+  assert.equal(messages.find((m) => m.kind === 'emote')?.clip, 'salute_roger')
   assert.deepEqual(messages.map((message) => message.state).filter(Boolean), [
     'IDLE',
     'IDLE',

@@ -27,9 +27,26 @@ export const CompanionMessageKind = Object.freeze({
   // replies with an `answer` naming the one that was clicked.
   ASK: 'ask',
   ASK_CLEAR: 'ask-clear',
+  // Play one expressive clip once. Separate from STATE because these are
+  // reactions to a moment, not a condition the pet stays in: the state
+  // underneath is unchanged and resumes when the clip ends.
+  EMOTE: 'emote',
 })
 
 export const MAX_ASK_OPTIONS = 4
+
+/**
+ * A one-shot expressive clip.
+ *
+ * The clip name is not validated here: packs deliberately differ, and the
+ * helper no-ops on a clip its pack does not have. Validating against one pack's
+ * vocabulary would make a pack-specific animation an error everywhere else.
+ */
+export function createEmote(clip) {
+  const name = String(clip ?? '').trim()
+  if (!name) throw new TypeError('emote needs a clip name')
+  return { clip: name }
+}
 
 /**
  * Normalise one DSH question into the shape the helper draws.

@@ -738,6 +738,14 @@ def run_visual(recorder: EventRecorder, snapshot_path: Path | None = None) -> in
                     self._apply_window_size()
                     self.update()
                 return
+            if kind == "emote":
+                # A pack that lacks this clip simply does not react. Packs
+                # deliberately carry different vocabularies, and a missing
+                # flourish is a better outcome than an error.
+                clip = str(message.get("clip", "")).strip()
+                if clip and clip in self.model.clips:
+                    self._play_model_overlay(clip)
+                return
             if kind == "ask-clear":
                 if self.ask is not None:
                     self.ask = None

@@ -6,8 +6,15 @@ import {
   CompanionMessageKind,
   CompanionState,
   createAsk,
+  createEmote,
   createMessage,
 } from './protocol.js'
+import {
+  EMOTE_COOLDOWN_MS,
+  emoteFor,
+  idleEmoteFor,
+  updateEmoteMemory,
+} from './emote-map.js'
 import { characterName, statusCopy } from './status-copy.js'
 
 const require = createRequire(import.meta.url)
@@ -178,6 +185,25 @@ function mount(ctx, config = {}, eventCtx = ctx) {
   // the answer has to come back as a resolved promise rather than as an event
   // fired at the host.
   let pending
+  let lastEmoteAt = 0
+  let lastEventAt = Date.now()
+  let lastIdleEmote
+  const emoteMemory = { retriesThisTurn: 0, stepsThisTurn: 0, quietForMs: 0 }
+
+  // Idle reactions are driven by a clock, because the trigger is that nothing
+  // arrived. Checked on a slow timer rather than a tick: the thresholds are
+  // minutes apart, so a minute of granularity is invisible.
+  const idleTimer = setInterval(() => {
+    if (!bridge) return
+    const quietFor = Date.now() - lastEventAt
+    const clip = idleEmoteFor(quietFor)
+    if (clip && clip !== lastIdleEmote) {
+      lastIdleEmote = clip
+      lastEmoteAt = Date.now()
+      bridge.send(createMessage(CompanionMessageKind.EMOTE, createEmote(clip)))
+    }
+  }, 60_000)
+  idleTimer.unref?.()
 
   const settlePending = (outcome, error) => {
     if (!pending) return
@@ -333,6 +359,17 @@ function mount(ctx, config = {}, eventCtx = ctx) {
     if (!bridge || !reducer) return
     try {
       for (const message of reducer.handle(session, event)) bridge.send(message)
+      emoteMemory.quietForMs = Date.now() - lastEventAt
+      lastEventAt = Date.now()
+      lastIdleEmote = undefined
+      updateEmoteMemory(emoteMemory, event)
+      const clip = emoteFor(event, emoteMemory)
+      // One reaction at a time, spaced out: a burst of events would otherwise
+      // interrupt each clip with the next and read as twitching.
+      if (clip && Date.now() - lastEmoteAt >= EMOTE_COOLDOWN_MS) {
+        lastEmoteAt = Date.now()
+        bridge.send(createMessage(CompanionMessageKind.EMOTE, createEmote(clip)))
+      }
     } catch (error) {
       logger.error?.('dsh-dafeiyu failed to handle session event', error)
     }
@@ -383,6 +420,7 @@ function mount(ctx, config = {}, eventCtx = ctx) {
     offEvent?.()
     offDisposed?.()
     offProvider?.()
+    clearInterval(idleTimer)
     // A question still on screen has a tool awaiting its promise. Rejecting it
     // lets the agent fail and retry; leaving it pending hangs that tool for the
     // rest of the run.
