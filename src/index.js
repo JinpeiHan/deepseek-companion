@@ -147,6 +147,40 @@ export function createConfigHandler(settings) {
 // state, leaving the web UI as the place to answer -- which is the honest
 // outcome, because a card with no usable choice would hide the bubble's normal
 // content and give the user nothing to click.
+/**
+ * Pull the questions out of an `ask_user_question` tool call.
+ *
+ * This is the tool the agent uses for "confirm this / pick one", and it is the
+ * thing worth answering from the bubble. It is a *tool call*, not an approval:
+ * approval/asked is the separate permission gate for running a tool at all.
+ * The argument key differs between DSH builds, so the known spellings are tried
+ * rather than assumed.
+ */
+export function askFromQuestionTool(event) {
+  const data = event?.data ?? {}
+  const args =
+    data.arguments ?? data.args ?? data.input ?? data.parameters ?? data.message?.arguments ?? null
+  const questions = Array.isArray(args?.questions) ? args.questions : null
+  if (!questions || questions.length === 0) return null
+  // One card at a time: the bubble shows a single question, and a second one
+  // would need somewhere to queue.
+  const first = questions[0]
+  const id = String(first?.id ?? data.callId ?? data.id ?? '')
+  if (!id) return null
+  const options = Array.isArray(first?.options) ? first.options : null
+  if (!options || options.length === 0) return null
+  try {
+    return createAsk({
+      id,
+      question: String(first.question ?? ''),
+      detail: String(first.header ?? ''),
+      options,
+    })
+  } catch {
+    return null
+  }
+}
+
 export function askFromApproval(event) {
   const data = event?.data ?? {}
   const id = String(data.id ?? '')
@@ -198,22 +232,30 @@ function mount(ctx, config = {}, eventCtx = ctx) {
     // plugin's, so the known spellings are tried and anything else is reported
     // rather than silently swallowed. A dropped answer leaves the agent
     // blocked, which is worse than a loud log.
-    const decide =
-      session.decideApproval?.bind(session)
-      ?? session.resolveApproval?.bind(session)
-      ?? session.approvals?.decide?.bind(session.approvals)
-      ?? ctx.sessions?.decideApproval?.bind(ctx.sessions)
-    if (typeof decide !== 'function') {
+    // ask_user_question is a consumer of the ctx.userInteraction seam, and the
+    // answer it expects is { id, selected: string[] } -- selected is an array
+    // because the tool supports multi-select. The provider side of that seam is
+    // whatever UI is attached; this tries the shapes a provider plausibly
+    // exposes and reports rather than swallowing, because a dropped answer
+    // leaves the agent blocked on a question nobody can see any more.
+    const answer = { id, selected: [value] }
+    const submit =
+      ctx.userInteraction?.answer?.bind(ctx.userInteraction)
+      ?? ctx.userInteraction?.resolve?.bind(ctx.userInteraction)
+      ?? session.userInteraction?.answer?.bind(session.userInteraction)
+      ?? session.answerQuestion?.bind(session)
+      ?? session.decideApproval?.bind(session)
+    if (typeof submit !== 'function') {
       logger.error?.(
-        'dsh-dafeiyu: the pet answered an approval but this DSH build exposes no way to submit it; '
-        + 'answer it in the web UI instead',
+        'dsh-dafeiyu: the pet answered a question but this DSH build exposes no provider seam to '
+        + 'submit it through; answer it in the web UI instead. Expected ctx.userInteraction.',
       )
       return
     }
     try {
-      decide(id, value)
+      submit(answer)
     } catch (error) {
-      logger.error?.('dsh-dafeiyu failed to submit an approval answer', error)
+      logger.error?.('dsh-dafeiyu failed to submit an answer', error)
     }
   }
 
@@ -302,7 +344,20 @@ function mount(ctx, config = {}, eventCtx = ctx) {
     if (!bridge || !reducer) return
     try {
       for (const message of reducer.handle(session, event)) bridge.send(message)
-      if (event?.type === 'approval/asked') {
+      if (event?.type === 'tool/call') {
+        const ask = askFromQuestionTool(event)
+        if (ask) {
+          pendingApprovals.set(ask.id, session)
+          bridge.send(createMessage(CompanionMessageKind.ASK, ask))
+        }
+      } else if (event?.type === 'tool/result') {
+        // Answered somewhere else, or the tool finished. Either way the
+        // question is no longer live.
+        const id = String(event.data?.callId ?? event.data?.id ?? '')
+        if (id && pendingApprovals.delete(id)) {
+          bridge.send(createMessage(CompanionMessageKind.ASK_CLEAR, { id }))
+        }
+      } else if (event?.type === 'approval/asked') {
         const ask = askFromApproval(event)
         if (ask) {
           pendingApprovals.set(ask.id, session)

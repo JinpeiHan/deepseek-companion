@@ -197,14 +197,14 @@ test('an approval becomes a card the pet can answer, and a decision takes it dow
   let onAnswer
   let dispose
   const decided = []
-  const session = {
-    header: { id: 's1' },
-    decideApproval: (id, value) => decided.push([id, value]),
-  }
+  const session = { header: { id: 's1' } }
   const ctx = {
     logger: { debug() {}, info() {}, warn() {}, error() {} },
     on(name, callback) { listeners.set(name, callback) },
     effect(setup) { dispose = setup() },
+    // ask_user_question consumes ctx.userInteraction, so this is the seam an
+    // answer travels back through.
+    userInteraction: { answer: (payload) => decided.push(payload) },
   }
 
   // Capture what the plugin hands the helper without spawning one.
@@ -227,7 +227,11 @@ test('an approval becomes a card the pet can answer, and a decision takes it dow
     // The pet answers.
     assert.equal(typeof onAnswer, 'function', 'the bridge exposes an answer callback')
     onAnswer({ id: 'ap-1', value: 'y' })
-    assert.deepEqual(decided, [['ap-1', 'y']], 'the answer goes back to the session that asked')
+    assert.deepEqual(
+      decided,
+      [{ id: 'ap-1', selected: ['y'] }],
+      'the answer uses the shape ask_user_question expects: selected is an array',
+    )
 
     // A decision made elsewhere clears the card.
     listeners.get('session/event')(session, {
@@ -236,6 +240,52 @@ test('an approval becomes a card the pet can answer, and a decision takes it dow
       data: { id: 'ap-1' },
     })
     assert.ok(sent.some((m) => m.kind === 'ask-clear'), 'a decision elsewhere takes the card down')
+  } finally {
+    HelperProcess.prototype.send = originalSend
+    HelperProcess.prototype.start = originalStart
+    if (typeof dispose === 'function') dispose()
+  }
+})
+
+test('an ask_user_question tool call becomes a card in the bubble', () => {
+  const listeners = new Map()
+  const sent = []
+  let dispose
+  const ctx = {
+    logger: { debug() {}, info() {}, warn() {}, error() {} },
+    on(name, callback) { listeners.set(name, callback) },
+    effect(setup) { dispose = setup() },
+  }
+  const originalSend = HelperProcess.prototype.send
+  const originalStart = HelperProcess.prototype.start
+  HelperProcess.prototype.send = function (message) { sent.push(message) }
+  HelperProcess.prototype.start = function () {}
+  try {
+    apply(ctx, { helper: { headless: true } })
+    listeners.get('session/event')({ header: { id: 's' } }, {
+      type: 'tool/call',
+      seq: 1,
+      data: {
+        callId: 'c1',
+        name: 'ask_user_question',
+        arguments: {
+          questions: [{
+            id: 'q1',
+            question: '用哪种方案？',
+            options: [{ value: 'a', label: '方案 A' }, { value: 'b', label: '方案 B' }],
+          }],
+        },
+      },
+    })
+    const ask = sent.find((m) => m.kind === 'ask')
+    assert.ok(ask, 'the question reaches the pet')
+    assert.equal(ask.id, 'q1', 'answered against the question id the tool echoes back')
+    assert.equal(ask.options.length, 2)
+
+    listeners.get('session/event')({ header: { id: 's' } }, {
+      type: 'tool/result', seq: 2, data: { callId: 'q1' },
+    })
+    assert.ok(sent.some((m) => m.kind === 'ask-clear'), 'the result takes the card down')
   } finally {
     HelperProcess.prototype.send = originalSend
     HelperProcess.prototype.start = originalStart
