@@ -68,17 +68,34 @@ def main() -> int:
             raise SystemExit(f"{source.name}: frame is fully transparent")
         heights.append(box[3] - box[1])
     spread = max(heights) - min(heights)
-    # A baked clip that still drifts would make the pet visibly zoom mid-action.
-    if spread > 12:
+    # Guard the DRIFT, not the spread. Height is not constant in a good
+    # performance -- the character should get shorter crouching in poke and
+    # taller with her feet off the ground in dragging -- so a raw-spread limit
+    # would reject exactly the clips worth having. Camera drift is the slow
+    # component, so fit it and check only that.
+    drift = 0.0
+    if len(heights) > 3:
+        x = list(range(len(heights)))
+        n = float(len(heights))
+        mean_x = sum(x) / n
+        mean_y = sum(heights) / n
+        denominator = sum((xi - mean_x) ** 2 for xi in x)
+        slope = (
+            sum((xi - mean_x) * (yi - mean_y) for xi, yi in zip(x, heights)) / denominator
+            if denominator
+            else 0.0
+        )
+        drift = abs(slope) * (len(heights) - 1)
+    if drift > 12:
         raise SystemExit(
-            f"character height varies by {spread}px across the clip; "
-            "re-run the matting with --group frame to remove the camera drift"
+            f"character height drifts {drift:.0f}px across the clip (spread {spread}px); "
+            "run scripts/detrend-clip.py over the matted frames first"
         )
 
     rel_dir = f"baked/{args.clip}"
     names = [f"{rel_dir}/{args.clip}_{index:02d}.png" for index in range(len(sources))]
     if args.dry_run:
-        print(f"{args.pack}/{args.clip}: {len(sources)} frames, height spread {spread}px")
+        print(f"{args.pack}/{args.clip}: {len(sources)} frames, spread {spread}px, drift {drift:.0f}px")
         for name in names[:3]:
             print(f"  {name}")
         print("  …")
@@ -102,7 +119,7 @@ def main() -> int:
     temp = manifest_path.with_suffix(".tmp.json")
     temp.write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     temp.replace(manifest_path)
-    print(f"{args.pack}/{args.clip}: baked {len(names)} frames at {args.frame_ms}ms, spread {spread}px")
+    print(f"{args.pack}/{args.clip}: baked {len(names)} frames at {args.frame_ms}ms, spread {spread}px, drift {drift:.0f}px")
     return 0
 
 
