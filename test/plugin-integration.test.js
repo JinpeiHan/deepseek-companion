@@ -8,8 +8,34 @@ import { apply, inject } from '../src/index.js'
 import { HelperProcess } from '../src/helper-process.js'
 
 test('plugin declares the service dependencies it actually consumes', () => {
-  assert.ok(inject.includes('settings'), 'settings is a real hard dependency for live config')
-  assert.ok(inject.includes('sessions'), 'sessions events drive the whole companion feature')
+  // sessions is required and settings is not, which is what lets the pet mount
+  // in the command-line DSH: Cordis holds a plugin unmounted until every
+  // *required* service exists, and the CLI has no settings service. mount()
+  // already falls back to a local scope when it is absent.
+  assert.deepEqual(inject.required, ['sessions'])
+  assert.deepEqual(inject.optional, ['settings'])
+})
+
+test('the plugin mounts without a settings service, as the CLI has none', () => {
+  const listeners = new Map()
+  let dispose
+  const ctx = {
+    logger: { debug() {}, info() {}, warn() {}, error() {} },
+    on(name, callback) {
+      listeners.set(name, callback)
+    },
+    effect(setup) {
+      dispose = setup()
+    },
+    // deliberately no ctx.settings: this is the command-line DSH.
+  }
+
+  assert.doesNotThrow(
+    () => apply(ctx, { helper: { headless: true } }),
+    'mounting must not require ctx.settings',
+  )
+  assert.ok(listeners.has('session/event'), 'the pet still subscribes to session events')
+  if (typeof dispose === 'function') dispose()
 })
 
 test('package metadata exposes the DSH web client bundle', () => {

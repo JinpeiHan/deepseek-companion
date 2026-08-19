@@ -35,3 +35,8 @@ art-references/rig/*/rig-records.jsonl
 art-references/rig/*/masks/
 art-references/rig/*/filled/
 art-references/rig/*/state.json
+
+# Frozen helper binaries are built per platform, not committed
+runtime/bin/linux-*/
+runtime/bin/darwin-*/
+.build/

@@ -11,7 +11,20 @@ import {
 
 const here = dirname(fileURLToPath(import.meta.url))
 const defaultHelperPath = resolve(here, '..', 'runtime', 'helper.py')
-const bundledHelperPath = resolve(here, '..', 'runtime', 'bin', 'win32-x64', 'dsh-dafeiyu-helper.exe')
+// PyInstaller cannot cross-compile, so each platform ships its own binary in a
+// directory named after that platform. Windows keeps its historical
+// win32-x64/*.exe path; Linux and macOS get theirs the moment a build runs
+// there. A WSL session still prefers the Windows binary, because the pet has to
+// draw on the Windows desktop rather than inside WSL's own display.
+const bundledArch = { x64: 'x64', arm64: 'arm64' }[process.arch] ?? process.arch
+const bundledDir = (platform) => `${platform}-${bundledArch}`
+const bundledName = (platform) => (platform === 'win32' ? 'dsh-dafeiyu-helper.exe' : 'dsh-dafeiyu-helper')
+const bundledPathFor = (platform) =>
+  resolve(here, '..', 'runtime', 'bin', bundledDir(platform), bundledName(platform))
+
+const windowsBundledPath = bundledPathFor('win32')
+const nativeBundledPath = bundledPathFor(process.platform)
+const bundledHelperPath = process.platform === 'win32' ? windowsBundledPath : nativeBundledPath
 
 function isWsl() {
   if (process.platform !== 'linux') return false
@@ -27,7 +40,9 @@ function isWsl() {
 }
 
 function shouldUseBundledHelper() {
-  return (process.platform === 'win32' || isWsl()) && existsSync(bundledHelperPath)
+  if (process.platform === 'win32') return existsSync(windowsBundledPath)
+  if (isWsl()) return existsSync(windowsBundledPath)
+  return existsSync(nativeBundledPath)
 }
 
 function toWindowsPath(path) {
@@ -38,6 +53,7 @@ function resolveHelperLaunch({
   platform,
   isWslEnv,
   bundledPath,
+  nativePath,
   helperPath,
   pythonEnv,
   headless = false,
@@ -57,6 +73,14 @@ function resolveHelperLaunch({
       args: ['/d', '/c', windowsPath(bundledPath)],
     }
   }
+  // A native frozen build beats falling back to whatever python3 is on PATH,
+  // which only works if PySide6 happens to be installed system-wide. Kept
+  // separate from bundledPath: that one is the Windows .exe, and handing it to
+  // a plain Linux session would be the Windows-interop path this deliberately
+  // does not take.
+  if (platform !== 'win32' && !isWslEnv && nativePath && fileExists(nativePath)) {
+    return { command: nativePath, args: [] }
+  }
   const command = pythonEnv || (platform === 'win32' ? 'py' : 'python3')
   return { command, args: defaultArgs(command, helperPath) }
 }
@@ -65,7 +89,8 @@ function defaultLaunch(headless = false) {
   return resolveHelperLaunch({
     platform: process.platform,
     isWslEnv: isWsl(),
-    bundledPath: bundledHelperPath,
+    bundledPath: windowsBundledPath,
+    nativePath: nativeBundledPath,
     helperPath: defaultHelperPath,
     pythonEnv: process.env.DSH_DAFEIYU_PYTHON,
     headless,

@@ -13,11 +13,13 @@ const require = createRequire(import.meta.url)
 const pkg = require('../package.json')
 
 export const name = 'dsh-dafeiyu'
-// The plugin's feature is built on session events, and mounting requires the
-// settings service (used to read live config). Keep the declared inject in
-// sync with those real hard dependencies instead of listing a service that
-// is never consumed directly.
-export const inject = ['sessions', 'settings']
+// Sessions is the only hard dependency: the pet's whole feature is reacting to
+// session events. Settings is optional, and listing it as required is what kept
+// the pet out of the command-line DSH -- Cordis holds a plugin unmounted until
+// every injected service exists, so the CLI, which has no settings service,
+// never mounted it and never reached the localSettingsScope fallback that was
+// written for exactly that case.
+export const inject = { required: ['sessions'], optional: ['settings'] }
 export const CONFIG_ENDPOINT = '/plugins/dsh-dafeiyu/config'
 export const Config = Schema.object({
   enabled: Schema.boolean().default(true).description('启用桌面小鲸鱼'),

@@ -9,8 +9,16 @@ const argument = (name) => {
   const index = process.argv.indexOf(name)
   return index >= 0 ? process.argv[index + 1] : undefined
 }
-const executable = resolve(argument('--executable')
-  ?? resolve(projectRoot, 'runtime/bin/win32-x64/dsh-dafeiyu-helper.exe'))
+// PyInstaller cannot cross-compile, so the default is this host's own build
+// rather than the Windows one.
+const arch = { x64: 'x64', arm64: 'arm64' }[process.arch] ?? process.arch
+const defaultExecutable = resolve(
+  projectRoot,
+  'runtime/bin',
+  `${process.platform}-${arch}`,
+  process.platform === 'win32' ? 'dsh-dafeiyu-helper.exe' : 'dsh-dafeiyu-helper',
+)
+const executable = resolve(argument('--executable') ?? defaultExecutable)
 const snapshot = resolve(argument('--snapshot')
   ?? resolve(projectRoot, '.build/helper/packaged-visual-smoke.png'))
 const timeoutMs = Number(argument('--timeout-ms') ?? 15_000)
