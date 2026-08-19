@@ -187,14 +187,52 @@ CLIPS: dict[str, dict] = {
             {"param": "headAngleZ", "wave": "sin", "periodMs": 5200, "amplitude": 3.5},
         ],
     },
+    # Sweeping, not generic "arms move". Both arms travel TOGETHER because they
+    # share a broom handle -- the previous version swung them in opposition,
+    # which reads as marching. The body counter-rotates against the stroke and
+    # the tail trails it, so the whole figure participates instead of only the
+    # shoulders. One stroke is 1400ms; every partner of that period is either
+    # equal to it or double it, so the cycle never drifts out of phase.
     "working": {
         "loop": True,
         "motion": "work",
         "oscillators": [
-            _breathe(1900, 0.8),
-            _swing(2000, 0.7),
-            {"param": "armSwingL", "wave": "sin", "periodMs": 1200, "amplitude": 6.0},
-            {"param": "armSwingR", "wave": "sin", "periodMs": 1200, "amplitude": -6.0},
+            _breathe(2800, 0.5),
+            {"param": "armSwingL", "wave": "sin", "periodMs": 1400, "amplitude": 9.0},
+            {"param": "armSwingR", "wave": "sin", "periodMs": 1400, "amplitude": 7.5},
+            {"param": "bodyAngleZ", "wave": "sin", "periodMs": 1400, "amplitude": -2.6},
+            {"param": "rootLeanZ", "wave": "sin", "periodMs": 1400, "amplitude": -1.8},
+            {"param": "headAngleZ", "wave": "sin", "periodMs": 1400, "amplitude": -2.2},
+            # Eyes track the broom head, which sits low and to the side.
+            {"param": "eyeBallX", "wave": "sin", "periodMs": 1400, "amplitude": 0.45},
+            {"param": "eyeBallY", "wave": "sin", "periodMs": 2800, "amplitude": 0.22, "bias": 0.30},
+            {"param": "headAngleX", "wave": "sin", "periodMs": 2800, "amplitude": 1.2, "bias": 2.4},
+            # The tail lags the stroke by half a cycle rather than leading it.
+            {"param": "tailSwing", "wave": "sin", "periodMs": 1400, "amplitude": 0.8, "phase": 0.5},
+            {"param": "rootBobY", "wave": "sin", "periodMs": 700, "amplitude": 1.1},
+        ],
+    },
+    # Eating a token: a repeating nibble. The mouth and the cheek squash share
+    # the 900ms bite period so the squash lands on the closing mouth rather than
+    # drifting against it, and the arms stay raised (bias) instead of swinging
+    # through rest, because the hands are holding something up to the face.
+    "eat_token": {
+        "loop": True,
+        "motion": "work",
+        "oscillators": [
+            _breathe(2700, 0.4),
+            {"param": "mouthOpen", "wave": "sin", "periodMs": 900, "amplitude": 0.5, "bias": 0.45},
+            {"param": "cheekSquash", "wave": "sin", "periodMs": 900, "amplitude": 0.34, "bias": 0.36},
+            {"param": "armSwingL", "wave": "sin", "periodMs": 1800, "amplitude": 3.0, "bias": 15.0},
+            {"param": "armSwingR", "wave": "sin", "periodMs": 1800, "amplitude": -3.0, "bias": -15.0},
+            # Head dips toward the hands and bobs with each bite.
+            {"param": "headAngleX", "wave": "sin", "periodMs": 900, "amplitude": 1.8, "bias": 4.0},
+            {"param": "headAngleZ", "wave": "sin", "periodMs": 3600, "amplitude": 2.4},
+            # Eyes squeeze shut a little on every bite: happy, not sleepy.
+            {"param": "eyeOpen", "wave": "sin", "periodMs": 900, "amplitude": -0.22, "bias": 0.74},
+            {"param": "eyeBallY", "wave": "sin", "periodMs": 1800, "amplitude": 0.15, "bias": 0.28},
+            _swing(1800, 0.9),
+            {"param": "rootBobY", "wave": "sin", "periodMs": 900, "amplitude": 1.4},
         ],
     },
     "working_search": {

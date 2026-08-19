@@ -41,7 +41,7 @@ from runtime.rig_model import RigModel  # noqa: E402
 from runtime.rig_pack import load_rig  # noqa: E402
 from runtime.rig_renderer import RigRenderer  # noqa: E402
 
-MOTIONS = ("idle", "blink", "look", "poke", "drag")
+MOTIONS = ("idle", "blink", "look", "poke", "drag", "sweep", "eat")
 
 
 def drive(driver: RigDriver, motion: str, frame: int, total: int, now_ms: int) -> None:
@@ -83,6 +83,10 @@ def main() -> int:
     renderer = RigRenderer(descriptor, rig)
 
     base_clip = rig["stateMap"]["IDLE"]
+    if args.motion == "sweep":
+        base_clip = rig["stateMap"]["WORKING"]
+    elif args.motion == "eat":
+        base_clip = "eat_token"
     overlay = "blink" if args.motion == "blink" else None
 
     left, top, right, bottom = renderer.pet_rect(args.scale)
