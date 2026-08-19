@@ -544,7 +544,38 @@ def tight_bbox(alpha: np.ndarray) -> tuple[int, int, int, int]:
     return int(xs.min()), int(ys.min()), int(xs.max() - xs.min() + 1), int(ys.max() - ys.min() + 1)
 
 
+
+def _merge_baked_clips(clips: dict, manifest_path: Path) -> dict:
+    """Carry any already-baked clip through a re-emit.
+
+    ``emit`` rebuilds the manifest from the template, and the template has no
+    idea which clips were later replaced by generated frames. Without this a
+    re-emit silently drops every ``frames`` list, so a manifest that took hours
+    of generation to fill comes back pointing at nothing while the PNGs sit
+    untouched on disk.
+    """
+    if not manifest_path.exists():
+        return clips
+    try:
+        existing = json.loads(manifest_path.read_text(encoding="utf-8")).get("clips", {})
+    except (OSError, ValueError):
+        return clips
+    for name, previous in existing.items():
+        frames = previous.get("frames")
+        if not frames or name not in clips:
+            continue
+        clips[name] = {
+            "loop": bool(previous.get("loop", True)),
+            "frames": list(frames),
+            "frameMs": int(previous.get("frameMs", 110)),
+        }
+        if previous.get("motion"):
+            clips[name]["motion"] = previous["motion"]
+    return clips
+
+
 def build_manifest(pack: str, annotations: dict, rects: dict, master_sha: str) -> dict:
+    manifest_path = REPO_ROOT / "assets" / f"pet-{pack}-rig.json"
     pivots = annotations["bonePivots"]
     part_pivots = annotations.get("partPivots", {})
 
@@ -597,7 +628,7 @@ def build_manifest(pack: str, annotations: dict, rects: dict, master_sha: str) -
         "chains": {name: json.loads(json.dumps(spec)) for name, spec in T.CHAINS.items()},
         "parts": parts,
         "bindings": [json.loads(json.dumps(b)) for b in T.BINDINGS],
-        "clips": json.loads(json.dumps(T.CLIPS)),
+        "clips": _merge_baked_clips(json.loads(json.dumps(T.CLIPS)), manifest_path),
         "stateMap": dict(T.STATE_MAP),
         "workingActivityMap": dict(T.WORKING_ACTIVITY_MAP),
         "idleMicroClips": list(T.IDLE_MICRO_CLIPS),

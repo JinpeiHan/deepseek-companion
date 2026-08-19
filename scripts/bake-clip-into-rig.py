@@ -19,7 +19,7 @@ from __future__ import annotations
 
 import argparse
 import json
-import shutil
+import shutil  # noqa: F401  (kept for --unbake rmtree)
 import sys
 from pathlib import Path
 
@@ -141,10 +141,14 @@ def main() -> int:
 
     out_dir = ROOT / "assets" / entry["root"] / rel_dir
     out_dir.mkdir(parents=True, exist_ok=True)
+    # Read every frame BEFORE clearing the directory. Passing the clip's own
+    # baked directory as --frames is the natural way to re-link a manifest
+    # entry, and deleting first would delete the very files about to be copied.
+    payloads = [source.read_bytes() for source in sources]
     for existing in out_dir.glob("*.png"):
         existing.unlink()
-    for source, name in zip(sources, names):
-        shutil.copy(source, ROOT / "assets" / entry["root"] / name)
+    for payload, name in zip(payloads, names):
+        (ROOT / "assets" / entry["root"] / name).write_bytes(payload)
 
     clip = manifest["clips"][args.clip]
     # Drop the oscillators: a clip is either solved or baked, never both, and

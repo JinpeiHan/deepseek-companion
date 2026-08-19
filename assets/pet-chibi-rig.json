@@ -8,241 +8,52 @@
   "maxFrameHeight": 512,
   "logicalWidth": 260,
   "logicalHeight": 260,
-  "footAnchor": [
-    0.5,
-    0.97
-  ],
-  "bubbleAnchor": [
-    0.5,
-    0.04
-  ],
-  "overflow": {
-    "left": 155,
-    "top": 62,
-    "right": 151,
-    "bottom": 42
-  },
+  "footAnchor": [0.5, 0.97],
+  "bubbleAnchor": [0.5, 0.04],
+  "overflow": {"left": 155, "top": 62, "right": 151, "bottom": 42},
   "params": {
-    "headAngleX": {
-      "min": -14,
-      "max": 14,
-      "default": 0
-    },
-    "headAngleY": {
-      "min": -18,
-      "max": 18,
-      "default": 0
-    },
-    "headAngleZ": {
-      "min": -18,
-      "max": 18,
-      "default": 0
-    },
-    "bodyAngleY": {
-      "min": -4,
-      "max": 4,
-      "default": 0
-    },
-    "bodyAngleZ": {
-      "min": -4,
-      "max": 4,
-      "default": 0
-    },
-    "eyeBallX": {
-      "min": -1,
-      "max": 1,
-      "default": 0
-    },
-    "eyeBallY": {
-      "min": -1,
-      "max": 1,
-      "default": 0
-    },
-    "rootLeanZ": {
-      "min": -5,
-      "max": 5,
-      "default": 0
-    },
-    "rootBobY": {
-      "min": -6,
-      "max": 6,
-      "default": 0
-    },
-    "breath": {
-      "min": -1,
-      "max": 1,
-      "default": 0
-    },
-    "eyeOpen": {
-      "min": 0,
-      "max": 1,
-      "default": 1
-    },
-    "mouthOpen": {
-      "min": 0,
-      "max": 1,
-      "default": 0
-    },
-    "cheekSquash": {
-      "min": 0,
-      "max": 1,
-      "default": 0
-    },
-    "armSwingL": {
-      "min": -14,
-      "max": 14,
-      "default": 0
-    },
-    "armSwingR": {
-      "min": -14,
-      "max": 14,
-      "default": 0
-    },
-    "hairSway": {
-      "min": -6,
-      "max": 6,
-      "default": 0
-    },
-    "tail0": {
-      "min": -10,
-      "max": 10,
-      "default": 0
-    },
-    "tail1": {
-      "min": -10,
-      "max": 10,
-      "default": 0
-    },
-    "tail2": {
-      "min": -10,
-      "max": 10,
-      "default": 0
-    },
-    "tail3": {
-      "min": -10,
-      "max": 10,
-      "default": 0
-    }
+    "headAngleX": {"min": -14, "max": 14, "default": 0},
+    "headAngleY": {"min": -18, "max": 18, "default": 0},
+    "headAngleZ": {"min": -18, "max": 18, "default": 0},
+    "bodyAngleY": {"min": -4, "max": 4, "default": 0},
+    "bodyAngleZ": {"min": -4, "max": 4, "default": 0},
+    "eyeBallX": {"min": -1, "max": 1, "default": 0},
+    "eyeBallY": {"min": -1, "max": 1, "default": 0},
+    "rootLeanZ": {"min": -5, "max": 5, "default": 0},
+    "rootBobY": {"min": -6, "max": 6, "default": 0},
+    "breath": {"min": -1, "max": 1, "default": 0},
+    "eyeOpen": {"min": 0, "max": 1, "default": 1},
+    "mouthOpen": {"min": 0, "max": 1, "default": 0},
+    "cheekSquash": {"min": 0, "max": 1, "default": 0},
+    "armSwingL": {"min": -14, "max": 14, "default": 0},
+    "armSwingR": {"min": -14, "max": 14, "default": 0},
+    "hairSway": {"min": -6, "max": 6, "default": 0},
+    "tail0": {"min": -10, "max": 10, "default": 0},
+    "tail1": {"min": -10, "max": 10, "default": 0},
+    "tail2": {"min": -10, "max": 10, "default": 0},
+    "tail3": {"min": -10, "max": 10, "default": 0}
   },
   "bones": [
-    {
-      "id": "root",
-      "parent": null,
-      "pivot": [
-        250,
-        492
-      ]
-    },
-    {
-      "id": "body",
-      "parent": "root",
-      "pivot": [
-        250,
-        430
-      ]
-    },
-    {
-      "id": "neck",
-      "parent": "body",
-      "pivot": [
-        247,
-        292
-      ]
-    },
-    {
-      "id": "head",
-      "parent": "neck",
-      "pivot": [
-        247,
-        288
-      ]
-    },
-    {
-      "id": "arm_l",
-      "parent": "body",
-      "pivot": [
-        186,
-        334
-      ]
-    },
-    {
-      "id": "arm_r",
-      "parent": "body",
-      "pivot": [
-        308,
-        334
-      ]
-    },
-    {
-      "id": "tail_b0",
-      "parent": "body",
-      "pivot": [
-        326,
-        382
-      ],
-      "chain": "tail",
-      "chainIndex": 0
-    },
-    {
-      "id": "tail_b1",
-      "parent": "tail_b0",
-      "pivot": [
-        340,
-        380
-      ],
-      "chain": "tail",
-      "chainIndex": 1
-    },
-    {
-      "id": "tail_b2",
-      "parent": "tail_b1",
-      "pivot": [
-        352,
-        378
-      ],
-      "chain": "tail",
-      "chainIndex": 2
-    },
-    {
-      "id": "tail_b3",
-      "parent": "tail_b2",
-      "pivot": [
-        364,
-        380
-      ],
-      "chain": "tail",
-      "chainIndex": 3
-    }
+    {"id": "root", "parent": null, "pivot": [250, 492]},
+    {"id": "body", "parent": "root", "pivot": [250, 430]},
+    {"id": "neck", "parent": "body", "pivot": [247, 292]},
+    {"id": "head", "parent": "neck", "pivot": [247, 288]},
+    {"id": "arm_l", "parent": "body", "pivot": [186, 334]},
+    {"id": "arm_r", "parent": "body", "pivot": [308, 334]},
+    {"id": "tail_b0", "parent": "body", "pivot": [326, 382], "chain": "tail", "chainIndex": 0},
+    {"id": "tail_b1", "parent": "tail_b0", "pivot": [340, 380], "chain": "tail", "chainIndex": 1},
+    {"id": "tail_b2", "parent": "tail_b1", "pivot": [352, 378], "chain": "tail", "chainIndex": 2},
+    {"id": "tail_b3", "parent": "tail_b2", "pivot": [364, 380], "chain": "tail", "chainIndex": 3}
   ],
   "chains": {
     "tail": {
       "driver": "tailSwing",
       "amplitudeDeg": 11.0,
-      "distribution": [
-        1.0,
-        0.85,
-        0.7,
-        0.55
-      ],
-      "spring": {
-        "stiffness": 84.0,
-        "dampingRatio": 0.42,
-        "lagPerSegmentMs": 26.0,
-        "maxDeg": 10.0
-      },
+      "distribution": [1.0, 0.85, 0.7, 0.55],
+      "spring": {"stiffness": 84.0, "dampingRatio": 0.42, "lagPerSegmentMs": 26.0, "maxDeg": 10.0},
       "deform": "strips",
-      "bones": [
-        "tail_b0",
-        "tail_b1",
-        "tail_b2",
-        "tail_b3"
-      ],
-      "segmentParams": [
-        "tail0",
-        "tail1",
-        "tail2",
-        "tail3"
-      ]
+      "bones": ["tail_b0", "tail_b1", "tail_b2", "tail_b3"],
+      "segmentParams": ["tail0", "tail1", "tail2", "tail3"]
     }
   },
   "parts": [
@@ -251,16 +62,8 @@
       "file": "parts/tail_0.png",
       "z": 11,
       "bone": "tail_b0",
-      "rect": [
-        296,
-        362,
-        56,
-        44
-      ],
-      "pivot": [
-        326.0,
-        382.0
-      ],
+      "rect": [296, 362, 56, 44],
+      "pivot": [326.0, 382.0],
       "hitGroup": "tail"
     },
     {
@@ -268,16 +71,8 @@
       "file": "parts/tail_1.png",
       "z": 12,
       "bone": "tail_b1",
-      "rect": [
-        324,
-        358,
-        32,
-        46
-      ],
-      "pivot": [
-        340.0,
-        380.0
-      ],
+      "rect": [324, 358, 32, 46],
+      "pivot": [340.0, 380.0],
       "hitGroup": "tail"
     },
     {
@@ -285,16 +80,8 @@
       "file": "parts/tail_2.png",
       "z": 13,
       "bone": "tail_b2",
-      "rect": [
-        336,
-        348,
-        30,
-        56
-      ],
-      "pivot": [
-        352.0,
-        378.0
-      ],
+      "rect": [336, 348, 30, 56],
+      "pivot": [352.0, 378.0],
       "hitGroup": "tail"
     },
     {
@@ -302,38 +89,19 @@
       "file": "parts/tail_3.png",
       "z": 14,
       "bone": "tail_b3",
-      "rect": [
-        346,
-        338,
-        74,
-        90
-      ],
-      "pivot": [
-        364.0,
-        380.0
-      ],
+      "rect": [346, 338, 74, 90],
+      "pivot": [364.0, 380.0],
       "hitGroup": "tail",
       "strips": 6,
-      "stripBones": [
-        "tail_b2",
-        "tail_b3"
-      ]
+      "stripBones": ["tail_b2", "tail_b3"]
     },
     {
       "id": "hair_back",
       "file": "parts/hair_back.png",
       "z": 10,
       "bone": "head",
-      "rect": [
-        91,
-        40,
-        329,
-        405
-      ],
-      "pivot": [
-        247.0,
-        268.0
-      ],
+      "rect": [91, 40, 329, 405],
+      "pivot": [247.0, 268.0],
       "hitGroup": "hair"
     },
     {
@@ -341,16 +109,8 @@
       "file": "parts/neck.png",
       "z": 18,
       "bone": "neck",
-      "rect": [
-        210,
-        274,
-        76,
-        40
-      ],
-      "pivot": [
-        247.0,
-        292.0
-      ],
+      "rect": [210, 274, 76, 40],
+      "pivot": [247.0, 292.0],
       "hitGroup": "body"
     },
     {
@@ -358,16 +118,8 @@
       "file": "parts/body.png",
       "z": 20,
       "bone": "body",
-      "rect": [
-        157,
-        284,
-        202,
-        209
-      ],
-      "pivot": [
-        258.0,
-        388.5
-      ],
+      "rect": [157, 284, 202, 209],
+      "pivot": [258.0, 388.5],
       "hitGroup": "body"
     },
     {
@@ -375,16 +127,8 @@
       "file": "parts/apron.png",
       "z": 24,
       "bone": "body",
-      "rect": [
-        186,
-        338,
-        125,
-        92
-      ],
-      "pivot": [
-        248.5,
-        384.0
-      ],
+      "rect": [186, 338, 125, 92],
+      "pivot": [248.5, 384.0],
       "hitGroup": "body"
     },
     {
@@ -392,16 +136,8 @@
       "file": "parts/arm_l.png",
       "z": 30,
       "bone": "arm_l",
-      "rect": [
-        148,
-        316,
-        54,
-        75
-      ],
-      "pivot": [
-        175.0,
-        353.5
-      ],
+      "rect": [148, 316, 54, 75],
+      "pivot": [175.0, 353.5],
       "hitGroup": "arm"
     },
     {
@@ -409,16 +145,8 @@
       "file": "parts/arm_r.png",
       "z": 31,
       "bone": "arm_r",
-      "rect": [
-        292,
-        316,
-        55,
-        75
-      ],
-      "pivot": [
-        319.5,
-        353.5
-      ],
+      "rect": [292, 316, 55, 75],
+      "pivot": [319.5, 353.5],
       "hitGroup": "arm"
     },
     {
@@ -426,16 +154,8 @@
       "file": "parts/head.png",
       "z": 40,
       "bone": "head",
-      "rect": [
-        177,
-        168,
-        141,
-        133
-      ],
-      "pivot": [
-        247.0,
-        288.0
-      ],
+      "rect": [177, 168, 141, 133],
+      "pivot": [247.0, 288.0],
       "hitGroup": "head"
     },
     {
@@ -443,16 +163,8 @@
       "file": "parts/cheek_l.png",
       "z": 42,
       "bone": "head",
-      "rect": [
-        183,
-        252,
-        29,
-        19
-      ],
-      "pivot": [
-        197.5,
-        261.5
-      ],
+      "rect": [183, 252, 29, 19],
+      "pivot": [197.5, 261.5],
       "hitGroup": "cheek"
     },
     {
@@ -460,16 +172,8 @@
       "file": "parts/cheek_r.png",
       "z": 43,
       "bone": "head",
-      "rect": [
-        283,
-        252,
-        29,
-        19
-      ],
-      "pivot": [
-        297.5,
-        261.5
-      ],
+      "rect": [283, 252, 29, 19],
+      "pivot": [297.5, 261.5],
       "hitGroup": "cheek"
     },
     {
@@ -477,16 +181,8 @@
       "file": "parts/eye_l.png",
       "z": 44,
       "bone": "head",
-      "rect": [
-        189,
-        214,
-        55,
-        45
-      ],
-      "pivot": [
-        216.5,
-        236.5
-      ],
+      "rect": [189, 214, 55, 45],
+      "pivot": [216.5, 236.5],
       "hitGroup": "head"
     },
     {
@@ -494,16 +190,8 @@
       "file": "parts/eye_r.png",
       "z": 45,
       "bone": "head",
-      "rect": [
-        257,
-        214,
-        55,
-        45
-      ],
-      "pivot": [
-        284.5,
-        236.5
-      ],
+      "rect": [257, 214, 55, 45],
+      "pivot": [284.5, 236.5],
       "hitGroup": "head"
     },
     {
@@ -511,16 +199,8 @@
       "file": "parts/eye_l_lid.png",
       "z": 46,
       "bone": "head",
-      "rect": [
-        188,
-        214,
-        57,
-        51
-      ],
-      "pivot": [
-        216.0,
-        212.0
-      ],
+      "rect": [188, 214, 57, 51],
+      "pivot": [216.0, 212.0],
       "hitGroup": "head"
     },
     {
@@ -528,16 +208,8 @@
       "file": "parts/eye_r_lid.png",
       "z": 47,
       "bone": "head",
-      "rect": [
-        256,
-        214,
-        57,
-        51
-      ],
-      "pivot": [
-        284.0,
-        212.0
-      ],
+      "rect": [256, 214, 57, 51],
+      "pivot": [284.0, 212.0],
       "hitGroup": "head"
     },
     {
@@ -545,16 +217,8 @@
       "file": "parts/mouth.png",
       "z": 48,
       "bone": "head",
-      "rect": [
-        228,
-        260,
-        22,
-        18
-      ],
-      "pivot": [
-        238.0,
-        262.0
-      ],
+      "rect": [228, 260, 22, 18],
+      "pivot": [238.0, 262.0],
       "hitGroup": "head"
     },
     {
@@ -562,16 +226,8 @@
       "file": "parts/hair_front.png",
       "z": 50,
       "bone": "head",
-      "rect": [
-        132,
-        88,
-        286,
-        173
-      ],
-      "pivot": [
-        247.0,
-        250.0
-      ],
+      "rect": [132, 88, 286, 173],
+      "pivot": [247.0, 250.0],
       "hitGroup": "hair"
     },
     {
@@ -579,281 +235,62 @@
       "file": "parts/headdress.png",
       "z": 55,
       "bone": "head",
-      "rect": [
-        131,
-        62,
-        236,
-        127
-      ],
-      "pivot": [
-        247.0,
-        220.0
-      ],
+      "rect": [131, 62, 236, 127],
+      "pivot": [247.0, 220.0],
       "hitGroup": "head"
     }
   ],
   "bindings": [
-    {
-      "param": "headAngleZ",
-      "bone": "head",
-      "channel": "rotate",
-      "gain": 1.0
-    },
-    {
-      "param": "headAngleY",
-      "bone": "head",
-      "channel": "rotate",
-      "gain": 0.16
-    },
-    {
-      "param": "headAngleY",
-      "bone": "head",
-      "channel": "translateX",
-      "gain": 0.22
-    },
-    {
-      "param": "headAngleY",
-      "bone": "body",
-      "channel": "rotate",
-      "gain": -0.05
-    },
-    {
-      "param": "headAngleX",
-      "bone": "head",
-      "channel": "translateY",
-      "gain": 0.3
-    },
-    {
-      "param": "bodyAngleY",
-      "bone": "body",
-      "channel": "rotate",
-      "gain": 0.5
-    },
-    {
-      "param": "bodyAngleZ",
-      "bone": "body",
-      "channel": "rotate",
-      "gain": 1.0
-    },
-    {
-      "param": "rootLeanZ",
-      "bone": "root",
-      "channel": "rotate",
-      "gain": 1.0
-    },
-    {
-      "param": "rootBobY",
-      "bone": "root",
-      "channel": "translateY",
-      "gain": 1.0
-    },
-    {
-      "param": "breath",
-      "bone": "body",
-      "channel": "scaleY",
-      "gain": 0.012,
-      "bias": 1.0
-    },
-    {
-      "param": "breath",
-      "bone": "head",
-      "channel": "translateY",
-      "gain": 0.8
-    },
-    {
-      "param": "hairSway",
-      "part": "hair_back",
-      "channel": "rotate",
-      "gain": 1.0
-    },
-    {
-      "param": "armSwingL",
-      "bone": "arm_l",
-      "channel": "rotate",
-      "gain": 1.0
-    },
-    {
-      "param": "armSwingR",
-      "bone": "arm_r",
-      "channel": "rotate",
-      "gain": 1.0
-    },
-    {
-      "param": "eyeBallX",
-      "part": "eye_l",
-      "channel": "translateX",
-      "gain": 2.2
-    },
-    {
-      "param": "eyeBallX",
-      "part": "eye_r",
-      "channel": "translateX",
-      "gain": 2.2
-    },
-    {
-      "param": "eyeBallY",
-      "part": "eye_l",
-      "channel": "translateY",
-      "gain": 1.6
-    },
-    {
-      "param": "eyeBallY",
-      "part": "eye_r",
-      "channel": "translateY",
-      "gain": 1.6
-    },
-    {
-      "param": "eyeOpen",
-      "part": "eye_l_lid",
-      "channel": "scaleY",
-      "curve": [
-        [
-          0.0,
-          1.0
-        ],
-        [
-          1.0,
-          0.0
-        ]
-      ]
-    },
-    {
-      "param": "eyeOpen",
-      "part": "eye_r_lid",
-      "channel": "scaleY",
-      "curve": [
-        [
-          0.0,
-          1.0
-        ],
-        [
-          1.0,
-          0.0
-        ]
-      ]
-    },
-    {
-      "param": "mouthOpen",
-      "part": "mouth",
-      "channel": "scaleY",
-      "curve": [
-        [
-          0.0,
-          1.0
-        ],
-        [
-          0.5,
-          1.6
-        ],
-        [
-          1.0,
-          2.3
-        ]
-      ]
-    },
-    {
-      "param": "cheekSquash",
-      "part": "cheek_l",
-      "channel": "scaleX",
-      "gain": 0.25,
-      "bias": 1.0
-    },
-    {
-      "param": "cheekSquash",
-      "part": "cheek_l",
-      "channel": "scaleY",
-      "gain": -0.2,
-      "bias": 1.0
-    },
-    {
-      "param": "cheekSquash",
-      "part": "cheek_r",
-      "channel": "scaleX",
-      "gain": 0.25,
-      "bias": 1.0
-    },
-    {
-      "param": "cheekSquash",
-      "part": "cheek_r",
-      "channel": "scaleY",
-      "gain": -0.2,
-      "bias": 1.0
-    },
-    {
-      "param": "tail0",
-      "bone": "tail_b0",
-      "channel": "rotate",
-      "gain": 1.0
-    },
-    {
-      "param": "tail1",
-      "bone": "tail_b1",
-      "channel": "rotate",
-      "gain": 1.0
-    },
-    {
-      "param": "tail2",
-      "bone": "tail_b2",
-      "channel": "rotate",
-      "gain": 1.0
-    },
-    {
-      "param": "tail3",
-      "bone": "tail_b3",
-      "channel": "rotate",
-      "gain": 1.0
-    }
+    {"param": "headAngleZ", "bone": "head", "channel": "rotate", "gain": 1.0},
+    {"param": "headAngleY", "bone": "head", "channel": "rotate", "gain": 0.16},
+    {"param": "headAngleY", "bone": "head", "channel": "translateX", "gain": 0.22},
+    {"param": "headAngleY", "bone": "body", "channel": "rotate", "gain": -0.05},
+    {"param": "headAngleX", "bone": "head", "channel": "translateY", "gain": 0.3},
+    {"param": "bodyAngleY", "bone": "body", "channel": "rotate", "gain": 0.5},
+    {"param": "bodyAngleZ", "bone": "body", "channel": "rotate", "gain": 1.0},
+    {"param": "rootLeanZ", "bone": "root", "channel": "rotate", "gain": 1.0},
+    {"param": "rootBobY", "bone": "root", "channel": "translateY", "gain": 1.0},
+    {"param": "breath", "bone": "body", "channel": "scaleY", "gain": 0.012, "bias": 1.0},
+    {"param": "breath", "bone": "head", "channel": "translateY", "gain": 0.8},
+    {"param": "hairSway", "part": "hair_back", "channel": "rotate", "gain": 1.0},
+    {"param": "armSwingL", "bone": "arm_l", "channel": "rotate", "gain": 1.0},
+    {"param": "armSwingR", "bone": "arm_r", "channel": "rotate", "gain": 1.0},
+    {"param": "eyeBallX", "part": "eye_l", "channel": "translateX", "gain": 2.2},
+    {"param": "eyeBallX", "part": "eye_r", "channel": "translateX", "gain": 2.2},
+    {"param": "eyeBallY", "part": "eye_l", "channel": "translateY", "gain": 1.6},
+    {"param": "eyeBallY", "part": "eye_r", "channel": "translateY", "gain": 1.6},
+    {"param": "eyeOpen", "part": "eye_l_lid", "channel": "scaleY", "curve": [[0.0, 1.0], [1.0, 0.0]]},
+    {"param": "eyeOpen", "part": "eye_r_lid", "channel": "scaleY", "curve": [[0.0, 1.0], [1.0, 0.0]]},
+    {"param": "mouthOpen", "part": "mouth", "channel": "scaleY", "curve": [[0.0, 1.0], [0.5, 1.6], [1.0, 2.3]]},
+    {"param": "cheekSquash", "part": "cheek_l", "channel": "scaleX", "gain": 0.25, "bias": 1.0},
+    {"param": "cheekSquash", "part": "cheek_l", "channel": "scaleY", "gain": -0.2, "bias": 1.0},
+    {"param": "cheekSquash", "part": "cheek_r", "channel": "scaleX", "gain": 0.25, "bias": 1.0},
+    {"param": "cheekSquash", "part": "cheek_r", "channel": "scaleY", "gain": -0.2, "bias": 1.0},
+    {"param": "tail0", "bone": "tail_b0", "channel": "rotate", "gain": 1.0},
+    {"param": "tail1", "bone": "tail_b1", "channel": "rotate", "gain": 1.0},
+    {"param": "tail2", "bone": "tail_b2", "channel": "rotate", "gain": 1.0},
+    {"param": "tail3", "bone": "tail_b3", "channel": "rotate", "gain": 1.0}
   ],
   "clips": {
     "idle": {
       "loop": true,
       "motion": "breathe",
-      "frames": [
-        "baked/idle/idle_00.png",
-        "baked/idle/idle_01.png",
-        "baked/idle/idle_02.png",
-        "baked/idle/idle_03.png",
-        "baked/idle/idle_04.png",
-        "baked/idle/idle_05.png",
-        "baked/idle/idle_06.png",
-        "baked/idle/idle_07.png",
-        "baked/idle/idle_08.png",
-        "baked/idle/idle_09.png",
-        "baked/idle/idle_10.png",
-        "baked/idle/idle_11.png",
-        "baked/idle/idle_12.png",
-        "baked/idle/idle_13.png",
-        "baked/idle/idle_14.png",
-        "baked/idle/idle_15.png"
-      ],
-      "frameMs": 110
+      "oscillators": [
+        {"param": "breath", "wave": "sin", "periodMs": 3600, "amplitude": 0.6},
+        {"param": "tailSwing", "wave": "sin", "periodMs": 2600, "amplitude": 0.5}
+      ]
     },
     "thinking": {
       "loop": true,
       "motion": "think",
-      "frames": [
-        "baked/thinking/thinking_00.png",
-        "baked/thinking/thinking_01.png",
-        "baked/thinking/thinking_02.png",
-        "baked/thinking/thinking_03.png",
-        "baked/thinking/thinking_04.png",
-        "baked/thinking/thinking_05.png",
-        "baked/thinking/thinking_06.png",
-        "baked/thinking/thinking_07.png",
-        "baked/thinking/thinking_08.png",
-        "baked/thinking/thinking_09.png",
-        "baked/thinking/thinking_10.png",
-        "baked/thinking/thinking_11.png",
-        "baked/thinking/thinking_12.png",
-        "baked/thinking/thinking_13.png",
-        "baked/thinking/thinking_14.png",
-        "baked/thinking/thinking_15.png"
-      ],
-      "frameMs": 110
+      "oscillators": [
+        {"param": "breath", "wave": "sin", "periodMs": 2800, "amplitude": 0.5},
+        {"param": "tailSwing", "wave": "sin", "periodMs": 3000, "amplitude": 0.35},
+        {"param": "headAngleZ", "wave": "sin", "periodMs": 5200, "amplitude": 3.5}
+      ]
     },
     "working": {
       "loop": true,
-      "motion": "work",
       "frames": [
         "baked/working/working_00.png",
         "baked/working/working_01.png",
@@ -872,11 +309,11 @@
         "baked/working/working_14.png",
         "baked/working/working_15.png"
       ],
-      "frameMs": 110
+      "frameMs": 110,
+      "motion": "work"
     },
     "eat_token": {
       "loop": true,
-      "motion": "work",
       "frames": [
         "baked/eat_token/eat_token_00.png",
         "baked/eat_token/eat_token_01.png",
@@ -895,11 +332,11 @@
         "baked/eat_token/eat_token_14.png",
         "baked/eat_token/eat_token_15.png"
       ],
-      "frameMs": 120
+      "frameMs": 120,
+      "motion": "work"
     },
     "working_search": {
       "loop": true,
-      "motion": "work",
       "frames": [
         "baked/working_search/working_search_00.png",
         "baked/working_search/working_search_01.png",
@@ -918,11 +355,11 @@
         "baked/working_search/working_search_14.png",
         "baked/working_search/working_search_15.png"
       ],
-      "frameMs": 110
+      "frameMs": 110,
+      "motion": "work"
     },
     "working_command": {
       "loop": true,
-      "motion": "work",
       "frames": [
         "baked/working_command/working_command_00.png",
         "baked/working_command/working_command_01.png",
@@ -941,73 +378,30 @@
         "baked/working_command/working_command_14.png",
         "baked/working_command/working_command_15.png"
       ],
-      "frameMs": 110
+      "frameMs": 110,
+      "motion": "work"
     },
     "waiting": {
       "loop": true,
-      "frames": [
-        "baked/waiting/waiting_00.png",
-        "baked/waiting/waiting_01.png",
-        "baked/waiting/waiting_02.png",
-        "baked/waiting/waiting_03.png",
-        "baked/waiting/waiting_04.png",
-        "baked/waiting/waiting_05.png",
-        "baked/waiting/waiting_06.png",
-        "baked/waiting/waiting_07.png",
-        "baked/waiting/waiting_08.png",
-        "baked/waiting/waiting_09.png",
-        "baked/waiting/waiting_10.png",
-        "baked/waiting/waiting_11.png",
-        "baked/waiting/waiting_12.png",
-        "baked/waiting/waiting_13.png",
-        "baked/waiting/waiting_14.png",
-        "baked/waiting/waiting_15.png"
-      ],
-      "frameMs": 110
+      "oscillators": [
+        {"param": "breath", "wave": "sin", "periodMs": 3000, "amplitude": 0.5},
+        {"param": "tailSwing", "wave": "sin", "periodMs": 3400, "amplitude": 0.3}
+      ]
     },
     "success": {
       "loop": true,
-      "frames": [
-        "baked/success/success_00.png",
-        "baked/success/success_01.png",
-        "baked/success/success_02.png",
-        "baked/success/success_03.png",
-        "baked/success/success_04.png",
-        "baked/success/success_05.png",
-        "baked/success/success_06.png",
-        "baked/success/success_07.png",
-        "baked/success/success_08.png",
-        "baked/success/success_09.png",
-        "baked/success/success_10.png",
-        "baked/success/success_11.png",
-        "baked/success/success_12.png",
-        "baked/success/success_13.png",
-        "baked/success/success_14.png",
-        "baked/success/success_15.png"
-      ],
-      "frameMs": 110
+      "oscillators": [
+        {"param": "breath", "wave": "sin", "periodMs": 900, "amplitude": 1.0},
+        {"param": "tailSwing", "wave": "sin", "periodMs": 900, "amplitude": 1.0},
+        {"param": "rootBobY", "wave": "sin", "periodMs": 900, "amplitude": 3.0}
+      ]
     },
     "error": {
       "loop": true,
-      "frames": [
-        "baked/error/error_00.png",
-        "baked/error/error_01.png",
-        "baked/error/error_02.png",
-        "baked/error/error_03.png",
-        "baked/error/error_04.png",
-        "baked/error/error_05.png",
-        "baked/error/error_06.png",
-        "baked/error/error_07.png",
-        "baked/error/error_08.png",
-        "baked/error/error_09.png",
-        "baked/error/error_10.png",
-        "baked/error/error_11.png",
-        "baked/error/error_12.png",
-        "baked/error/error_13.png",
-        "baked/error/error_14.png",
-        "baked/error/error_15.png"
-      ],
-      "frameMs": 110
+      "oscillators": [
+        {"param": "breath", "wave": "sin", "periodMs": 2600, "amplitude": 0.4},
+        {"param": "headAngleZ", "wave": "sin", "periodMs": 320, "amplitude": 2.5}
+      ]
     },
     "error_dizzy": {
       "loop": true,
@@ -1054,415 +448,105 @@
       "frameMs": 110
     },
     "blink": {
-      "loop": true,
+      "loop": false,
       "durationMs": 240,
-      "envelope": {
-        "attackMs": 60,
-        "holdMs": 40,
-        "decayMs": 120
-      },
+      "envelope": {"attackMs": 60, "holdMs": 40, "decayMs": 120},
       "tracks": [
         {
           "param": "eyeOpen",
           "blend": "override",
           "interp": "linear",
-          "keys": [
-            [
-              0,
-              1.0
-            ],
-            [
-              90,
-              0.0
-            ],
-            [
-              140,
-              0.0
-            ],
-            [
-              240,
-              1.0
-            ]
-          ]
+          "keys": [[0, 1.0], [90, 0.0], [140, 0.0], [240, 1.0]]
         }
-      ],
-      "frames": [
-        "baked/blink/blink_00.png",
-        "baked/blink/blink_01.png",
-        "baked/blink/blink_02.png",
-        "baked/blink/blink_03.png",
-        "baked/blink/blink_04.png",
-        "baked/blink/blink_05.png",
-        "baked/blink/blink_06.png",
-        "baked/blink/blink_07.png",
-        "baked/blink/blink_08.png",
-        "baked/blink/blink_09.png",
-        "baked/blink/blink_10.png",
-        "baked/blink/blink_11.png",
-        "baked/blink/blink_12.png",
-        "baked/blink/blink_13.png",
-        "baked/blink/blink_14.png",
-        "baked/blink/blink_15.png"
-      ],
-      "frameMs": 110
+      ]
     },
     "glance": {
-      "loop": true,
+      "loop": false,
       "durationMs": 900,
-      "envelope": {
-        "attackMs": 160,
-        "holdMs": 260,
-        "decayMs": 320
-      },
+      "envelope": {"attackMs": 160, "holdMs": 260, "decayMs": 320},
       "tracks": [
         {
           "param": "eyeBallX",
           "blend": "add",
           "interp": "smooth",
-          "keys": [
-            [
-              0,
-              0.0
-            ],
-            [
-              260,
-              0.7
-            ],
-            [
-              620,
-              0.7
-            ],
-            [
-              900,
-              0.0
-            ]
-          ]
+          "keys": [[0, 0.0], [260, 0.7], [620, 0.7], [900, 0.0]]
         },
         {
           "param": "headAngleY",
           "blend": "add",
           "interp": "smooth",
-          "keys": [
-            [
-              0,
-              0.0
-            ],
-            [
-              300,
-              4.0
-            ],
-            [
-              620,
-              4.0
-            ],
-            [
-              900,
-              0.0
-            ]
-          ]
+          "keys": [[0, 0.0], [300, 4.0], [620, 4.0], [900, 0.0]]
         }
-      ],
-      "frames": [
-        "baked/glance/glance_00.png",
-        "baked/glance/glance_01.png",
-        "baked/glance/glance_02.png",
-        "baked/glance/glance_03.png",
-        "baked/glance/glance_04.png",
-        "baked/glance/glance_05.png",
-        "baked/glance/glance_06.png",
-        "baked/glance/glance_07.png",
-        "baked/glance/glance_08.png",
-        "baked/glance/glance_09.png",
-        "baked/glance/glance_10.png",
-        "baked/glance/glance_11.png",
-        "baked/glance/glance_12.png",
-        "baked/glance/glance_13.png",
-        "baked/glance/glance_14.png",
-        "baked/glance/glance_15.png"
-      ],
-      "frameMs": 110
+      ]
     },
     "head_pat": {
-      "loop": true,
+      "loop": false,
       "durationMs": 520,
-      "envelope": {
-        "attackMs": 90,
-        "holdMs": 120,
-        "decayMs": 200
-      },
+      "envelope": {"attackMs": 90, "holdMs": 120, "decayMs": 200},
       "tracks": [
         {
           "param": "headAngleZ",
           "blend": "add",
           "interp": "smooth",
-          "keys": [
-            [
-              0,
-              0.0
-            ],
-            [
-              180,
-              -5.0
-            ],
-            [
-              340,
-              3.0
-            ],
-            [
-              520,
-              0.0
-            ]
-          ]
+          "keys": [[0, 0.0], [180, -5.0], [340, 3.0], [520, 0.0]]
         },
         {
           "param": "eyeOpen",
           "blend": "override",
           "interp": "linear",
-          "keys": [
-            [
-              0,
-              1.0
-            ],
-            [
-              160,
-              0.2
-            ],
-            [
-              380,
-              0.2
-            ],
-            [
-              520,
-              1.0
-            ]
-          ]
+          "keys": [[0, 1.0], [160, 0.2], [380, 0.2], [520, 1.0]]
         },
-        {
-          "param": "mouthOpen",
-          "blend": "add",
-          "interp": "smooth",
-          "keys": [
-            [
-              0,
-              0.0
-            ],
-            [
-              200,
-              0.45
-            ],
-            [
-              520,
-              0.0
-            ]
-          ]
-        }
-      ],
-      "frames": [
-        "baked/head_pat/head_pat_00.png",
-        "baked/head_pat/head_pat_01.png",
-        "baked/head_pat/head_pat_02.png",
-        "baked/head_pat/head_pat_03.png",
-        "baked/head_pat/head_pat_04.png",
-        "baked/head_pat/head_pat_05.png",
-        "baked/head_pat/head_pat_06.png",
-        "baked/head_pat/head_pat_07.png",
-        "baked/head_pat/head_pat_08.png",
-        "baked/head_pat/head_pat_09.png",
-        "baked/head_pat/head_pat_10.png",
-        "baked/head_pat/head_pat_11.png",
-        "baked/head_pat/head_pat_12.png",
-        "baked/head_pat/head_pat_13.png",
-        "baked/head_pat/head_pat_14.png",
-        "baked/head_pat/head_pat_15.png"
-      ],
-      "frameMs": 110
+        {"param": "mouthOpen", "blend": "add", "interp": "smooth", "keys": [[0, 0.0], [200, 0.45], [520, 0.0]]}
+      ]
     },
     "poke": {
-      "loop": true,
+      "loop": false,
       "durationMs": 360,
-      "envelope": {
-        "attackMs": 60,
-        "holdMs": 60,
-        "decayMs": 180
-      },
+      "envelope": {"attackMs": 60, "holdMs": 60, "decayMs": 180},
       "tracks": [
-        {
-          "param": "cheekSquash",
-          "blend": "add",
-          "interp": "smooth",
-          "keys": [
-            [
-              0,
-              0.0
-            ],
-            [
-              110,
-              0.85
-            ],
-            [
-              360,
-              0.0
-            ]
-          ]
-        },
-        {
-          "param": "mouthOpen",
-          "blend": "add",
-          "interp": "smooth",
-          "keys": [
-            [
-              0,
-              0.0
-            ],
-            [
-              110,
-              0.6
-            ],
-            [
-              360,
-              0.0
-            ]
-          ]
-        },
-        {
-          "param": "headAngleX",
-          "blend": "add",
-          "interp": "smooth",
-          "keys": [
-            [
-              0,
-              0.0
-            ],
-            [
-              110,
-              -3.0
-            ],
-            [
-              360,
-              0.0
-            ]
-          ]
-        }
-      ],
-      "frames": [
-        "baked/poke/poke_00.png",
-        "baked/poke/poke_01.png",
-        "baked/poke/poke_02.png",
-        "baked/poke/poke_03.png",
-        "baked/poke/poke_04.png",
-        "baked/poke/poke_05.png",
-        "baked/poke/poke_06.png",
-        "baked/poke/poke_07.png",
-        "baked/poke/poke_08.png",
-        "baked/poke/poke_09.png",
-        "baked/poke/poke_10.png",
-        "baked/poke/poke_11.png",
-        "baked/poke/poke_12.png",
-        "baked/poke/poke_13.png",
-        "baked/poke/poke_14.png",
-        "baked/poke/poke_15.png"
-      ],
-      "frameMs": 110
+        {"param": "cheekSquash", "blend": "add", "interp": "smooth", "keys": [[0, 0.0], [110, 0.85], [360, 0.0]]},
+        {"param": "mouthOpen", "blend": "add", "interp": "smooth", "keys": [[0, 0.0], [110, 0.6], [360, 0.0]]},
+        {"param": "headAngleX", "blend": "add", "interp": "smooth", "keys": [[0, 0.0], [110, -3.0], [360, 0.0]]}
+      ]
     },
     "tail": {
-      "loop": true,
+      "loop": false,
       "durationMs": 420,
-      "envelope": {
-        "attackMs": 50,
-        "holdMs": 60,
-        "decayMs": 260
-      },
+      "envelope": {"attackMs": 50, "holdMs": 60, "decayMs": 260},
       "tracks": [
         {
           "param": "tail3",
           "blend": "add",
           "interp": "smooth",
-          "keys": [
-            [
-              0,
-              0.0
-            ],
-            [
-              120,
-              10.0
-            ],
-            [
-              260,
-              -6.0
-            ],
-            [
-              420,
-              0.0
-            ]
-          ]
+          "keys": [[0, 0.0], [120, 10.0], [260, -6.0], [420, 0.0]]
         },
         {
           "param": "tail2",
           "blend": "add",
           "interp": "smooth",
-          "keys": [
-            [
-              0,
-              0.0
-            ],
-            [
-              140,
-              6.0
-            ],
-            [
-              280,
-              -3.0
-            ],
-            [
-              420,
-              0.0
-            ]
-          ]
+          "keys": [[0, 0.0], [140, 6.0], [280, -3.0], [420, 0.0]]
         },
         {
           "param": "eyeOpen",
           "blend": "override",
           "interp": "linear",
-          "keys": [
-            [
-              0,
-              1.0
-            ],
-            [
-              120,
-              0.35
-            ],
-            [
-              300,
-              0.35
-            ],
-            [
-              420,
-              1.0
-            ]
-          ]
+          "keys": [[0, 1.0], [120, 0.35], [300, 0.35], [420, 1.0]]
         }
-      ],
-      "frames": [
-        "baked/tail/tail_00.png",
-        "baked/tail/tail_01.png",
-        "baked/tail/tail_02.png",
-        "baked/tail/tail_03.png",
-        "baked/tail/tail_04.png",
-        "baked/tail/tail_05.png",
-        "baked/tail/tail_06.png",
-        "baked/tail/tail_07.png",
-        "baked/tail/tail_08.png",
-        "baked/tail/tail_09.png",
-        "baked/tail/tail_10.png",
-        "baked/tail/tail_11.png",
-        "baked/tail/tail_12.png",
-        "baked/tail/tail_13.png",
-        "baked/tail/tail_14.png",
-        "baked/tail/tail_15.png"
-      ],
-      "frameMs": 110
-    }
+      ]
+    },
+    "taunt_token_jab": {"loop": false, "durationMs": 1700},
+    "smug_zako": {"loop": false, "durationMs": 1700},
+    "slack_off": {"loop": true, "motion": "wait"},
+    "love_heart_hands": {"loop": false, "durationMs": 1700},
+    "dash_run": {"loop": true},
+    "sulk_pout": {"loop": false, "durationMs": 1700},
+    "soul_leaving": {"loop": false, "durationMs": 1900},
+    "salute_roger": {"loop": false, "durationMs": 1500},
+    "plead_kneel": {"loop": false, "durationMs": 1900},
+    "confused_question": {"loop": false, "durationMs": 1700},
+    "relax_armchair": {"loop": true, "motion": "wait"},
+    "cry_wail": {"loop": false, "durationMs": 1900},
+    "idea_lightbulb": {"loop": false, "durationMs": 1500}
   },
   "stateMap": {
     "IDLE": "idle",
@@ -1480,101 +564,27 @@
     "testing": "working_command",
     "using-tool": "working"
   },
-  "idleMicroClips": [
-    "blink",
-    "glance"
-  ],
+  "idleMicroClips": ["blink", "glance"],
   "hitGroups": {
-    "head": [
-      "head",
-      "eye_l",
-      "eye_r",
-      "eye_l_lid",
-      "eye_r_lid",
-      "mouth",
-      "headdress"
-    ],
-    "hair": [
-      "hair_front",
-      "hair_back"
-    ],
-    "cheek": [
-      "cheek_l",
-      "cheek_r"
-    ],
-    "arm": [
-      "arm_l",
-      "arm_r"
-    ],
-    "body": [
-      "body",
-      "apron",
-      "neck"
-    ],
-    "tail": [
-      "tail_0",
-      "tail_1",
-      "tail_2",
-      "tail_3"
-    ]
+    "head": ["head", "eye_l", "eye_r", "eye_l_lid", "eye_r_lid", "mouth", "headdress"],
+    "hair": ["hair_front", "hair_back"],
+    "cheek": ["cheek_l", "cheek_r"],
+    "arm": ["arm_l", "arm_r"],
+    "body": ["body", "apron", "neck"],
+    "tail": ["tail_0", "tail_1", "tail_2", "tail_3"]
   },
   "interactions": {
-    "head": {
-      "clip": "head_pat",
-      "copy": "head_pat",
-      "impulse": {
-        "param": "headAngleZ",
-        "angularVel": 36.0
-      }
-    },
-    "hair": {
-      "clip": "head_pat",
-      "copy": "head_pat",
-      "impulse": {
-        "param": "hairSway",
-        "angularVel": 44.0
-      }
-    },
-    "cheek": {
-      "clip": "poke",
-      "copy": "poke",
-      "impulse": {
-        "param": "cheekSquash",
-        "squashVel": 3.0
-      }
-    },
-    "arm": {
-      "clip": "poke",
-      "copy": "poke",
-      "impulse": {
-        "param": "armSwingL",
-        "angularVel": 30.0
-      }
-    },
-    "body": {
-      "clip": "poke",
-      "copy": "poke",
-      "impulse": {
-        "param": "bodyAngleZ",
-        "angularVel": 22.0
-      }
-    },
-    "tail": {
-      "clip": "tail",
-      "copy": "tail",
-      "impulse": {
-        "chain": "tail",
-        "chainAngularVel": 180.0
-      }
-    }
+    "head": {"clip": "head_pat", "copy": "head_pat", "impulse": {"param": "headAngleZ", "angularVel": 36.0}},
+    "hair": {"clip": "head_pat", "copy": "head_pat", "impulse": {"param": "hairSway", "angularVel": 44.0}},
+    "cheek": {"clip": "poke", "copy": "poke", "impulse": {"param": "cheekSquash", "squashVel": 3.0}},
+    "arm": {"clip": "poke", "copy": "poke", "impulse": {"param": "armSwingL", "angularVel": 30.0}},
+    "body": {"clip": "poke", "copy": "poke", "impulse": {"param": "bodyAngleZ", "angularVel": 22.0}},
+    "tail": {"clip": "tail", "copy": "tail", "impulse": {"chain": "tail", "chainAngularVel": 180.0}}
   },
   "qa": {
     "master": "art-references/rig/chibi/master.png",
     "masterSha256": "1bd1e9fd5ac64460452d3f93f055aab447f538b32fb0b640741f1cf445ca2d20",
-    "restHiddenParts": [
-      "eye_l_lid",
-      "eye_r_lid"
-    ],
+    "restHiddenParts": ["eye_l_lid", "eye_r_lid"],
     "axisX": 247
   }
 }

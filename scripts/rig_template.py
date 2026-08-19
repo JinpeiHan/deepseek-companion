@@ -393,6 +393,28 @@ CLIPS: dict[str, dict] = {
     },
 }
 
+# Emoji actions, from the sticker set in pet-emoji/. These are performances
+# rather than states: nothing in stateMap routes to them, so they are played as
+# one-shot overlays. All of them are baked, because every one needs a prop, a
+# floor, or a whole-body pose the rig's standing master cannot deform into.
+EMOJI_CLIPS: dict[str, dict] = {
+    "taunt_token_jab": {"loop": False, "durationMs": 1700},
+    "smug_zako": {"loop": False, "durationMs": 1700},
+    "slack_off": {"loop": True, "motion": "wait"},
+    "love_heart_hands": {"loop": False, "durationMs": 1700},
+    "dash_run": {"loop": True},
+    "sulk_pout": {"loop": False, "durationMs": 1700},
+    "soul_leaving": {"loop": False, "durationMs": 1900},
+    "salute_roger": {"loop": False, "durationMs": 1500},
+    "plead_kneel": {"loop": False, "durationMs": 1900},
+    "confused_question": {"loop": False, "durationMs": 1700},
+    "relax_armchair": {"loop": True, "motion": "wait"},
+    "cry_wail": {"loop": False, "durationMs": 1900},
+    "idea_lightbulb": {"loop": False, "durationMs": 1500},
+}
+
+CLIPS.update(EMOJI_CLIPS)
+
 STATE_MAP: dict[str, str] = {
     "IDLE": "idle",
     "THINKING": "thinking",
