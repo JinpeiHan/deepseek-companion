@@ -191,55 +191,46 @@ test('live settings keep the active project state without restarting the helper'
   await rm(directory, { recursive: true, force: true })
 })
 
-test('an approval becomes a card the pet can answer, and a decision takes it down', () => {
-  const listeners = new Map()
+test('the pet registers as the user-questions provider and answers through it', async () => {
   const sent = []
   let onAnswer
+  let provider
   let dispose
-  const decided = []
-  const session = { header: { id: 's1' } }
   const ctx = {
     logger: { debug() {}, info() {}, warn() {}, error() {} },
-    on(name, callback) { listeners.set(name, callback) },
+    on() {},
     effect(setup) { dispose = setup() },
-    // ask_user_question consumes ctx.userInteraction, so this is the seam an
-    // answer travels back through.
-    userInteraction: { answer: (payload) => decided.push(payload) },
+    // ctx.userQuestions is a pull seam: the tool awaits the provider's ask().
+    userQuestions: {
+      registerProvider(candidate) {
+        provider = candidate
+        return () => { provider = undefined }
+      },
+    },
   }
-
-  // Capture what the plugin hands the helper without spawning one.
   const originalSend = HelperProcess.prototype.send
   const originalStart = HelperProcess.prototype.start
   HelperProcess.prototype.send = function (message) { sent.push(message) }
   HelperProcess.prototype.start = function () { onAnswer = this.onAnswer }
   try {
     apply(ctx, { helper: { headless: true } })
-    listeners.get('session/event')(session, {
-      type: 'approval/asked',
-      seq: 1,
-      data: { id: 'ap-1', toolName: 'bash', options: [{ value: 'y', label: '允许' }] },
+    assert.ok(provider, 'the pet registers itself as the provider')
+
+    const answered = provider.ask({
+      questions: [{
+        id: 'q1',
+        question: '用哪种方案？',
+        options: [{ label: '方案 A', description: '更快' }, { label: '方案 B' }],
+      }],
     })
     const ask = sent.find((m) => m.kind === 'ask')
-    assert.ok(ask, 'the approval reaches the pet as an ask')
-    assert.equal(ask.id, 'ap-1')
-    assert.deepEqual(ask.options, [{ value: 'y', label: '允许' }])
+    assert.ok(ask, 'the question reaches the pet')
+    assert.deepEqual(ask.options, [{ label: '方案 A', description: '更快' }, { label: '方案 B' }])
 
-    // The pet answers.
-    assert.equal(typeof onAnswer, 'function', 'the bridge exposes an answer callback')
-    onAnswer({ id: 'ap-1', value: 'y' })
-    assert.deepEqual(
-      decided,
-      [{ id: 'ap-1', selected: ['y'] }],
-      'the answer uses the shape ask_user_question expects: selected is an array',
-    )
-
-    // A decision made elsewhere clears the card.
-    listeners.get('session/event')(session, {
-      type: 'approval/decided',
-      seq: 2,
-      data: { id: 'ap-1' },
-    })
-    assert.ok(sent.some((m) => m.kind === 'ask-clear'), 'a decision elsewhere takes the card down')
+    onAnswer({ id: 'q1', value: '方案 A' })
+    // selected carries labels, which is what the host echoes back.
+    assert.deepEqual(await answered, { answers: [{ id: 'q1', selected: ['方案 A'] }] })
+    assert.ok(sent.some((m) => m.kind === 'ask-clear'), 'the card comes down once answered')
   } finally {
     HelperProcess.prototype.send = originalSend
     HelperProcess.prototype.start = originalStart
@@ -247,47 +238,56 @@ test('an approval becomes a card the pet can answer, and a decision takes it dow
   }
 })
 
-test('an ask_user_question tool call becomes a card in the bubble', () => {
-  const listeners = new Map()
-  const sent = []
+test('a question the bubble cannot show is declined rather than swallowed', async () => {
+  let provider
   let dispose
   const ctx = {
     logger: { debug() {}, info() {}, warn() {}, error() {} },
-    on(name, callback) { listeners.set(name, callback) },
+    on() {},
     effect(setup) { dispose = setup() },
+    userQuestions: { registerProvider(c) { provider = c; return () => {} } },
   }
-  const originalSend = HelperProcess.prototype.send
   const originalStart = HelperProcess.prototype.start
-  HelperProcess.prototype.send = function (message) { sent.push(message) }
   HelperProcess.prototype.start = function () {}
   try {
     apply(ctx, { helper: { headless: true } })
-    listeners.get('session/event')({ header: { id: 's' } }, {
-      type: 'tool/call',
-      seq: 1,
-      data: {
-        callId: 'c1',
-        name: 'ask_user_question',
-        arguments: {
-          questions: [{
-            id: 'q1',
-            question: '用哪种方案？',
-            options: [{ value: 'a', label: '方案 A' }, { value: 'b', label: '方案 B' }],
-          }],
-        },
-      },
-    })
-    const ask = sent.find((m) => m.kind === 'ask')
-    assert.ok(ask, 'the question reaches the pet')
-    assert.equal(ask.id, 'q1', 'answered against the question id the tool echoes back')
-    assert.equal(ask.options.length, 2)
-
-    listeners.get('session/event')({ header: { id: 's' } }, {
-      type: 'tool/result', seq: 2, data: { callId: 'q1' },
-    })
-    assert.ok(sent.some((m) => m.kind === 'ask-clear'), 'the result takes the card down')
+    // No options means nothing to click; declining lets the host fall back to a
+    // UI that can take free text.
+    await assert.rejects(provider.ask({ questions: [{ id: 'q', question: 'free text?' }] }))
+    // More than one question would need somewhere to queue.
+    await assert.rejects(provider.ask({
+      questions: [
+        { id: 'a', question: 'one', options: [{ label: 'x' }] },
+        { id: 'b', question: 'two', options: [{ label: 'y' }] },
+      ],
+    }))
   } finally {
-    HelperProcess.prototype.send = originalSend
+    HelperProcess.prototype.start = originalStart
+    if (typeof dispose === 'function') dispose()
+  }
+})
+
+test('a duplicate provider is reported, not fatal', () => {
+  const warnings = []
+  let dispose
+  const ctx = {
+    logger: { debug() {}, info() {}, warn: (m) => warnings.push(String(m)), error() {} },
+    on() {},
+    effect(setup) { dispose = setup() },
+    userQuestions: {
+      registerProvider() {
+        throw new Error('a user-questions provider is already registered')
+      },
+    },
+  }
+  const originalStart = HelperProcess.prototype.start
+  HelperProcess.prototype.start = function () {}
+  try {
+    // Only one provider may be active, so a richer UI winning is expected and
+    // must not stop the pet from mounting and showing states.
+    assert.doesNotThrow(() => apply(ctx, { helper: { headless: true } }))
+    assert.ok(warnings.some((w) => w.includes('already')), 'the clash is reported')
+  } finally {
     HelperProcess.prototype.start = originalStart
     if (typeof dispose === 'function') dispose()
   }

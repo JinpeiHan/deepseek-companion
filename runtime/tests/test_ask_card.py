@@ -14,8 +14,8 @@ class AskFromMessageTests(unittest.TestCase):
             "id": "approval-1",
             "question": "是否执行数据库迁移？",
             "options": [
-                {"value": "yes", "label": "执行迁移"},
-                {"value": "no", "label": "取消"},
+                {"label": "执行迁移"},
+                {"label": "取消", "description": "什么都不做"},
             ],
         }
         message.update(overrides)
@@ -25,20 +25,21 @@ class AskFromMessageTests(unittest.TestCase):
         ask = ask_from_message(self._message())
         self.assertIsNotNone(ask)
         self.assertEqual(ask["id"], "approval-1")
-        self.assertEqual([o["value"] for o in ask["options"]], ["yes", "no"])
+        # The label is the identity: it is what the host echoes back.
+        self.assertEqual([o["label"] for o in ask["options"]], ["执行迁移", "取消"])
 
     def test_rejects_an_ask_with_no_answerable_option(self):
         # Showing this would take over the bubble and leave no way out of it.
         self.assertIsNone(ask_from_message(self._message(options=[])))
-        self.assertIsNone(ask_from_message(self._message(options=[{"label": "no value"}])))
-        self.assertIsNone(ask_from_message(self._message(options=[{"value": "v", "label": "  "}])))
+        self.assertIsNone(ask_from_message(self._message(options=[{"description": "no label"}])))
+        self.assertIsNone(ask_from_message(self._message(options=[{"label": "  "}])))
 
     def test_rejects_an_ask_with_nothing_to_answer_against(self):
         self.assertIsNone(ask_from_message(self._message(id="")))
         self.assertIsNone(ask_from_message(self._message(question="   ")))
 
     def test_caps_the_option_count(self):
-        many = [{"value": str(i), "label": f"option {i}"} for i in range(9)]
+        many = [{"label": f"option {i}"} for i in range(9)]
         ask = ask_from_message(self._message(options=many))
         self.assertEqual(len(ask["options"]), 4, "a speech bubble is not a dialog")
 

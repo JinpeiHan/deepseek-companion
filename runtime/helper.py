@@ -466,10 +466,12 @@ def ask_from_message(message: "dict[str, Any]") -> "dict[str, Any] | None":
     """
     question = str(message.get("question", "")).strip()
     identifier = str(message.get("id", "")).strip()
+    # DSH options carry a label and an optional description, and the answer
+    # echoes back labels -- there is no separate value to send.
     options = [
-        {"value": str(o["value"]), "label": str(o["label"])}
+        {"label": str(o["label"]).strip(), "description": str(o.get("description", "")).strip()}
         for o in (message.get("options") or [])
-        if isinstance(o, dict) and str(o.get("value", "")).strip() and str(o.get("label", "")).strip()
+        if isinstance(o, dict) and str(o.get("label", "")).strip()
     ]
     if not question or not identifier or not options:
         return None
@@ -1535,7 +1537,7 @@ def run_visual(recorder: EventRecorder, snapshot_path: Path | None = None) -> in
                         option["label"], Qt.TextElideMode.ElideRight, text_width - round(24 * s)
                     ),
                 )
-                self.ask_hit_rects.append((*rect, option["value"]))
+                self.ask_hit_rects.append((*rect, option["label"]))
 
         def _draw_card_background(
             self,

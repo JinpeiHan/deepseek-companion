@@ -147,65 +147,6 @@ export function createConfigHandler(settings) {
 // state, leaving the web UI as the place to answer -- which is the honest
 // outcome, because a card with no usable choice would hide the bubble's normal
 // content and give the user nothing to click.
-/**
- * Pull the questions out of an `ask_user_question` tool call.
- *
- * This is the tool the agent uses for "confirm this / pick one", and it is the
- * thing worth answering from the bubble. It is a *tool call*, not an approval:
- * approval/asked is the separate permission gate for running a tool at all.
- * The argument key differs between DSH builds, so the known spellings are tried
- * rather than assumed.
- */
-export function askFromQuestionTool(event) {
-  const data = event?.data ?? {}
-  const args =
-    data.arguments ?? data.args ?? data.input ?? data.parameters ?? data.message?.arguments ?? null
-  const questions = Array.isArray(args?.questions) ? args.questions : null
-  if (!questions || questions.length === 0) return null
-  // One card at a time: the bubble shows a single question, and a second one
-  // would need somewhere to queue.
-  const first = questions[0]
-  const id = String(first?.id ?? data.callId ?? data.id ?? '')
-  if (!id) return null
-  const options = Array.isArray(first?.options) ? first.options : null
-  if (!options || options.length === 0) return null
-  try {
-    return createAsk({
-      id,
-      question: String(first.question ?? ''),
-      detail: String(first.header ?? ''),
-      options,
-    })
-  } catch {
-    return null
-  }
-}
-
-export function askFromApproval(event) {
-  const data = event?.data ?? {}
-  const id = String(data.id ?? '')
-  if (!id) return null
-  const raw =
-    (Array.isArray(data.options) && data.options)
-    || (Array.isArray(data.choices) && data.choices)
-    || (Array.isArray(data.actions) && data.actions)
-    || null
-  const options = raw
-    ? raw
-    : [
-        { value: 'approve', label: '允许' },
-        { value: 'deny', label: '拒绝' },
-      ]
-  const question =
-    String(data.question ?? data.prompt ?? data.title ?? '').trim()
-    || `是否允许 ${String(data.toolName ?? 'this tool')}？`
-  try {
-    return createAsk({ id, question, options, detail: String(data.detail ?? data.toolName ?? '') })
-  } catch {
-    return null
-  }
-}
-
 function mount(ctx, config = {}, eventCtx = ctx) {
   const logger = ctx.logger ?? console
   const base = publicConfig(config)
@@ -217,46 +158,67 @@ function mount(ctx, config = {}, eventCtx = ctx) {
   let bridge
   let reducer
   let restartTimer
-  // Which session each pending approval belongs to, so an answer goes back to
-  // the session that asked rather than to whichever one is current.
-  const pendingApprovals = new Map()
+  // One in-flight question at a time, resolved when the pet is clicked.
+  // ctx.userQuestions is a pull seam: the tool awaits the provider's ask(), so
+  // the answer has to come back as a resolved promise rather than as an event
+  // fired at the host.
+  let pending
 
-  const submitAnswer = ({ id, value }) => {
-    const session = pendingApprovals.get(id)
-    pendingApprovals.delete(id)
-    if (!session) {
-      logger.warn?.(`dsh-dafeiyu: answer for unknown approval ${id}`)
+  const settlePending = (outcome, error) => {
+    if (!pending) return
+    const { resolve, reject, timer } = pending
+    pending = undefined
+    if (timer) clearTimeout(timer)
+    bridge?.send(createMessage(CompanionMessageKind.ASK_CLEAR, {}))
+    if (error) reject(error)
+    else resolve(outcome)
+  }
+
+  const onPetAnswer = ({ id, value }) => {
+    if (!pending || pending.id !== id) {
+      logger.warn?.(`dsh-dafeiyu: an answer arrived for ${id}, which is no longer being asked`)
       return
     }
-    // The host decides approvals; the shape of that call is DSH's, not this
-    // plugin's, so the known spellings are tried and anything else is reported
-    // rather than silently swallowed. A dropped answer leaves the agent
-    // blocked, which is worse than a loud log.
-    // ask_user_question is a consumer of the ctx.userInteraction seam, and the
-    // answer it expects is { id, selected: string[] } -- selected is an array
-    // because the tool supports multi-select. The provider side of that seam is
-    // whatever UI is attached; this tries the shapes a provider plausibly
-    // exposes and reports rather than swallowing, because a dropped answer
-    // leaves the agent blocked on a question nobody can see any more.
-    const answer = { id, selected: [value] }
-    const submit =
-      ctx.userInteraction?.answer?.bind(ctx.userInteraction)
-      ?? ctx.userInteraction?.resolve?.bind(ctx.userInteraction)
-      ?? session.userInteraction?.answer?.bind(session.userInteraction)
-      ?? session.answerQuestion?.bind(session)
-      ?? session.decideApproval?.bind(session)
-    if (typeof submit !== 'function') {
-      logger.error?.(
-        'dsh-dafeiyu: the pet answered a question but this DSH build exposes no provider seam to '
-        + 'submit it through; answer it in the web UI instead. Expected ctx.userInteraction.',
-      )
-      return
-    }
-    try {
-      submit(answer)
-    } catch (error) {
-      logger.error?.('dsh-dafeiyu failed to submit an answer', error)
-    }
+    // selected carries option *labels*: that is what the host echoes back.
+    settlePending({ answers: [{ id, selected: [value] }] })
+  }
+
+  const askProvider = {
+    ask(request) {
+      const question = request?.questions?.[0]
+      if (!question) return Promise.reject(new Error('ask_user_question requires a question'))
+      // Only the first question is shown. A second would need somewhere to
+      // queue, and a bubble that silently drops one is worse than declining.
+      if (request.questions.length > 1) {
+        return Promise.reject(new Error('the pet shows one question at a time; use the web UI'))
+      }
+      let ask
+      try {
+        ask = createAsk({
+          id: question.id,
+          question: question.question,
+          detail: question.detail ?? question.header ?? '',
+          options: question.options,
+        })
+      } catch (error) {
+        // No options means nothing to click. Declining lets the host fall back
+        // to a UI that can take free text, instead of the pet showing a card
+        // with no way out of it.
+        return Promise.reject(error)
+      }
+      if (!bridge || pending) {
+        return Promise.reject(new Error('the pet is not available to ask right now'))
+      }
+      return new Promise((resolve, reject) => {
+        pending = { id: ask.id, resolve, reject, timer: undefined }
+        const onAbort = () => settlePending(undefined, new Error('ask_user_question was aborted'))
+        if (request.signal) {
+          if (request.signal.aborted) return onAbort()
+          request.signal.addEventListener('abort', onAbort, { once: true })
+        }
+        bridge.send(createMessage(CompanionMessageKind.ASK, ask))
+      })
+    },
   }
 
   const stopRuntime = (reason = 'settings-change') => {
@@ -300,7 +262,7 @@ function mount(ctx, config = {}, eventCtx = ctx) {
     const helperConfig = config.helper ?? {}
     bridge = new HelperProcess({
       ...helperConfig,
-      onAnswer: submitAnswer,
+      onAnswer: onPetAnswer,
       env: {
         ...helperConfig.env,
         DSH_DAFEIYU_PROPORTION: String(resolved.characterProportion ?? defaults.characterProportion),
@@ -340,36 +302,21 @@ function mount(ctx, config = {}, eventCtx = ctx) {
   // session bus: a throw here could stop every other subscriber from seeing
   // the event, which would look exactly like "installing the pet broke other
   // plugins".
+  // Only one provider may be active, so a duplicate is expected whenever a
+  // richer UI is already attached -- report it and carry on showing states
+  // rather than failing to mount.
+  let offProvider
+  try {
+    offProvider = ctx.userQuestions?.registerProvider?.(askProvider)
+    if (offProvider) logger.info?.('dsh-dafeiyu: answering questions in the pet bubble')
+  } catch (error) {
+    logger.warn?.(`dsh-dafeiyu: another user-questions provider is active; questions stay in that UI (${error?.message ?? error})`)
+  }
+
   const offEvent = eventCtx.on('session/event', (session, event) => {
     if (!bridge || !reducer) return
     try {
       for (const message of reducer.handle(session, event)) bridge.send(message)
-      if (event?.type === 'tool/call') {
-        const ask = askFromQuestionTool(event)
-        if (ask) {
-          pendingApprovals.set(ask.id, session)
-          bridge.send(createMessage(CompanionMessageKind.ASK, ask))
-        }
-      } else if (event?.type === 'tool/result') {
-        // Answered somewhere else, or the tool finished. Either way the
-        // question is no longer live.
-        const id = String(event.data?.callId ?? event.data?.id ?? '')
-        if (id && pendingApprovals.delete(id)) {
-          bridge.send(createMessage(CompanionMessageKind.ASK_CLEAR, { id }))
-        }
-      } else if (event?.type === 'approval/asked') {
-        const ask = askFromApproval(event)
-        if (ask) {
-          pendingApprovals.set(ask.id, session)
-          bridge.send(createMessage(CompanionMessageKind.ASK, ask))
-        }
-      } else if (event?.type === 'approval/decided') {
-        // Decided elsewhere -- the web UI, the CLI, a timeout. Take the card
-        // down rather than leaving a question the agent has already moved past.
-        const id = String(event.data?.id ?? '')
-        if (id) pendingApprovals.delete(id)
-        bridge.send(createMessage(CompanionMessageKind.ASK_CLEAR, { id }))
-      }
     } catch (error) {
       logger.error?.('dsh-dafeiyu failed to handle session event', error)
     }
@@ -419,13 +366,22 @@ function mount(ctx, config = {}, eventCtx = ctx) {
     restartTimer = undefined
     offEvent?.()
     offDisposed?.()
+    offProvider?.()
+    // A question still on screen has a tool awaiting its promise. Rejecting it
+    // lets the agent fail and retry; leaving it pending hangs that tool for the
+    // rest of the run.
+    settlePending(undefined, new Error('the pet stopped while a question was open'))
     unwatch()
     stopRuntime('dsh-host-stop')
   })
 }
 
 export function apply(ctx, config = {}) {
-  if (typeof ctx.inject === 'function') {
+  // ctx.inject waits for every listed service, so listing settings here kept
+  // the pet unmounted on the command line just as surely as declaring it in
+  // `inject` did -- mount() has handled its absence all along. Only wait for it
+  // when the host actually has it.
+  if (typeof ctx.inject === 'function' && ctx.settings !== undefined) {
     ctx.inject(['settings'], (settingsCtx) => mount(settingsCtx, config, ctx))
     return
   }

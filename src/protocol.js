@@ -31,21 +31,26 @@ export const CompanionMessageKind = Object.freeze({
 
 export const MAX_ASK_OPTIONS = 4
 
-/** Normalise an approval into the shape the helper draws. */
+/**
+ * Normalise one DSH question into the shape the helper draws.
+ *
+ * DSH options carry a label and an optional description, and the answer echoes
+ * back *labels* -- there is no separate value. So the label is the identity
+ * here too, rather than inventing an id the host would not recognise.
+ */
 export function createAsk({ id, question, options, detail }) {
   const text = String(question ?? '').trim()
   if (!id) throw new TypeError('ask needs an id to answer against')
   if (!text) throw new TypeError('ask needs a question')
   const list = (Array.isArray(options) ? options : [])
-    .map((option) =>
-      typeof option === 'string'
-        ? { value: option, label: option }
-        : { value: String(option?.value ?? option?.label ?? ''), label: String(option?.label ?? option?.value ?? '') },
-    )
-    .filter((option) => option.value && option.label)
-    // The bubble is a desktop-pet speech bubble, not a dialog: past a handful of
-    // choices it stops being readable, and the web UI remains the place for a
-    // long list.
+    .map((option) => {
+      const label = String(typeof option === 'string' ? option : (option?.label ?? '')).trim()
+      const description = String(typeof option === 'string' ? '' : (option?.description ?? '')).trim()
+      return description ? { label, description } : { label }
+    })
+    .filter((option) => option.label)
+    // A speech bubble is not a dialog: past a handful of choices it stops being
+    // readable, and the web UI stays the place for a long list.
     .slice(0, MAX_ASK_OPTIONS)
   if (list.length === 0) throw new TypeError('ask needs at least one option')
   return { id: String(id), question: text, detail: detail ? String(detail) : '', options: list }
