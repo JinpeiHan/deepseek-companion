@@ -18,9 +18,21 @@ import { assertDecodable, confine, decodeRgba, listPngs, readHeader } from './li
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const EDGE_ALPHA = 8
 
-const PACKS = {
-  standard: { manifest: 'assets/pet-standard-manifest.json', root: 'assets/pet-standard' },
-  slender: { manifest: 'assets/pet-slender-manifest.json', root: 'assets/pet-slender' },
+// Which packs to check comes from the registry rather than a list here, so
+// this cannot drift from what the runtime can actually load. Only frame packs
+// belong to this validator: a rig pack has no 512x512 frame grid to compare
+// against the chibi action matrix, and validate-rig.mjs covers those instead.
+// chibi is the reference the others are compared to, so it is not a subject.
+const registeredFramePacks = async () => {
+  const registry = await readJson('assets/pet-packs.json')
+  const packs = {}
+  for (const [id, entry] of Object.entries(registry.packs)) {
+    if (id === registry.defaultPack) continue
+    const manifest = await readJson(`assets/${entry.manifest}`)
+    if ((manifest.renderer ?? 'frames') !== 'frames') continue
+    packs[id] = { manifest: `assets/${entry.manifest}`, root: `assets/${entry.root}` }
+  }
+  return packs
 }
 
 const readJson = async (relativePath) => JSON.parse(await readFile(resolve(ROOT, relativePath), 'utf8'))
@@ -71,9 +83,13 @@ const validateSamples = async (dir) => {
 
 const validatePacks = async () => {
   const chibi = await readJson('assets/pet-manifest.json')
+  const packs = await registeredFramePacks()
   let failures = 0
   const declaredCounts = []
-  for (const [pack, meta] of Object.entries(PACKS)) {
+  if (Object.keys(packs).length === 0) {
+    console.log('no non-default frame packs registered; rig packs are checked by validate-rig.mjs')
+  }
+  for (const [pack, meta] of Object.entries(packs)) {
     const manifest = await readJson(meta.manifest)
     const packRoot = resolve(ROOT, meta.root)
     const declared = []

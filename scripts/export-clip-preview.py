@@ -40,8 +40,14 @@ everything downstream of `load_frames()` stays the same.
 from __future__ import annotations
 
 import argparse
+import atexit
 import json
 import math
+import os
+import shutil
+import subprocess
+import sys
+import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -123,17 +129,48 @@ def resolve_clip_source(reference: str) -> tuple[str, str, tuple[Path, ...], int
     return pack_id, clip_id, tuple(paths), int(clip["frameMs"]), bool(clip["loop"])
 
 
+def resolve_rig_source(reference: str) -> tuple[str, str, tuple[Path, ...], int, bool]:
+    """Render `<pack>/<motion>` offscreen and return the frames it produced.
+
+    The ten solved clips have no frames on disk -- they are bone poses evaluated
+    at paint time -- so the only way to preview them is to run the renderer.
+    Doing it here rather than asking the caller for a directory keeps every
+    preview on one code path, which is the point: the previous preview set mixed
+    rig-rendered motion tests with baked clips and looked inconsistent because
+    it was produced by two different tools on two different days.
+    """
+    pack_id, _, motion = reference.partition("/")
+    if not pack_id or not motion:
+        raise SystemExit(f"--source rig: expected <pack>/<motion>, got {reference!r}")
+    # The frames have to outlive this call -- load_frames reads them later -- so
+    # the directory is cleaned at exit rather than by a context manager here.
+    work = Path(tempfile.mkdtemp(prefix="rig-preview-"))
+    atexit.register(shutil.rmtree, work, True)
+    environment = {**os.environ, "QT_QPA_PLATFORM": "offscreen"}
+    result = subprocess.run(
+        [sys.executable, str(ROOT / "scripts" / "render-rig-clip.py"),
+         "--pack", pack_id, "--motion", motion, "--frames", "16", "--out", str(work)],
+        capture_output=True, text=True, env=environment,
+    )
+    if result.returncode != 0:
+        raise SystemExit(f"rig:{reference}: render failed\n{result.stderr[-600:]}")
+    paths = tuple(sorted(work.glob("*.png")))
+    if not paths:
+        raise SystemExit(f"rig:{reference}: renderer produced no frames")
+    # Solved motions are continuous, so they always loop; 16 frames at 24fps is
+    # the cadence render-rig-clip samples them at.
+    return pack_id, motion, paths, 42, True
+
+
 def build_plan(args: argparse.Namespace) -> ClipPlan:
     scheme, _, reference = args.source.partition(":")
     if scheme == "rig":
-        raise SystemExit(
-            "--source rig: not implemented yet; it will render frames via "
-            "scripts/render-rig-clip.py once the rig renderer lands"
-        )
-    if scheme != "clip":
-        raise SystemExit(f"--source: expected clip:<pack>/<clip>, got {args.source!r}")
+        pack, clip, paths, manifest_ms, loop = resolve_rig_source(reference)
+    elif scheme == "clip":
+        pack, clip, paths, manifest_ms, loop = resolve_clip_source(reference)
+    else:
+        raise SystemExit(f"--source: expected clip:<pack>/<clip> or rig:<pack>/<motion>, got {args.source!r}")
 
-    pack, clip, paths, manifest_ms, loop = resolve_clip_source(reference)
     if args.fps is not None:
         frame_ms = max(1, round(1000 / args.fps))
     elif args.frame_ms is not None:

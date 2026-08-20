@@ -31,6 +31,12 @@ import subprocess
 import sys
 from pathlib import Path
 
+from PIL import Image
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from remove_image_background_lib import plate_colour_of, plate_consistent_run  # noqa: E402
+
 ROOT = Path(__file__).resolve().parent.parent
 ART_PYTHON = "/home/jinpei/anaconda3/envs/dsh-art/bin/python"
 
@@ -80,8 +86,8 @@ CLIPS: dict[str, tuple[str | None, str]] = {
     "idle": ("idle_front", "stands quietly at rest, arms relaxed at her sides, breathing gently, hair and tail swaying a little"),
     "thinking": ("idle_think", "thinks, one hand near her chin, eyes drifting upward, head tilting slowly"),
     "working": ("sweep", "sweeps the floor with a broom, pushing it left and right in a steady rhythm, leaning into each stroke"),
-    "working_search": ("idle_front", "walks in place looking around for something, head turning side to side, arms swinging"),
-    "working_command": ("idle_front", "types busily on an invisible keyboard in front of her, hands moving quickly, focused expression"),
+    "working_search": ("idle_front", "raises one hand flat to her brow like a lookout shading her eyes, leans forward and turns her head and shoulders to scan to one side and then the other, keeping her feet planted and her whole body inside the frame"),
+    "working_command": ("idle_front", "throws one arm straight out to point forward decisively, the other fist planted on her hip, leaning her whole body forward behind the pointing arm, commanding expression"),
     "waiting": ("talk", "waits and speaks, one hand raised in a small gesture, mouth opening and closing"),
     "success": ("happy", "celebrates happily, raising both hands, eyes curving into a delighted smile, bouncing lightly"),
     "error": ("angry", "pouts angrily, hands on hips, cheeks puffed, eyebrows lowered"),
@@ -106,15 +112,50 @@ EMOJI_CLIPS: dict[str, tuple[str, str]] = {
     "slack_off": ("slack-off", "slumps on the floor having given up, limbs sprawled, face blank"),
     "love_heart_hands": ("love-heart-hands", "makes a heart shape with both hands, eyes closed happily, hearts floating around her"),
     "dash_run": ("dash-run", "sprints forward at full speed, arms pumping, hair and tail streaming behind"),
-    "sulk_pout": ("sulk-pout", "pouts and sulks, brow furrowed, arms drawn in close, looking away"),
+    "sulk_pout": ("sulk-pout", "turns her whole body away in a huff, folds both arms tightly across her chest and hunches her shoulders up, then peeks back over one shoulder, cheeks puffed"),
     "soul_leaving": ("soul-leaving", "slumps exhausted as a little ghost drifts out of her mouth"),
     "salute_roger": ("salute-roger", "snaps a crisp salute, standing straight, bright confident expression"),
     "plead_kneel": ("plead-kneel", "kneels with both hands clasped, pleading upward with teary eyes"),
-    "confused_question": ("confused-question", "tilts her head in confusion, finger to her chin, question marks above her"),
+    "confused_question": ("confused-question", "tilts her head far over to one side, then lifts both shoulders in a big shrug with both palms turned up and elbows out wide, puzzled expression"),
     "relax_armchair": ("relax-armchair", "sits back relaxed holding a warm mug, sipping contentedly"),
     "cry_wail": ("cry-wail", "wails with her eyes squeezed shut, tears streaming, arms down"),
     "idea_lightbulb": ("idea-lightbulb", "raises one finger as an idea strikes, eyes lighting up"),
 }
+
+
+def edge_report(frames: "list[Path]", samples: int = 12) -> "dict[str, int]":
+    """How many sampled frames run off each edge of the raw generation.
+
+    Checked on the *raw* frames, not the finished asset. Matting crops to the
+    character's bounding box and re-centres it, so a clip whose arms left the
+    top of frame comes out looking tidy with clear margin all round -- the crop
+    is baked into the artwork, not into the canvas, and no amount of inspecting
+    the asset can find it. standard/dragging shipped with the hands cut off
+    exactly that way.
+
+    The background is whatever the model chose -- measured over the shipped
+    set, 39 clips came back on black and 41 on white -- so "is there ink at the
+    edge" is decided against the frame's own corners rather than against an
+    assumed black plate.
+    """
+    from PIL import Image
+    import numpy as np
+
+    counts = {"top": 0, "bottom": 0, "left": 0, "right": 0}
+    step = max(1, len(frames) // samples)
+    for path in frames[::step]:
+        pixels = np.asarray(Image.open(path).convert("RGB")).astype(int)
+        corners = np.concatenate([
+            pixels[:10, :10].reshape(-1, 3), pixels[:10, -10:].reshape(-1, 3),
+            pixels[-10:, :10].reshape(-1, 3), pixels[-10:, -10:].reshape(-1, 3),
+        ])
+        background = corners.mean(axis=0)
+        ink = np.abs(pixels - background).sum(axis=2) > 90
+        if ink[:4, :].sum() > 60: counts["top"] += 1
+        if ink[-4:, :].sum() > 60: counts["bottom"] += 1
+        if ink[:, :4].sum() > 60: counts["left"] += 1
+        if ink[:, -4:].sum() > 60: counts["right"] += 1
+    return counts
 
 
 def run(cmd: list[str], **kwargs) -> subprocess.CompletedProcess:
@@ -178,6 +219,18 @@ def main() -> int:
     parser.add_argument("--keep", type=int, default=16, help="frames kept after decimation")
     parser.add_argument("--frame-ms", type=int, default=110)
     parser.add_argument("--work", default="/tmp/petclip/batch")
+    # Pinning the last frame to the first is how a loop clip was made to end
+    # where it began, but MiniMax responds by barely moving: measured across the
+    # shipped set, 11 clips came back under 2.0 mean inter-frame difference.
+    # --free-motion drops the pinned end and lets the model act.
+    # The seed is derived from the clip's position in the run so a whole batch
+    # is reproducible. Retrying one clip that the edge guard rejected needs a
+    # different draw, and moving it in the list would change every other seed.
+    parser.add_argument("--seed-base", type=int, default=1000)
+    parser.add_argument("--regenerate-video", action="store_true",
+                        help="discard any cached raw video and sample a new one")
+    parser.add_argument("--free-motion", action="store_true",
+                        help="do not pin the last frame; let the model move")
     parser.add_argument("--force", action="store_true")
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()
@@ -214,7 +267,13 @@ def main() -> int:
             f"{meta['proportion']} with {IDENTITY}. She {action}. "
             "Keep the exact head-to-body proportion of the reference. Full body, feet visible, "
             "character stays centred and the same size throughout, consistent character design, "
-            "simple plain background. The character stays fully visible and fully opaque in every single frame: no fade to black, no dissolve, no cut away, no camera transition, and she never leaves the frame. " + meta.get("tone", "")
+            "simple plain background. The character stays fully visible and fully opaque in "
+            "every single frame: no fade to black, no dissolve, no cut away, no camera "
+            "transition, and she never leaves the frame. Her whole body including both "
+            "hands, the top of her hair and both feet stays inside the frame at all times, "
+            "with clear margin on every side. Nothing but the character appears: no human "
+            "hand, no arm, no prop held by anyone else, no text, no speech bubble, no "
+            "border. " + meta.get("tone", "")
         )
         raw = work / f"{pack}-{clip}"
         small = work / f"{pack}-{clip}-16"
@@ -222,12 +281,21 @@ def main() -> int:
         print(f"[{index}/{len(todo)}] {pack}/{clip}", flush=True)
         try:
             first = first_frame_for(pack, clip, work)
-            if not raw.exists() or len(list(raw.glob("*.png"))) < args.length:
+            # Reusing a complete raw video is what makes a re-bake cheap, but it
+            # silently ignores any flag that changes how the video is generated
+            # -- --free-motion in particular would re-decimate the very clip it
+            # was meant to replace. --regenerate-video forces a new sampling.
+            have_video = raw.exists() and len(list(raw.glob("*.png"))) >= args.length
+            if args.regenerate_video and have_video:
+                shutil.rmtree(raw)
+                have_video = False
+            if not have_video:
                 result = run([
                     sys.executable, "scripts/generate-video-clip.py", "--mode", "i2v",
-                    "--first-frame", str(first), "--last-frame", str(first),
+                    "--first-frame", str(first),
+                    *([] if args.free_motion else ["--last-frame", str(first)]),
                     "--prompt", prompt, "--length", str(args.length),
-                    "--width", "512", "--height", "768", "--seed", str(1000 + index),
+                    "--width", "512", "--height", "768", "--seed", str(args.seed_base + index),
                     "--prefix", f"petclip/{pack}-{clip}", "--out", str(raw),
                 ])
                 if result.returncode != 0:
@@ -236,12 +304,34 @@ def main() -> int:
             frames = sorted(raw.glob("*.png"))
             if len(frames) < args.keep:
                 raise RuntimeError(f"only {len(frames)} frames generated")
+            edges = edge_report(frames)
+            crossed = {side: n for side, n in edges.items() if n > 0}
+            if crossed:
+                raise RuntimeError(
+                    f"the character leaves the frame ({crossed}); regenerate rather than "
+                    "reprocess -- matting re-centres the crop and hides it"
+                )
             small.mkdir(parents=True, exist_ok=True)
             for existing in small.glob("*.png"):
                 existing.unlink()
-            step = len(frames) / args.keep
-            for slot in range(args.keep):
-                shutil.copy(frames[int(slot * step)], small / f"{slot:02d}.png")
+            # Decimate from the plate-consistent interior, not the whole video.
+            # The head and tail frames come back on a different plate colour and
+            # their silhouette edges are contaminated with it; see
+            # plate_consistent_run in remove_image_background_lib.
+            plates = [plate_colour_of(Image.open(path)) for path in frames]
+            start, stop = plate_consistent_run(plates)
+            usable = frames[start:stop]
+            if len(usable) < args.keep:
+                raise RuntimeError(
+                    f"only {len(usable)} of {len(frames)} frames share one plate colour"
+                )
+            if len(usable) < len(frames):
+                print(f"  {pack}/{clip}: keeping frames {start}..{stop} "
+                      f"({len(frames) - len(usable)} off-plate frames dropped)")
+            step = len(usable) / args.keep
+            order = [usable[int(slot * step)] for slot in range(args.keep)]
+            for slot, source in enumerate(order):
+                shutil.copy(source, small / f"{slot:02d}.png")
 
             shared = work / f"{pack}-{clip}-shared"
             result = run([sys.executable, "scripts/remove-image-background.py",
