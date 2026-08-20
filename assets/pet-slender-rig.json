@@ -891,7 +891,7 @@
         "baked/eat_token/eat_token_14.png",
         "baked/eat_token/eat_token_15.png"
       ],
-      "frameMs": 110
+      "frameMs": 120
     },
     "working_search": {
       "loop": true,

@@ -21,7 +21,15 @@ test('validate-rig passes for every rig pack', async () => {
     cwd: repositoryRoot,
   })
   for (const pack of PACKS) {
-    assert.match(stdout, new RegExp(`pet-${pack}-rig: 20 parts`), `${pack} was not validated`)
+    // The summary also carries the baked-clip counts, which is the only place
+    // the 19 pre-rendered sequences per pack are checked against disk.
+    assert.match(
+      stdout,
+      new RegExp(`pet-${pack}-rig: \\d+ baked clips/\\d+ frames, 20 parts`),
+      `${pack} was not validated`,
+    )
+    assert.match(stdout, new RegExp(`pet-${pack}-rig: 19 baked clips/304 frames`),
+      `${pack} baked clip coverage changed`)
   }
   assert.match(stdout, new RegExp(`OK: ${PACKS.length} rig pack\\(s\\) validated\\.`))
 })

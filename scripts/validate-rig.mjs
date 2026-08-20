@@ -141,6 +141,41 @@ const validatePack = async (pack) => {
     layers.set(part.id, { width, height, pixels, part })
   }
 
+  // -- baked clip frames --------------------------------------------------- //
+  // 19 of the 29 clips are pre-rendered frame sequences rather than solved
+  // poses, and nothing else on disk checks them: validate-pet-packs.mjs only
+  // covers registered *frame* packs, and both proportion packs are rigs now.
+  // A frame that is missing, mis-sized or not RGBA fails the whole pack at
+  // load time in load_pack_assets, so it has to fail here first.
+  let bakedClips = 0
+  let bakedFrames = 0
+  for (const [name, clip] of Object.entries(manifest.clips ?? {})) {
+    const frames = clip.frames ?? []
+    if (frames.length === 0) continue
+    bakedClips += 1
+    const clipLabel = `${label}/clip:${name}`
+    check(clip.frameMs > 0, clipLabel, `frameMs is ${clip.frameMs}`)
+    for (const relativePath of frames) {
+      const frameLabel = `${clipLabel}/${relativePath}`
+      const framePath = resolve(packRoot, relativePath)
+      confine(packRoot, framePath, frameLabel)
+      let buffer
+      try {
+        buffer = await readFile(framePath)
+      } catch {
+        fail(clipLabel, `frame missing on disk: ${relativePath}`)
+        continue
+      }
+      const header = readHeader(buffer, frameLabel)
+      check(header.width === CANVAS && header.height === CANVAS, clipLabel,
+        `${relativePath} is ${header.width}x${header.height}, expected ${CANVAS}x${CANVAS}`)
+      check(header.colorType === 6, clipLabel,
+        `${relativePath} is colour type ${header.colorType}, expected 6 (RGBA)`)
+      assertDecodable(header, frameLabel)
+      bakedFrames += 1
+    }
+  }
+
   // -- chain continuity ---------------------------------------------------- //
   for (const [name, chain] of Object.entries(manifest.chains ?? {})) {
     const parts = manifest.parts.filter((part) => chain.bones.includes(part.bone))
@@ -234,7 +269,7 @@ const validatePack = async (pack) => {
     `rest recomposite mean |dRGB| is ${meanDelta.toFixed(2)}/255 (max ${MEAN_DELTA_MAX})`)
 
   console.log(
-    `${label}: ${manifest.parts.length} parts, coverage ${(coverage * 100).toFixed(3)}%, ` +
+    `${label}: ${bakedClips} baked clips/${bakedFrames} frames, ${manifest.parts.length} parts, coverage ${(coverage * 100).toFixed(3)}%, ` +
     `spill ${(spill * 100).toFixed(3)}%, mean |dRGB| ${meanDelta.toFixed(2)}/255`,
   )
   return manifest

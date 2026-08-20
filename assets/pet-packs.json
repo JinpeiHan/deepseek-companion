@@ -7,12 +7,12 @@
       "root": "pet"
     },
     "standard": {
-      "manifest": "pet-standard-manifest.json",
-      "root": "pet-standard"
+      "manifest": "pet-standard-rig.json",
+      "root": "pet-standard-rig"
     },
     "slender": {
-      "manifest": "pet-slender-manifest.json",
-      "root": "pet-slender"
+      "manifest": "pet-slender-rig.json",
+      "root": "pet-slender-rig"
     },
     "standard-rig": {
       "manifest": "pet-standard-rig.json",
