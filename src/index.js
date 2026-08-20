@@ -5,19 +5,29 @@ import { HelperProcess } from './helper-process.js'
 import {
   CompanionMessageKind,
   CompanionState,
+  createAsk,
+  createEmote,
   createMessage,
 } from './protocol.js'
+import {
+  EMOTE_COOLDOWN_MS,
+  emoteFor,
+  idleEmoteFor,
+  updateEmoteMemory,
+} from './emote-map.js'
 import { characterName, statusCopy } from './status-copy.js'
 
 const require = createRequire(import.meta.url)
 const pkg = require('../package.json')
 
 export const name = 'dsh-dafeiyu'
-// The plugin's feature is built on session events, and mounting requires the
-// settings service (used to read live config). Keep the declared inject in
-// sync with those real hard dependencies instead of listing a service that
-// is never consumed directly.
-export const inject = ['sessions', 'settings']
+// Sessions is the only hard dependency: the pet's whole feature is reacting to
+// session events. Settings is optional, and listing it as required is what kept
+// the pet out of the command-line DSH -- Cordis holds a plugin unmounted until
+// every injected service exists, so the CLI, which has no settings service,
+// never mounted it and never reached the localSettingsScope fallback that was
+// written for exactly that case.
+export const inject = { required: ['sessions'], optional: ['settings'] }
 export const CONFIG_ENDPOINT = '/plugins/dsh-dafeiyu/config'
 export const Config = Schema.object({
   enabled: Schema.boolean().default(true).description('启用桌面小鲸鱼'),
@@ -137,10 +147,32 @@ export function createConfigHandler(settings) {
   }
 }
 
+
+// DSH names an approval's choices differently depending on the tool that asked,
+// so the shapes are tried in order rather than assuming one. A tool that offers
+// nothing selectable falls through to `null` and the pet just shows the waiting
+// state, leaving the web UI as the place to answer -- which is the honest
+// outcome, because a card with no usable choice would hide the bubble's normal
+// content and give the user nothing to click.
+/**
+ * Read an optional service without tripping cordis's inject guard.
+ *
+ * cordis throws `cannot get property "x" without inject` on a plain property
+ * read of a service the plugin has not declared, so probing for one that is
+ * deliberately optional has to go through get(). A host without get() is a
+ * plain object -- a test double -- where the property read is the only option.
+ */
+function optionalService(ctx, name) {
+  if (typeof ctx?.get === 'function') return ctx.get(name)
+  return ctx?.[name]
+}
+
 function mount(ctx, config = {}, eventCtx = ctx) {
   const logger = ctx.logger ?? console
   const base = publicConfig(config)
-  const settings = ctx.settings?.register?.('dsh-dafeiyu', Config, {
+  // settings is optional so the command-line DSH, which has none, can mount.
+  const settingsService = optionalService(ctx, 'settings')
+  const settings = settingsService?.register?.('dsh-dafeiyu', Config, {
     base,
     applies: 'live',
   }) ?? localSettingsScope(base)
@@ -148,6 +180,87 @@ function mount(ctx, config = {}, eventCtx = ctx) {
   let bridge
   let reducer
   let restartTimer
+  // One in-flight question at a time, resolved when the pet is clicked.
+  // ctx.userQuestions is a pull seam: the tool awaits the provider's ask(), so
+  // the answer has to come back as a resolved promise rather than as an event
+  // fired at the host.
+  let pending
+  let lastEmoteAt = 0
+  let lastEventAt = Date.now()
+  let lastIdleEmote
+  const emoteMemory = { retriesThisTurn: 0, stepsThisTurn: 0, quietForMs: 0 }
+
+  // Idle reactions are driven by a clock, because the trigger is that nothing
+  // arrived. Checked on a slow timer rather than a tick: the thresholds are
+  // minutes apart, so a minute of granularity is invisible.
+  const idleTimer = setInterval(() => {
+    if (!bridge) return
+    const quietFor = Date.now() - lastEventAt
+    const clip = idleEmoteFor(quietFor)
+    if (clip && clip !== lastIdleEmote) {
+      lastIdleEmote = clip
+      lastEmoteAt = Date.now()
+      bridge.send(createMessage(CompanionMessageKind.EMOTE, createEmote(clip)))
+    }
+  }, 60_000)
+  idleTimer.unref?.()
+
+  const settlePending = (outcome, error) => {
+    if (!pending) return
+    const { resolve, reject, timer } = pending
+    pending = undefined
+    if (timer) clearTimeout(timer)
+    bridge?.send(createMessage(CompanionMessageKind.ASK_CLEAR, {}))
+    if (error) reject(error)
+    else resolve(outcome)
+  }
+
+  const onPetAnswer = ({ id, value }) => {
+    if (!pending || pending.id !== id) {
+      logger.warn?.(`dsh-dafeiyu: an answer arrived for ${id}, which is no longer being asked`)
+      return
+    }
+    // selected carries option *labels*: that is what the host echoes back.
+    settlePending({ answers: [{ id, selected: [value] }] })
+  }
+
+  const askProvider = {
+    ask(request) {
+      const question = request?.questions?.[0]
+      if (!question) return Promise.reject(new Error('ask_user_question requires a question'))
+      // Only the first question is shown. A second would need somewhere to
+      // queue, and a bubble that silently drops one is worse than declining.
+      if (request.questions.length > 1) {
+        return Promise.reject(new Error('the pet shows one question at a time; use the web UI'))
+      }
+      let ask
+      try {
+        ask = createAsk({
+          id: question.id,
+          question: question.question,
+          detail: question.detail ?? question.header ?? '',
+          options: question.options,
+        })
+      } catch (error) {
+        // No options means nothing to click. Declining lets the host fall back
+        // to a UI that can take free text, instead of the pet showing a card
+        // with no way out of it.
+        return Promise.reject(error)
+      }
+      if (!bridge || pending) {
+        return Promise.reject(new Error('the pet is not available to ask right now'))
+      }
+      return new Promise((resolve, reject) => {
+        pending = { id: ask.id, resolve, reject, timer: undefined }
+        const onAbort = () => settlePending(undefined, new Error('ask_user_question was aborted'))
+        if (request.signal) {
+          if (request.signal.aborted) return onAbort()
+          request.signal.addEventListener('abort', onAbort, { once: true })
+        }
+        bridge.send(createMessage(CompanionMessageKind.ASK, ask))
+      })
+    },
+  }
 
   const stopRuntime = (reason = 'settings-change') => {
     bridge?.stop(reason)
@@ -190,6 +303,7 @@ function mount(ctx, config = {}, eventCtx = ctx) {
     const helperConfig = config.helper ?? {}
     bridge = new HelperProcess({
       ...helperConfig,
+      onAnswer: onPetAnswer,
       env: {
         ...helperConfig.env,
         DSH_DAFEIYU_PROPORTION: String(resolved.characterProportion ?? defaults.characterProportion),
@@ -229,10 +343,33 @@ function mount(ctx, config = {}, eventCtx = ctx) {
   // session bus: a throw here could stop every other subscriber from seeing
   // the event, which would look exactly like "installing the pet broke other
   // plugins".
+  // Only one provider may be active, so a duplicate is expected whenever a
+  // richer UI is already attached -- report it and carry on showing states
+  // rather than failing to mount.
+  let offProvider
+  try {
+    const questions = optionalService(ctx, 'userQuestions')
+    offProvider = questions?.registerProvider?.(askProvider)
+    if (offProvider) logger.info?.('dsh-dafeiyu: answering questions in the pet bubble')
+  } catch (error) {
+    logger.warn?.(`dsh-dafeiyu: another user-questions provider is active; questions stay in that UI (${error?.message ?? error})`)
+  }
+
   const offEvent = eventCtx.on('session/event', (session, event) => {
     if (!bridge || !reducer) return
     try {
       for (const message of reducer.handle(session, event)) bridge.send(message)
+      emoteMemory.quietForMs = Date.now() - lastEventAt
+      lastEventAt = Date.now()
+      lastIdleEmote = undefined
+      updateEmoteMemory(emoteMemory, event)
+      const clip = emoteFor(event, emoteMemory)
+      // One reaction at a time, spaced out: a burst of events would otherwise
+      // interrupt each clip with the next and read as twitching.
+      if (clip && Date.now() - lastEmoteAt >= EMOTE_COOLDOWN_MS) {
+        lastEmoteAt = Date.now()
+        bridge.send(createMessage(CompanionMessageKind.EMOTE, createEmote(clip)))
+      }
     } catch (error) {
       logger.error?.('dsh-dafeiyu failed to handle session event', error)
     }
@@ -282,13 +419,23 @@ function mount(ctx, config = {}, eventCtx = ctx) {
     restartTimer = undefined
     offEvent?.()
     offDisposed?.()
+    offProvider?.()
+    clearInterval(idleTimer)
+    // A question still on screen has a tool awaiting its promise. Rejecting it
+    // lets the agent fail and retry; leaving it pending hangs that tool for the
+    // rest of the run.
+    settlePending(undefined, new Error('the pet stopped while a question was open'))
     unwatch()
     stopRuntime('dsh-host-stop')
   })
 }
 
 export function apply(ctx, config = {}) {
-  if (typeof ctx.inject === 'function') {
+  // ctx.inject waits for every listed service, so listing settings here kept
+  // the pet unmounted on the command line just as surely as declaring it in
+  // `inject` did -- mount() has handled its absence all along. Only wait for it
+  // when the host actually has it.
+  if (typeof ctx.inject === 'function' && optionalService(ctx, 'settings') !== undefined) {
     ctx.inject(['settings'], (settingsCtx) => mount(settingsCtx, config, ctx))
     return
   }

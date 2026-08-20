@@ -2,8 +2,29 @@
   "formatVersion": 1,
   "defaultPack": "chibi",
   "packs": {
-    "chibi": { "manifest": "pet-manifest.json", "root": "pet" },
-    "standard": { "manifest": "pet-standard-manifest.json", "root": "pet-standard" },
-    "slender": { "manifest": "pet-slender-manifest.json", "root": "pet-slender" }
+    "chibi": {
+      "manifest": "pet-manifest.json",
+      "root": "pet"
+    },
+    "standard": {
+      "manifest": "pet-standard-manifest.json",
+      "root": "pet-standard"
+    },
+    "slender": {
+      "manifest": "pet-slender-manifest.json",
+      "root": "pet-slender"
+    },
+    "standard-rig": {
+      "manifest": "pet-standard-rig.json",
+      "root": "pet-standard-rig"
+    },
+    "chibi-rig": {
+      "manifest": "pet-chibi-rig.json",
+      "root": "pet-chibi-rig"
+    },
+    "slender-rig": {
+      "manifest": "pet-slender-rig.json",
+      "root": "pet-slender-rig"
+    }
   }
 }

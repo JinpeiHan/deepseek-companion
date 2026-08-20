@@ -8,10 +8,21 @@ const MANIFESTS = ['../assets/pet-standard-manifest.json', '../assets/pet-slende
 
 const readJson = async (relative) => JSON.parse(await readFile(new URL(relative, import.meta.url), 'utf8'))
 
-test('registry declares three stable proportion packs', async () => {
+test('registry declares the frame packs plus the rig packs', async () => {
   const registry = await readJson('../assets/pet-packs.json')
   assert.equal(registry.defaultPack, 'chibi')
-  assert.deepEqual(Object.keys(registry.packs), ['chibi', 'standard', 'slender'])
+  assert.deepEqual(Object.keys(registry.packs), [
+    'chibi',
+    'standard',
+    'slender',
+    'standard-rig',
+    'chibi-rig',
+    'slender-rig',
+  ])
+  // The default must stay a frame pack: a rig pack is only reachable by an
+  // explicit choice, so a broken rig can never be what a new user first sees.
+  const defaultManifest = await readJson(`../assets/${registry.packs[registry.defaultPack].manifest}`)
+  assert.notEqual(defaultManifest.renderer, 'rig')
 })
 
 test('new manifests declare the funded keyframe subset symmetrically', async () => {
@@ -27,7 +38,7 @@ test('new manifests declare the funded keyframe subset symmetrically', async () 
     counts.push(Object.values(manifest.clips).reduce((sum, clip) => sum + clip.frames.length, 0))
   }
   assert.equal(new Set(counts).size, 1, `packs are asymmetric: ${counts.join(' vs ')}`)
-  assert.equal(counts[0], 23)
+  assert.equal(counts[0], 50)
 })
 
 test('new manifests keep chibi timing and reference 512 frame files', async () => {
@@ -66,9 +77,9 @@ test('nothing the helper resolves without a fallback points at an unfunded clip'
 
 test('generation jobs cover both packs exactly once per frame', async () => {
   const { jobs } = await readJson('../art-references/generation-jobs.json')
-  assert.equal(jobs.length, 46)
-  assert.equal(jobs.filter((job) => job.pack === 'standard').length, 23)
-  assert.equal(jobs.filter((job) => job.pack === 'slender').length, 23)
+  assert.equal(jobs.length, 100)
+  assert.equal(jobs.filter((job) => job.pack === 'standard').length, 50)
+  assert.equal(jobs.filter((job) => job.pack === 'slender').length, 50)
   assert.equal(new Set(jobs.map((job) => job.output)).size, jobs.length)
   for (const job of jobs) {
     assert.ok(job.references.length >= 4, `${job.output} needs at least four references`)

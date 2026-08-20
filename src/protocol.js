@@ -22,7 +22,56 @@ export const CompanionMessageKind = Object.freeze({
   PONG: 'pong',
   CLOSED: 'closed',
   SHUTDOWN: 'shutdown',
+  // An approval the agent is blocked on, shown in the pet's bubble so it can be
+  // answered without going to the web UI. ASK carries the choices; the helper
+  // replies with an `answer` naming the one that was clicked.
+  ASK: 'ask',
+  ASK_CLEAR: 'ask-clear',
+  // Play one expressive clip once. Separate from STATE because these are
+  // reactions to a moment, not a condition the pet stays in: the state
+  // underneath is unchanged and resumes when the clip ends.
+  EMOTE: 'emote',
 })
+
+export const MAX_ASK_OPTIONS = 4
+
+/**
+ * A one-shot expressive clip.
+ *
+ * The clip name is not validated here: packs deliberately differ, and the
+ * helper no-ops on a clip its pack does not have. Validating against one pack's
+ * vocabulary would make a pack-specific animation an error everywhere else.
+ */
+export function createEmote(clip) {
+  const name = String(clip ?? '').trim()
+  if (!name) throw new TypeError('emote needs a clip name')
+  return { clip: name }
+}
+
+/**
+ * Normalise one DSH question into the shape the helper draws.
+ *
+ * DSH options carry a label and an optional description, and the answer echoes
+ * back *labels* -- there is no separate value. So the label is the identity
+ * here too, rather than inventing an id the host would not recognise.
+ */
+export function createAsk({ id, question, options, detail }) {
+  const text = String(question ?? '').trim()
+  if (!id) throw new TypeError('ask needs an id to answer against')
+  if (!text) throw new TypeError('ask needs a question')
+  const list = (Array.isArray(options) ? options : [])
+    .map((option) => {
+      const label = String(typeof option === 'string' ? option : (option?.label ?? '')).trim()
+      const description = String(typeof option === 'string' ? '' : (option?.description ?? '')).trim()
+      return description ? { label, description } : { label }
+    })
+    .filter((option) => option.label)
+    // A speech bubble is not a dialog: past a handful of choices it stops being
+    // readable, and the web UI stays the place for a long list.
+    .slice(0, MAX_ASK_OPTIONS)
+  if (list.length === 0) throw new TypeError('ask needs at least one option')
+  return { id: String(id), question: text, detail: detail ? String(detail) : '', options: list }
+}
 
 const states = new Set(Object.values(CompanionState))
 const kinds = new Set(Object.values(CompanionMessageKind))

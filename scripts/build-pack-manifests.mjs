@@ -1,15 +1,15 @@
 #!/usr/bin/env node
 // Derives the standard and slender manifests from the chibi action matrix.
 //
-// The first production pass only funds a keyframe subset, so KEYFRAME_CLIPS
-// decides which clips exist in the new packs. Clips left out are dropped from
-// the manifest entirely rather than declared with missing files: the Python
-// loader reads every declared frame eagerly, while `play_overlay()` degrades to
-// a no-op for a clip that is simply absent. stateMap and workingActivityMap are
-// remapped so they can never point at a clip that was not funded.
+// The standard and slender packs mirror the full chibi action matrix, so all
+// three proportions support the same actions and any pack can be swapped in
+// without the runtime losing a behaviour.
 //
-// Adding a clip back later is a one-line edit here plus a rerun of
-// build-generation-jobs.mjs.
+// Clips are still filtered through PACK_CLIPS rather than copied blindly: a
+// clip left out is dropped from the manifest entirely rather than declared with
+// missing files, because the Python loader reads every declared frame eagerly
+// while `play_overlay()` degrades to a no-op for an absent clip. stateMap and
+// workingActivityMap are remapped so they can never point at a dropped clip.
 
 import { readFile, writeFile } from 'node:fs/promises'
 import { dirname, resolve } from 'node:path'
@@ -17,7 +17,7 @@ import { fileURLToPath } from 'node:url'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 
-export const KEYFRAME_CLIPS = [
+export const PACK_CLIPS = [
   // DSH state skeleton: every state in stateMap must resolve to one of these.
   'idle',
   'thinking',
@@ -29,10 +29,22 @@ export const KEYFRAME_CLIPS = [
   'dragging',
   // Idle micro-motion, so IDLE is not a frozen icon.
   'blink',
+  'glance',
   // Interactions.
   'head_pat',
   'poke',
+  'tail',
+  // Locomotion: the walk cycles plus their start/stop transitions.
+  'working_search',
+  'working_command',
+  'walk_start_left',
+  'walk_stop_left',
+  'walk_start_right',
+  'walk_stop_right',
 ]
+
+// Kept as an alias so existing importers keep working.
+export const KEYFRAME_CLIPS = PACK_CLIPS
 
 const PACKS = [
   ['assets/pet-standard-manifest.json', 'whale-girl-standard'],
@@ -46,7 +58,7 @@ const renameFrame = (frame) => {
 
 const build = (chibi, characterId) => {
   const clips = {}
-  for (const name of KEYFRAME_CLIPS) {
+  for (const name of PACK_CLIPS) {
     const clip = chibi.clips[name]
     if (!clip) throw new Error(`chibi manifest has no clip named ${name}`)
     clips[name] = {

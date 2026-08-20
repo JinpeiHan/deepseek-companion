@@ -26,20 +26,67 @@ const makeDshHome = async ({ settings, credentials } = {}) => {
 
 test('config reads base url and key from the DSH home', async () => {
   const dshHome = await makeDshHome()
-  const config = await loadOpenAiImageConfig({ dshHome })
+  const config = await loadOpenAiImageConfig({ dshHome, envFile: null, env: {} })
   assert.deepEqual(config, {
     baseURL: 'https://example.invalid/v1',
     apiKey: SECRET,
     model: 'gpt-image-2',
+    source: 'dsh',
   })
+})
+
+const makeEnvFile = async (body) => {
+  const dir = await mkdtemp(join(tmpdir(), 'dsh-env-'))
+  const file = join(dir, '.env')
+  await writeFile(file, body, 'utf8')
+  return file
+}
+
+test('config prefers a .env file and tolerates comments, quotes and export', async () => {
+  const envFile = await makeEnvFile(
+    ['# credentials', 'export OPENAI_BASE_URL="https://env.invalid/v1/"', `OPENAI_API_KEY='${SECRET}'`, ''].join('\n'),
+  )
+  const dshHome = await makeDshHome()
+  const config = await loadOpenAiImageConfig({ dshHome, envFile, env: {} })
+  // .env wins over the DSH install, and the trailing slash is trimmed.
+  assert.equal(config.baseURL, 'https://env.invalid/v1')
+  assert.equal(config.apiKey, SECRET)
+  assert.equal(config.source, '.env')
+})
+
+test('config falls back to the real environment, then to DSH', async () => {
+  const fromEnv = await loadOpenAiImageConfig({
+    dshHome: '',
+    envFile: null,
+    env: { OPENAI_BASE_URL: 'https://proc.invalid/v1', OPENAI_API_KEY: SECRET },
+  })
+  assert.equal(fromEnv.source, 'environment')
+  assert.equal(fromEnv.baseURL, 'https://proc.invalid/v1')
+
+  const dshHome = await makeDshHome()
+  const viaDsh = await loadOpenAiImageConfig({ dshHome, envFile: join(dshHome, 'missing.env'), env: {} })
+  assert.equal(viaDsh.source, 'dsh')
+})
+
+test('config error names every source tried and never contains the key', async () => {
+  const envFile = await makeEnvFile(`OPENAI_API_KEY=${SECRET}\n`)
+  await assert.rejects(
+    loadOpenAiImageConfig({ dshHome: '', envFile, env: {} }),
+    (error) => {
+      assert.match(error.message, /OPENAI_BASE_URL/u)
+      assert.match(error.message, /Copy \.env\.example/u)
+      assert.ok(!error.message.includes(SECRET), 'error message leaked the API key')
+      return true
+    },
+  )
 })
 
 test('config fails clearly when base url or key is missing', async () => {
   const noBase = await makeDshHome({ settings: 'llm-pi-ai: {}\n' })
-  await assert.rejects(loadOpenAiImageConfig({ dshHome: noBase }), /baseURL is not configured/u)
+  await assert.rejects(loadOpenAiImageConfig({ dshHome: noBase, envFile: null, env: {} }), /baseURL is not configured/u)
   const noKey = await makeDshHome({ credentials: 'DEEPSEEK_API_KEY: other\n' })
-  await assert.rejects(loadOpenAiImageConfig({ dshHome: noKey }), /OPENAI_API_KEY is not configured/u)
-  await assert.rejects(loadOpenAiImageConfig({ dshHome: '' }), /DSH_HOME is required/u)
+  await assert.rejects(loadOpenAiImageConfig({ dshHome: noKey, envFile: null, env: {} }), /OPENAI_API_KEY is not configured/u)
+  await assert.rejects(loadOpenAiImageConfig({ dshHome: '', envFile: null, env: {} }), /not configured/u)
 })
 
 test('client lists models and never leaks the key in errors', async () => {

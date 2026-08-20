@@ -1,0 +1,223 @@
+{
+  "pack": "standard",
+  "characterId": "whale-girl-standard-rig",
+  "master": "assets/pet-standard/idle_front/idle_front_512.png",
+  "axisX": 235,
+  "note": "Hand-authored cut for the standard proportion. Coordinates are master pixels on the 512x512 canvas. Shapes are generous where a colour gate can make the precise cut (the hairline: bangs are saturated blue, the forehead under them is skin) and tight where no gate can, because the navy dress and the navy hair share a palette.",
+  "mirrorPartners": {
+    "arm_l": "arm_r",
+    "arm_r": "arm_l",
+    "cheek_l": "cheek_r",
+    "cheek_r": "cheek_l",
+    "eye_l": "eye_r",
+    "eye_r": "eye_l"
+  },
+  "bonePivots": {
+    "root": [237, 496],
+    "body": [237, 400],
+    "neck": [233, 215],
+    "head": [233, 208],
+    "arm_l": [190, 206],
+    "arm_r": [300, 206],
+    "tail_b0": [306, 338],
+    "tail_b1": [326, 342],
+    "tail_b2": [344, 348],
+    "tail_b3": [360, 356]
+  },
+  "partPivots": {
+    "head": [233, 208],
+    "hair_back": [233, 205],
+    "hair_front": [233, 200],
+    "headdress": [233, 190],
+    "neck": [233, 215],
+    "eye_l_lid": [209, 154],
+    "eye_r_lid": [257, 154],
+    "mouth": [234, 184],
+    "tail_0": [306, 338],
+    "tail_1": [326, 342],
+    "tail_2": [344, 348],
+    "tail_3": [360, 356]
+  },
+  "regions": {
+    "headdress": {
+      "include": [
+        ["rect", 145, 70, 200, 60],
+        ["poly", [[143, 118], [176, 118], [176, 158], [143, 158]]],
+        ["poly", [[314, 118], [347, 118], [347, 160], [314, 160]]]
+      ],
+      "gate": ["white"],
+      "grow": 2
+    },
+    "hair_front": {
+      "include": [["rect", 148, 45, 200, 160]],
+      "exclude": [["rect", 192, 152, 36, 34], ["rect", 240, 152, 36, 34]],
+      "gate": ["hair"],
+      "grow": 2
+    },
+    "mouth": {"include": [["rect", 226, 184, 16, 11]], "grow": 2},
+    "eye_l": {"include": [["ellipse", 209, 170, 16, 14]], "grow": 2},
+    "eye_r": {"include": [["ellipse", 257, 170, 16, 14]], "grow": 2},
+    "cheek_l": {"include": [["ellipse", 199, 188, 12, 7]], "grow": 2},
+    "cheek_r": {"include": [["ellipse", 266, 188, 12, 7]], "grow": 2},
+    "eye_l_lid": {
+      "include": [],
+      "occlude": [["ellipse", 209, 170, 18, 16]],
+      "base": [222, 180],
+      "baseRamp": 8,
+      "mirror": false,
+      "stamp": [{"fromPart": "eye_l", "gate": ["dark"], "topRows": 5, "offset": [0, 13]}],
+      "grow": 0
+    },
+    "eye_r_lid": {
+      "include": [],
+      "occlude": [["ellipse", 257, 170, 18, 16]],
+      "base": [222, 180],
+      "baseRamp": 8,
+      "mirror": false,
+      "stamp": [{"fromPart": "eye_r", "gate": ["dark"], "topRows": 5, "offset": [0, 13]}],
+      "grow": 0
+    },
+    "neck": {
+      "include": [["rect", 214, 196, 44, 12]],
+      "base": [235, 178],
+      "baseRamp": 10,
+      "grow": 2,
+      "occludeParts": ["head", "body", "hair_front", "hair_back", "headdress"],
+      "occludeClip": [["rect", 204, 186, 60, 40]],
+      "occludeGrow": 3,
+      "gate": ["skin"]
+    },
+    "head": {
+      "include": [["ellipse", 233, 172, 50, 40]],
+      "base": [235, 178],
+      "baseRamp": 16,
+      "grow": 2,
+      "occludeParts": ["hair_front", "headdress"],
+      "occludeClip": [["ellipse", 233, 168, 56, 56]],
+      "occludeGrow": 3
+    },
+    "tail_3": {"include": [["rect", 350, 296, 56, 108]], "grow": 10},
+    "tail_2": {"include": [["rect", 336, 318, 26, 48]], "grow": 10},
+    "tail_1": {"include": [["rect", 322, 328, 24, 34]], "grow": 10},
+    "tail_0": {
+      "include": [["rect", 308, 328, 24, 30]],
+      "base": [355, 350],
+      "baseRamp": 12,
+      "mirror": false,
+      "grow": 10,
+      "occludeParts": ["body", "apron", "arm_r"],
+      "occludeClip": [["rect", 272, 316, 44, 50]],
+      "occludeGrow": 3
+    },
+    "arm_l": {
+      "include": [
+        ["poly", [[168, 190], [204, 190], [205, 240], [204, 286], [186, 293], [167, 288], [165, 240]]],
+        ["poly", [[150, 292], [184, 292], [186, 312], [180, 334], [156, 334], [148, 314]]]
+      ],
+      "base": [190, 240],
+      "baseRamp": 10,
+      "grow": 2,
+      "occludeParts": ["hair_back", "hair_front", "body", "headdress"],
+      "occludeClip": [["rect", 158, 184, 52, 26]],
+      "occludeGrow": 3
+    },
+    "arm_r": {
+      "include": [
+        ["poly", [[303, 190], [267, 190], [266, 240], [267, 286], [285, 293], [304, 288], [306, 240]]],
+        ["poly", [[321, 292], [287, 292], [285, 312], [291, 334], [315, 334], [323, 314]]]
+      ],
+      "base": [281, 240],
+      "baseRamp": 10,
+      "grow": 2,
+      "occludeParts": ["hair_back", "hair_front", "body", "headdress"],
+      "occludeClip": [["rect", 262, 184, 52, 26]],
+      "occludeGrow": 3
+    },
+    "apron": {
+      "include": [
+        [
+          "poly",
+          [
+            [196, 264],
+            [280, 264],
+            [292, 290],
+            [298, 330],
+            [292, 362],
+            [272, 382],
+            [240, 390],
+            [208, 382],
+            [188, 362],
+            [182, 330],
+            [188, 290]
+          ]
+        ]
+      ],
+      "grow": 3,
+      "occludeParts": ["arm_l", "arm_r"],
+      "occludeClip": [
+        [
+          "poly",
+          [
+            [184, 258],
+            [288, 258],
+            [302, 300],
+            [302, 344],
+            [292, 372],
+            [240, 396],
+            [188, 372],
+            [178, 344],
+            [178, 300]
+          ]
+        ]
+      ],
+      "base": [240, 320],
+      "baseRamp": 10,
+      "occludeGrow": 3
+    },
+    "body": {
+      "include": [
+        [
+          "poly",
+          [
+            [203, 190],
+            [268, 190],
+            [272, 240],
+            [276, 285],
+            [292, 300],
+            [300, 330],
+            [310, 360],
+            [322, 396],
+            [318, 414],
+            [288, 416],
+            [290, 500],
+            [190, 500],
+            [192, 416],
+            [162, 414],
+            [158, 396],
+            [170, 360],
+            [180, 330],
+            [190, 300],
+            [196, 285],
+            [200, 240]
+          ]
+        ]
+      ],
+      "base": [200, 392],
+      "baseRamp": 14,
+      "grow": 2,
+      "occludeParts": ["apron", "arm_l", "arm_r", "neck"],
+      "occludeClip": [["poly", [[186, 190], [288, 190], [300, 270], [310, 330], [322, 400], [156, 400], [168, 330], [178, 270]]]],
+      "occludeGrow": 4
+    },
+    "hair_back": {
+      "include": [["rect", 100, 60, 320, 300]],
+      "base": [240, 140],
+      "baseRamp": 18,
+      "grow": 2,
+      "occludeParts": ["head", "neck", "hair_front", "headdress", "eye_l", "eye_r", "cheek_l", "cheek_r", "mouth"],
+      "occludeClip": [["rect", 150, 66, 170, 190]],
+      "occludeGrow": 4
+    }
+  },
+  "minComponentPx": 1400
+}

@@ -9,13 +9,13 @@
 //     validates loose sample PNGs: 512x512 RGBA, real transparency, and a
 //     character that does not touch the frame border.
 
-import { readFile, readdir } from 'node:fs/promises'
-import { inflateSync } from 'node:zlib'
-import { dirname, relative, resolve, sep } from 'node:path'
+import { readFile } from 'node:fs/promises'
+import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
+import { assertDecodable, confine, decodeRgba, listPngs, readHeader } from './lib/png.mjs'
+
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
-const SIGNATURE = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])
 const EDGE_ALPHA = 8
 
 const PACKS = {
@@ -25,67 +25,15 @@ const PACKS = {
 
 const readJson = async (relativePath) => JSON.parse(await readFile(resolve(ROOT, relativePath), 'utf8'))
 
-const readHeader = (buffer, label) => {
-  if (!buffer.subarray(0, 8).equals(SIGNATURE)) throw new Error(`${label}: not a PNG file`)
-  if (buffer.readUInt32BE(8) !== 13 || buffer.toString('latin1', 12, 16) !== 'IHDR') {
-    throw new Error(`${label}: malformed IHDR chunk`)
-  }
-  const width = buffer.readUInt32BE(16)
-  const height = buffer.readUInt32BE(20)
-  const bitDepth = buffer.readUInt8(24)
-  const colorType = buffer.readUInt8(25)
-  const interlace = buffer.readUInt8(28)
+// The proportion packs are the one place that still requires a fixed 512x512
+// RGBA frame; the decoder in ./lib/png.mjs stays size-agnostic so the rig
+// validator can share it.
+const readPackHeader = (buffer, label) => {
+  const header = readHeader(buffer, label)
+  const { width, height } = header
   if (width !== 512 || height !== 512) throw new Error(`${label}: expected 512x512, got ${width}x${height}`)
-  if (colorType !== 6) throw new Error(`${label}: expected RGBA color type 6, got ${colorType}`)
-  if (bitDepth !== 8) throw new Error(`${label}: expected bit depth 8, got ${bitDepth}`)
-  if (interlace !== 0) throw new Error(`${label}: interlaced PNG is not supported`)
+  assertDecodable(header, label)
   return { width, height }
-}
-
-const paeth = (a, b, c) => {
-  const p = a + b - c
-  const pa = Math.abs(p - a)
-  const pb = Math.abs(p - b)
-  const pc = Math.abs(p - c)
-  if (pa <= pb && pa <= pc) return a
-  return pb <= pc ? b : c
-}
-
-const decodeRgba = (buffer, label) => {
-  const { width, height } = readHeader(buffer, label)
-  const chunks = []
-  let offset = 8
-  while (offset < buffer.length) {
-    const length = buffer.readUInt32BE(offset)
-    const type = buffer.toString('latin1', offset + 4, offset + 8)
-    if (type === 'IDAT') chunks.push(buffer.subarray(offset + 8, offset + 8 + length))
-    if (type === 'IEND') break
-    offset += length + 12
-  }
-  if (chunks.length === 0) throw new Error(`${label}: no IDAT data`)
-  const raw = inflateSync(Buffer.concat(chunks))
-  const bpp = 4
-  const stride = width * bpp
-  const pixels = Buffer.alloc(height * stride)
-  for (let y = 0; y < height; y += 1) {
-    const filter = raw[y * (stride + 1)]
-    const line = raw.subarray(y * (stride + 1) + 1, y * (stride + 1) + 1 + stride)
-    const out = pixels.subarray(y * stride, (y + 1) * stride)
-    const prior = y === 0 ? null : pixels.subarray((y - 1) * stride, y * stride)
-    for (let x = 0; x < stride; x += 1) {
-      const left = x >= bpp ? out[x - bpp] : 0
-      const up = prior ? prior[x] : 0
-      const upLeft = prior && x >= bpp ? prior[x - bpp] : 0
-      const value = line[x]
-      if (filter === 0) out[x] = value
-      else if (filter === 1) out[x] = (value + left) & 0xff
-      else if (filter === 2) out[x] = (value + up) & 0xff
-      else if (filter === 3) out[x] = (value + ((left + up) >> 1)) & 0xff
-      else if (filter === 4) out[x] = (value + paeth(left, up, upLeft)) & 0xff
-      else throw new Error(`${label}: unknown PNG filter ${filter}`)
-    }
-  }
-  return { width, height, pixels }
 }
 
 const inspectAlpha = ({ width, height, pixels }) => {
@@ -104,28 +52,13 @@ const inspectAlpha = ({ width, height, pixels }) => {
   return { transparent, opaque, edgeInk }
 }
 
-const confine = (rootDir, filePath, label) => {
-  const rel = relative(rootDir, filePath)
-  if (rel.startsWith('..') || rel.startsWith(sep) || rel === '') throw new Error(`${label}: path escapes pack root`)
-}
-
-const listPngs = async (dir, base = dir) => {
-  const entries = await readdir(dir, { withFileTypes: true })
-  const files = []
-  for (const entry of entries) {
-    const full = resolve(dir, entry.name)
-    if (entry.isDirectory()) files.push(...(await listPngs(full, base)))
-    else if (entry.name.toLowerCase().endsWith('.png')) files.push(relative(base, full).split(sep).join('/'))
-  }
-  return files.sort()
-}
-
 const validateSamples = async (dir) => {
   const target = resolve(ROOT, dir)
   const files = await listPngs(target)
   if (files.length === 0) throw new Error(`no PNG samples found in ${dir}`)
   for (const file of files) {
     const buffer = await readFile(resolve(target, file))
+    readPackHeader(buffer, file)
     const image = decodeRgba(buffer, file)
     const { transparent, edgeInk } = inspectAlpha(image)
     if (transparent === 0) throw new Error(`${file}: no transparent pixels`)
@@ -195,7 +128,7 @@ const validatePacks = async () => {
       const filePath = resolve(packRoot, frame)
       confine(packRoot, filePath, `${pack}/${frame}`)
       const buffer = await readFile(filePath)
-      readHeader(buffer, `${pack}/${frame}`)
+      readPackHeader(buffer, `${pack}/${frame}`)
     }
     console.log(`${pack}: ${Object.keys(manifest.clips).length} clips, ${declaredSorted.length} RGBA frames OK`)
   }

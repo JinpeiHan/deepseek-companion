@@ -16,50 +16,26 @@ from __future__ import annotations
 
 import argparse
 import shutil
+import sys
 import tempfile
 from pathlib import Path
 
 import numpy as np
 from PIL import Image
-from rembg import new_session, remove
-from scipy import ndimage
 
-TARGET = (512, 512)
-# Matches footAnchor/logical sizing in the pack manifests: the character stands
-# on 97% of the frame height and never fills more than 90% of it.
-FOOT_ANCHOR_Y = 0.97
-MAX_HEIGHT_RATIO = 0.90
-MAX_WIDTH_RATIO = 0.94
-# Anything the matting model gives more than this much opacity is treated as
-# character. Kept low on purpose: white-on-white cloth comes back faint.
-SOLID_ALPHA = 30
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-
-def cut_alpha(source: Image.Image, session) -> Image.Image:
-    """Return the source RGB with a hardened alpha channel."""
-    mask = np.asarray(remove(source, session=session).convert("RGBA"))[:, :, 3]
-    solid = mask > SOLID_ALPHA
-    labels, count = ndimage.label(solid)
-    if count > 1:
-        sizes = ndimage.sum(solid, labels, range(1, count + 1))
-        solid = labels == (int(np.argmax(sizes)) + 1)
-    if not solid.any():
-        raise ValueError("matting produced an empty mask")
-    cut = source.copy()
-    cut.putalpha(Image.fromarray(np.where(solid, 255, 0).astype(np.uint8)))
-    return cut
-
-
-def fit(image: Image.Image, box: tuple[int, int, int, int], scale: float) -> Image.Image:
-    """Place one character into a 512x512 frame using a shared scale factor."""
-    character = image.crop(box)
-    size = (max(1, round(character.width * scale)), max(1, round(character.height * scale)))
-    character = character.resize(size, Image.Resampling.LANCZOS)
-    canvas = Image.new("RGBA", TARGET, (0, 0, 0, 0))
-    left = max(0, (TARGET[0] - size[0]) // 2)
-    top = max(0, min(round(TARGET[1] * FOOT_ANCHOR_Y) - size[1], TARGET[1] - size[1]))
-    canvas.paste(character, (left, top), character)
-    return canvas
+# One matting implementation, shared with normalize-pack-scale.py.
+from remove_image_background_lib import (  # noqa: E402
+    FOOT_ANCHOR_Y,
+    MAX_HEIGHT_RATIO,
+    MAX_WIDTH_RATIO,
+    SOLID_ALPHA,
+    TARGET,
+    cut_alpha,
+    fit,
+    new_matting_session,
+)
 
 
 def group_key(path: Path, source_root: Path, mode: str) -> str:
@@ -75,6 +51,11 @@ def main() -> int:
     parser.add_argument("--input", required=True, help="input PNG file or directory")
     parser.add_argument("--output", required=True, help="output PNG file or directory")
     parser.add_argument("--model", default="isnet-anime", help="rembg model name (default: isnet-anime)")
+    parser.add_argument(
+        "--preserve-vertical",
+        action="store_true",
+        help="keep each frame's height above the group's lowest foot instead of bottom-anchoring every frame",
+    )
     parser.add_argument(
         "--group",
         default="pack",
@@ -95,12 +76,13 @@ def main() -> int:
     if not pairs:
         raise SystemExit(f"no PNG input found at {source}")
 
-    session = new_session(args.model, providers=["CPUExecutionProvider"])
+    session = new_matting_session(args.model)
     staging = Path(tempfile.mkdtemp(prefix="dsh-matte-"))
     try:
         # Pass 1: matte once, remember every bounding box.
         boxes: dict[Path, tuple[int, int, int, int]] = {}
         groups: dict[str, list[Path]] = {}
+        group_of: dict[Path, str] = {}
         for index, (path, _) in enumerate(pairs):
             with Image.open(path) as handle:
                 cut = cut_alpha(handle.convert("RGBA"), session)
@@ -110,7 +92,9 @@ def main() -> int:
             staged = staging / f"{index:04d}.png"
             cut.save(staged, format="PNG")
             boxes[staged] = box
-            groups.setdefault(group_key(path, source_root, args.group), []).append(staged)
+            key = group_key(path, source_root, args.group)
+            groups.setdefault(key, []).append(staged)
+            group_of[staged] = key
             print(f"{path.name}: matted with {args.model}, bbox {box[2] - box[0]}x{box[3] - box[1]}")
 
         # One scale per group, driven by its tallest and widest frame, so relative
@@ -128,7 +112,13 @@ def main() -> int:
         for index, (path, destination) in enumerate(pairs):
             staged = staging / f"{index:04d}.png"
             with Image.open(staged) as handle:
-                fitted = fit(handle.convert("RGBA"), boxes[staged], scales[staged])
+                lift = 0.0
+                if args.preserve_vertical:
+                    # The group's lowest foot is the ground; everything else
+                    # keeps however far above it the model drew the character.
+                    ground = max(boxes[f][3] for f in groups[group_of[staged]])
+                    lift = (ground - boxes[staged][3]) * scales[staged]
+                fitted = fit(handle.convert("RGBA"), boxes[staged], scales[staged], lift)
             assert fitted.mode == "RGBA", f"{path.name}: expected RGBA, got {fitted.mode}"
             assert fitted.size == TARGET, f"{path.name}: expected {TARGET}, got {fitted.size}"
             low, _ = fitted.getchannel("A").getextrema()
