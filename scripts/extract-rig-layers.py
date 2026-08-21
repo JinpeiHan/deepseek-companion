@@ -60,6 +60,7 @@ sys.path.insert(0, str(REPO_ROOT))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
 import rig_template as T  # noqa: E402
+from rig_overlap import required_grow  # noqa: E402
 from runtime.rig_model import (  # noqa: E402
     RigModel,
     a_invert,
@@ -342,6 +343,39 @@ def _binary_dilate(mask: np.ndarray, radius: int) -> np.ndarray:
     assert ndimage is not None, "scipy is required for dilation"
     structure = ndimage.generate_binary_structure(2, 2)
     return ndimage.binary_dilation(mask, structure=structure, iterations=int(radius))
+
+
+def boundary_radii(
+    masks: "dict[str, np.ndarray]", annotations: dict
+) -> "dict[str, dict[str, float]]":
+    """For each pair of touching parts, how far their shared seam sits from the pivot.
+
+    Distance is measured from the part's own pivot to the seam, because that is
+    what sets how far the seam travels when the part turns. Using the farthest
+    pixel instead would over-grow every layer: the tip of a strand of hair is
+    free silhouette and has no neighbour to crack away from.
+    """
+    assert ndimage is not None, "scipy is required to measure part boundaries"
+    pivots = annotations.get("partPivots", {})
+    bone_pivots = annotations["bonePivots"]
+    by_id = {part["id"]: part for part in T.PARTS}
+    out: dict[str, dict[str, float]] = {}
+    dilated = {pid: _binary_dilate(mask, 2) for pid, mask in masks.items()}
+    for part_id, mask in masks.items():
+        if not mask.any():
+            continue
+        pivot = pivots.get(part_id) or bone_pivots[by_id[part_id]["bone"]]
+        radii: dict[str, float] = {}
+        for other, other_mask in masks.items():
+            if other == part_id or not other_mask.any():
+                continue
+            seam = dilated[part_id] & other_mask
+            if seam.sum() < 12:
+                continue
+            ys, xs = np.where(seam)
+            radii[other] = float(np.hypot(xs - pivot[0], ys - pivot[1]).mean())
+        out[part_id] = radii
+    return out
 
 
 def fill_part(
@@ -891,9 +925,24 @@ def run(args) -> int:
     if "fill" in stages:
         axis_x = float(annotations["axisX"])
         mirror_partners = annotations.get("mirrorPartners", {})
+        # How much each part must overlap its neighbours, derived from the rig's
+        # own declared rotation limits rather than guessed. See rig_overlap: an
+        # exact partition cracks the instant two parts turn by different amounts,
+        # and the growth below is clipped to the silhouette, so the margin only
+        # ever hides under the neighbour it is protecting against.
+        neighbours = boundary_radii(masks, annotations)
+        computed_grow = required_grow(T.PARTS, T.BONES, T.PARAMS, T.BINDINGS, neighbours)
+        widened = {k: v for k, v in computed_grow.items()
+                   if v > int(annotations["regions"][k].get("grow", 2))}
+        if widened:
+            print(f"[fill] seam margin widened for {len(widened)} part(s): "
+                  + ", ".join(f"{k}->{v}px" for k, v in sorted(widened.items())))
         for part in T.PARTS:
             part_id = part["id"]
-            spec = annotations["regions"][part_id]
+            spec = dict(annotations["regions"][part_id])
+            # The annotation may ask for more, never less: a hand-tuned value
+            # that already exceeds the computed need is left alone.
+            spec["grow"] = max(int(spec.get("grow", 2)), computed_grow[part_id])
             partner = mirror_partners.get(part_id)
             source = masks[partner] if partner else None
             rgba, synth, report = fill_part(
