@@ -85,7 +85,7 @@ IDENTITY = (
 CLIPS: dict[str, tuple[str | None, str]] = {
     "idle": ("idle_front", "stands quietly at rest, arms relaxed at her sides, breathing gently, hair and tail swaying a little"),
     "thinking": ("idle_think", "thinks, one hand near her chin, eyes drifting upward, head tilting slowly"),
-    "working": ("sweep", "sweeps the floor with a broom, pushing it left and right in a steady rhythm, leaning into each stroke"),
+    "working": ("sweep", "sweeps the floor: her feet stay planted and her body stays in one place while only her arms work, both hands sliding along the broom handle as she reaches far out and then pulls back in. The bristle head stays down in contact with the floor the whole time and travels in a wide arc across it, and the handle swings through a large change of angle on every stroke"),
     "working_search": ("idle_front", "raises one hand flat to her brow like a lookout shading her eyes, leans forward and turns her head and shoulders to scan to one side and then the other, keeping her feet planted and her whole body inside the frame"),
     "working_command": ("idle_front", "throws one arm straight out to point forward decisively, the other fist planted on her hip, leaning her whole body forward behind the pointing arm, commanding expression"),
     "waiting": ("talk", "waits and speaks, one hand raised in a small gesture, mouth opening and closing"),
