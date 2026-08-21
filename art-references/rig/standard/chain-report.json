@@ -1,25 +1,8 @@
 {
   "segments": [
-    {
-      "from": "tail_0",
-      "to": "tail_1",
-      "overlapPx": 24
-    },
-    {
-      "from": "tail_1",
-      "to": "tail_2",
-      "overlapPx": 28
-    },
-    {
-      "from": "tail_2",
-      "to": "tail_3",
-      "overlapPx": 21
-    }
+    {"from": "tail_0", "to": "tail_1", "overlapPx": 24},
+    {"from": "tail_1", "to": "tail_2", "overlapPx": 36},
+    {"from": "tail_2", "to": "tail_3", "overlapPx": 19}
   ],
-  "bones": [
-    "tail_b0",
-    "tail_b1",
-    "tail_b2",
-    "tail_b3"
-  ]
+  "bones": ["tail_b0", "tail_b1", "tail_b2", "tail_b3"]
 }

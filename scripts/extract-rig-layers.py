@@ -378,6 +378,64 @@ def boundary_radii(
     return out
 
 
+def build_closed_lid(master, cx, cy, rx, ry, pad=3):
+    """Draw a closed anime eye for the lid layer: skin over the socket, the
+    character's own lash line carried across it.
+
+    The lid used to be stamped -- the top five rows of the open eye, gated to
+    dark pixels and shifted down 13px, over an ellipse flooded from a skin
+    sample. What came out was a cream blob the size of the whole eye with a
+    smear along its bottom, so every blink and every poke reaction painted a
+    pale patch over the character's face. That is the "it covers her eyes"
+    report.
+
+    Lifting the lash contour instead of stamping rows keeps the line the artist
+    drew: its weight, its colour and its curve. The skin is sampled only from
+    pixels that are actually skin, because the socket is ringed by hair and
+    averaging across it dragged blue bands into the fill.
+    """
+    x0,x1 = cx-rx-pad, cx+rx+pad
+    y0,y1 = cy-ry-pad, cy+ry+pad
+    tile = master[y0:y1, x0:x1].astype(np.float32)
+    h,w = tile.shape[:2]
+    yy,xx = np.mgrid[0:h,0:w]
+    ecx,ecy = cx-x0, cy-y0
+    inside = ((xx-ecx)/rx)**2 + ((yy-ecy)/ry)**2 <= 1.0
+    lum = tile[:,:,:3].mean(axis=2)
+
+    # Skin is sampled from skin, not from whole rows: the socket is ringed by
+    # hair, and averaging across it dragged blue bands into the fill.
+    rgb = tile[:,:,:3]
+    warm = (rgb[:,:,0] >= rgb[:,:,2] - 4) & (lum > 150) & (tile[:,:,3] > 200)
+    ring = (~inside) & warm
+    skin = np.median(rgb[ring], axis=0) if ring.sum() >= 12 else np.array([236.,226.,220.])
+
+    out = tile.copy()
+    out[inside, :3] = skin
+
+    # The lash contour is the topmost dark pixel of each column of the open eye.
+    # Lifting that curve wholesale and dropping it to the middle of the socket
+    # keeps the artist's line weight and its shape; drawing an arc instead gave
+    # a straight stub that read as a scratch.
+    dark = (lum < 110) & inside
+    target = ecy + 1
+    for col in range(w):
+        rows = np.where(dark[:, col])[0]
+        if rows.size == 0:
+            continue
+        top = rows.min()
+        thickness = 2 if rows.size > 3 else 1
+        for k in range(thickness):
+            src = min(top + k, h - 1)
+            dst = target + k
+            if 0 <= dst < h and inside[dst, col]:
+                out[dst, col, :3] = tile[src, col, :3]
+
+    out[:,:,3] = np.where(inside | (tile[:,:,3] > 0), 255, 0)
+    return out.round().astype(np.uint8), (x0,y0)
+
+
+
 def fill_part(
     part_id: str,
     mask: np.ndarray,
@@ -401,6 +459,24 @@ def fill_part(
 
     grow = int(spec.get("grow", 2))
     grown = _binary_dilate(mask, grow) & opaque if mask.any() else np.zeros_like(mask)
+
+    # Margin is only allowed where a part drawn *above* this one covers it in
+    # the rest pose. That makes the growth invisible by construction: the rest
+    # recomposite cannot change, because every added pixel is painted over by
+    # something later in z order. It surfaces exactly when that neighbour moves
+    # away, which is the hole it exists to fill.
+    #
+    # Growing without this restriction is what pushed the rest recomposite from
+    # 0.47 to 7.40 mean |dRGB|: body and apron, widened to 40px and 28px, were
+    # reaching past their covering layers and repainting the silhouette.
+    if masks is not None:
+        covered = np.zeros_like(mask)
+        own_z = next((entry["z"] for entry in T.PARTS if entry["id"] == part_id), None)
+        if own_z is not None:
+            for entry in T.PARTS:
+                if entry["z"] > own_z and entry["id"] in masks:
+                    covered |= masks[entry["id"]]
+        grown = mask | (grown & covered)
 
     # The occluded region is best expressed as "whoever is drawn on top of me":
     # ``occludeParts`` unions those parts' own masks, so the fill is exactly as
@@ -516,6 +592,26 @@ def fill_part(
         stamped += int(moved.sum())
     report["stamp"] = stamped
 
+    # 6. closed eye -- the lid is a drawing, not a stitched-together fill.
+    # base+stamp gets the pieces but not the result: the flood fills the whole
+    # socket with skin and the stamp lands the lash at the bottom of it, which
+    # is why the lid read as a pale blob with a smear under it.
+    drawn_mask = np.zeros_like(mask)
+    eye = spec.get("closedEye")
+    if eye:
+        cx, cy, rx, ry = (int(v) for v in eye)
+        lid, (ox, oy) = build_closed_lid(master, cx, cy, rx, ry)
+        h, w = lid.shape[:2]
+        region = np.zeros_like(mask)
+        region[oy:oy + h, ox:ox + w] = lid[:, :, 3] > 0
+        region &= target
+        patch = np.zeros_like(out)
+        patch[oy:oy + h, ox:ox + w] = lid[:, :, :3]
+        out[region] = patch[region]
+        valid |= region
+        drawn_mask |= region
+        report["closedEye"] = int(region.sum())
+
     synthesised = target & ~mask
     # Smooth only the synthesised interior: TELEA leaves radial streaks that a
     # posed sweep turns into visible spokes. The one-pixel erosion keeps the
@@ -527,7 +623,12 @@ def fill_part(
             ),
             dtype=np.float32,
         )
-        deep = ~_binary_dilate(~synthesised, 1) & ~_binary_dilate(stamped_mask, 1)
+        # The closed lid is drawn art like a stamp is, so it is excluded from
+        # the smoothing for the same reason: the blur exists to kill inpaint
+        # streaks, and running it over the lash line softened it to a smudge.
+        deep = (~_binary_dilate(~synthesised, 1)
+                & ~_binary_dilate(stamped_mask, 1)
+                & ~_binary_dilate(drawn_mask, 1))
         out[deep] = blurred[deep]
 
     out_alpha = np.zeros((size, size), dtype=np.uint8)
