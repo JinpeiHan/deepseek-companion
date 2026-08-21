@@ -9,153 +9,100 @@
     "synthesised": 2323,
     "total": 2688
   },
-  "tail_1": {
-    "claimed": 371,
-    "grow": 941,
-    "mirror": 0,
-    "inpaint": 0,
-    "base": 0,
-    "stamp": 0,
-    "synthesised": 941,
-    "total": 1312
-  },
+  "tail_1": {"claimed": 371, "grow": 685, "mirror": 0, "inpaint": 0, "base": 0, "stamp": 0, "synthesised": 685, "total": 1056},
   "tail_2": {
     "claimed": 356,
-    "grow": 897,
+    "grow": 1439,
     "mirror": 0,
     "inpaint": 0,
     "base": 0,
     "stamp": 0,
-    "synthesised": 897,
-    "total": 1253
+    "synthesised": 1439,
+    "total": 1795
   },
-  "tail_3": {
-    "claimed": 2319,
-    "grow": 203,
-    "mirror": 0,
-    "inpaint": 0,
-    "base": 0,
-    "stamp": 0,
-    "synthesised": 203,
-    "total": 2522
-  },
+  "tail_3": {"claimed": 2319, "grow": 0, "mirror": 0, "inpaint": 0, "base": 0, "stamp": 0, "synthesised": 0, "total": 2319},
   "hair_back": {
     "claimed": 4699,
-    "grow": 500,
-    "mirror": 1,
-    "inpaint": 18123,
-    "base": 18123,
+    "grow": 7236,
+    "mirror": 29,
+    "inpaint": 17079,
+    "base": 17079,
     "stamp": 0,
-    "synthesised": 18624,
-    "total": 23323
+    "synthesised": 24344,
+    "total": 29043
   },
   "neck": {
     "claimed": 37,
-    "grow": 101,
-    "mirror": 54,
-    "inpaint": 2146,
-    "base": 2146,
+    "grow": 397,
+    "mirror": 117,
+    "inpaint": 1831,
+    "base": 1831,
     "stamp": 0,
-    "synthesised": 2301,
-    "total": 2338
+    "synthesised": 2345,
+    "total": 2382
   },
   "body": {
     "claimed": 14768,
-    "grow": 1206,
-    "mirror": 634,
-    "inpaint": 16522,
-    "base": 16522,
+    "grow": 25408,
+    "mirror": 328,
+    "inpaint": 452,
+    "base": 452,
     "stamp": 0,
-    "synthesised": 18362,
-    "total": 33130
+    "synthesised": 26188,
+    "total": 40956
   },
   "apron": {
     "claimed": 11173,
-    "grow": 1513,
-    "mirror": 99,
-    "inpaint": 1951,
-    "base": 1951,
+    "grow": 6195,
+    "mirror": 25,
+    "inpaint": 56,
+    "base": 56,
     "stamp": 0,
-    "synthesised": 3563,
-    "total": 14736
+    "synthesised": 6276,
+    "total": 17449
   },
   "arm_l": {
     "claimed": 4614,
-    "grow": 638,
+    "grow": 1519,
     "mirror": 0,
-    "inpaint": 780,
-    "base": 780,
+    "inpaint": 32,
+    "base": 32,
     "stamp": 0,
-    "synthesised": 1418,
-    "total": 6032
+    "synthesised": 1551,
+    "total": 6165
   },
   "arm_r": {
     "claimed": 4608,
-    "grow": 699,
-    "mirror": 0,
-    "inpaint": 889,
-    "base": 889,
+    "grow": 1802,
+    "mirror": 5,
+    "inpaint": 46,
+    "base": 46,
     "stamp": 0,
-    "synthesised": 1588,
-    "total": 6196
+    "synthesised": 1853,
+    "total": 6461
   },
   "head": {
-    "claimed": 2087,
-    "grow": 1482,
-    "mirror": 548,
-    "inpaint": 3987,
-    "base": 3987,
+    "claimed": 2179,
+    "grow": 3497,
+    "mirror": 588,
+    "inpaint": 2530,
+    "base": 2530,
     "stamp": 0,
-    "synthesised": 6017,
-    "total": 8104
+    "synthesised": 6615,
+    "total": 8794
   },
-  "cheek_l": {
-    "claimed": 126,
-    "grow": 150,
-    "mirror": 0,
-    "inpaint": 0,
-    "base": 0,
-    "stamp": 0,
-    "synthesised": 150,
-    "total": 276
-  },
-  "cheek_r": {
-    "claimed": 149,
-    "grow": 157,
-    "mirror": 0,
-    "inpaint": 0,
-    "base": 0,
-    "stamp": 0,
-    "synthesised": 157,
-    "total": 306
-  },
-  "eye_l": {
-    "claimed": 742,
-    "grow": 264,
-    "mirror": 0,
-    "inpaint": 0,
-    "base": 0,
-    "stamp": 0,
-    "synthesised": 264,
-    "total": 1006
-  },
-  "eye_r": {
-    "claimed": 742,
-    "grow": 264,
-    "mirror": 0,
-    "inpaint": 0,
-    "base": 0,
-    "stamp": 0,
-    "synthesised": 264,
-    "total": 1006
-  },
+  "cheek_l": {"claimed": 126, "grow": 106, "mirror": 0, "inpaint": 0, "base": 0, "stamp": 0, "synthesised": 106, "total": 232},
+  "cheek_r": {"claimed": 149, "grow": 107, "mirror": 0, "inpaint": 0, "base": 0, "stamp": 0, "synthesised": 107, "total": 256},
+  "eye_l": {"claimed": 742, "grow": 14, "mirror": 0, "inpaint": 0, "base": 0, "stamp": 0, "synthesised": 14, "total": 756},
+  "eye_r": {"claimed": 742, "grow": 2, "mirror": 0, "inpaint": 0, "base": 0, "stamp": 0, "synthesised": 2, "total": 744},
   "eye_l_lid": {
     "claimed": 0,
     "grow": 0,
     "mirror": 0,
     "inpaint": 950,
-    "base": 950,
-    "stamp": 135,
+    "base": 0,
+    "stamp": 0,
+    "closedEye": 950,
     "synthesised": 950,
     "total": 950
   },
@@ -164,39 +111,22 @@
     "grow": 0,
     "mirror": 0,
     "inpaint": 950,
-    "base": 950,
-    "stamp": 128,
+    "base": 0,
+    "stamp": 0,
+    "closedEye": 950,
     "synthesised": 950,
     "total": 950
   },
-  "mouth": {
-    "claimed": 176,
-    "grow": 124,
-    "mirror": 0,
-    "inpaint": 0,
-    "base": 0,
-    "stamp": 0,
-    "synthesised": 124,
-    "total": 300
-  },
+  "mouth": {"claimed": 84, "grow": 0, "mirror": 0, "inpaint": 0, "base": 0, "stamp": 0, "synthesised": 0, "total": 84},
   "hair_front": {
     "claimed": 11184,
-    "grow": 1508,
+    "grow": 2259,
     "mirror": 0,
     "inpaint": 0,
     "base": 0,
     "stamp": 0,
-    "synthesised": 1508,
-    "total": 12692
+    "synthesised": 2259,
+    "total": 13443
   },
-  "headdress": {
-    "claimed": 2747,
-    "grow": 551,
-    "mirror": 0,
-    "inpaint": 0,
-    "base": 0,
-    "stamp": 0,
-    "synthesised": 551,
-    "total": 3298
-  }
+  "headdress": {"claimed": 2747, "grow": 0, "mirror": 0, "inpaint": 0, "base": 0, "stamp": 0, "synthesised": 0, "total": 2747}
 }

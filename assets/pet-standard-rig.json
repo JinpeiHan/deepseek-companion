@@ -270,9 +270,9 @@
       "bone": "tail_b1",
       "rect": [
         308,
-        330,
+        340,
         38,
-        53
+        43
       ],
       "pivot": [
         326.0,
@@ -286,10 +286,10 @@
       "z": 7,
       "bone": "tail_b2",
       "rect": [
-        318,
-        340,
-        42,
-        49
+        310,
+        331,
+        58,
+        64
       ],
       "pivot": [
         344.0,
@@ -303,9 +303,9 @@
       "z": 8,
       "bone": "tail_b3",
       "rect": [
-        339,
+        349,
         306,
-        54,
+        44,
         92
       ],
       "pivot": [
@@ -328,7 +328,7 @@
         119,
         66,
         232,
-        235
+        256
       ],
       "pivot": [
         233.0,
@@ -360,13 +360,13 @@
       "bone": "body",
       "rect": [
         136,
-        194,
-        197,
-        303
+        165,
+        196,
+        332
       ],
       "pivot": [
-        234.5,
-        345.5
+        234.0,
+        331.0
       ],
       "hitGroup": "body"
     },
@@ -376,14 +376,14 @@
       "z": 24,
       "bone": "body",
       "rect": [
-        178,
-        258,
-        125,
-        136
+        154,
+        236,
+        169,
+        155
       ],
       "pivot": [
-        240.5,
-        326.0
+        238.5,
+        313.5
       ],
       "hitGroup": "body"
     },
@@ -394,13 +394,13 @@
       "bone": "arm_l",
       "rect": [
         152,
-        184,
-        58,
-        153
+        181,
+        77,
+        154
       ],
       "pivot": [
-        181.0,
-        260.5
+        190.5,
+        258.0
       ],
       "hitGroup": "arm"
     },
@@ -410,14 +410,14 @@
       "z": 31,
       "bone": "arm_r",
       "rect": [
-        262,
-        184,
-        61,
-        153
+        241,
+        179,
+        82,
+        156
       ],
       "pivot": [
-        292.5,
-        260.5
+        282.0,
+        257.0
       ],
       "hitGroup": "arm"
     },
@@ -430,7 +430,7 @@
         177,
         112,
         113,
-        103
+        101
       ],
       "pivot": [
         233.0,
@@ -446,11 +446,11 @@
       "rect": [
         190,
         179,
-        24,
+        23,
         17
       ],
       "pivot": [
-        202.0,
+        201.5,
         187.5
       ],
       "hitGroup": "cheek"
@@ -479,12 +479,12 @@
       "bone": "head",
       "rect": [
         191,
-        154,
-        37,
-        33
+        156,
+        35,
+        29
       ],
       "pivot": [
-        209.5,
+        208.5,
         170.5
       ],
       "hitGroup": "head"
@@ -496,12 +496,12 @@
       "bone": "head",
       "rect": [
         239,
-        154,
-        37,
-        33
+        156,
+        35,
+        29
       ],
       "pivot": [
-        257.5,
+        256.5,
         170.5
       ],
       "hitGroup": "head"
@@ -546,10 +546,10 @@
       "z": 48,
       "bone": "head",
       "rect": [
-        224,
-        182,
-        20,
-        15
+        228,
+        186,
+        12,
+        7
       ],
       "pivot": [
         234.0,
@@ -564,9 +564,9 @@
       "bone": "head",
       "rect": [
         140,
-        83,
+        74,
         193,
-        124
+        131
       ],
       "pivot": [
         233.0,
@@ -580,10 +580,10 @@
       "z": 55,
       "bone": "head",
       "rect": [
-        166,
+        167,
         52,
-        135,
-        92
+        132,
+        90
       ],
       "pivot": [
         233.0,
@@ -1357,7 +1357,6 @@
     },
     "taunt_token_jab": {
       "loop": true,
-      "durationMs": 1700,
       "frames": [
         "baked/taunt_token_jab/taunt_token_jab_00.png",
         "baked/taunt_token_jab/taunt_token_jab_01.png",
@@ -1380,7 +1379,6 @@
     },
     "smug_zako": {
       "loop": true,
-      "durationMs": 1700,
       "frames": [
         "baked/smug_zako/smug_zako_00.png",
         "baked/smug_zako/smug_zako_01.png",
@@ -1403,7 +1401,6 @@
     },
     "slack_off": {
       "loop": true,
-      "motion": "wait",
       "frames": [
         "baked/slack_off/slack_off_00.png",
         "baked/slack_off/slack_off_01.png",
@@ -1422,11 +1419,11 @@
         "baked/slack_off/slack_off_14.png",
         "baked/slack_off/slack_off_15.png"
       ],
-      "frameMs": 110
+      "frameMs": 110,
+      "motion": "wait"
     },
     "love_heart_hands": {
       "loop": true,
-      "durationMs": 1700,
       "frames": [
         "baked/love_heart_hands/love_heart_hands_00.png",
         "baked/love_heart_hands/love_heart_hands_01.png",
@@ -1471,7 +1468,6 @@
     },
     "sulk_pout": {
       "loop": true,
-      "durationMs": 1700,
       "frames": [
         "baked/sulk_pout/sulk_pout_00.png",
         "baked/sulk_pout/sulk_pout_01.png",
@@ -1494,7 +1490,6 @@
     },
     "soul_leaving": {
       "loop": true,
-      "durationMs": 1900,
       "frames": [
         "baked/soul_leaving/soul_leaving_00.png",
         "baked/soul_leaving/soul_leaving_01.png",
@@ -1517,7 +1512,6 @@
     },
     "salute_roger": {
       "loop": true,
-      "durationMs": 1500,
       "frames": [
         "baked/salute_roger/salute_roger_00.png",
         "baked/salute_roger/salute_roger_01.png",
@@ -1540,7 +1534,6 @@
     },
     "plead_kneel": {
       "loop": true,
-      "durationMs": 1900,
       "frames": [
         "baked/plead_kneel/plead_kneel_00.png",
         "baked/plead_kneel/plead_kneel_01.png",
@@ -1563,7 +1556,6 @@
     },
     "confused_question": {
       "loop": true,
-      "durationMs": 1700,
       "frames": [
         "baked/confused_question/confused_question_00.png",
         "baked/confused_question/confused_question_01.png",
@@ -1586,7 +1578,6 @@
     },
     "relax_armchair": {
       "loop": true,
-      "motion": "wait",
       "frames": [
         "baked/relax_armchair/relax_armchair_00.png",
         "baked/relax_armchair/relax_armchair_01.png",
@@ -1605,11 +1596,11 @@
         "baked/relax_armchair/relax_armchair_14.png",
         "baked/relax_armchair/relax_armchair_15.png"
       ],
-      "frameMs": 110
+      "frameMs": 110,
+      "motion": "wait"
     },
     "cry_wail": {
       "loop": true,
-      "durationMs": 1900,
       "frames": [
         "baked/cry_wail/cry_wail_00.png",
         "baked/cry_wail/cry_wail_01.png",
@@ -1632,7 +1623,6 @@
     },
     "idea_lightbulb": {
       "loop": true,
-      "durationMs": 1500,
       "frames": [
         "baked/idea_lightbulb/idea_lightbulb_00.png",
         "baked/idea_lightbulb/idea_lightbulb_01.png",

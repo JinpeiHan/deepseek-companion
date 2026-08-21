@@ -14,8 +14,11 @@ def _write_bundle(root: Path, *, standard_manifest: bool) -> None:
     (assets / "pet").mkdir(parents=True)
     (assets / "pet-packs.json").write_text(json.dumps({
         "formatVersion": 1,
-        "defaultPack": "chibi",
+        "defaultPack": "chibi-frames",
         "packs": {
+            # chibi is a rig in the real bundle; the loader's last resort is the
+            # rig-free frame pack, so that is what the fixture registers.
+            "chibi-frames": {"manifest": "pet-manifest.json", "root": "pet"},
             "chibi": {"manifest": "pet-manifest.json", "root": "pet"},
             "standard": {"manifest": "pet-standard-manifest.json", "root": "pet-standard"},
         },
@@ -44,18 +47,18 @@ def _write_bundle(root: Path, *, standard_manifest: bool) -> None:
 
 
 class PackFallbackTests(unittest.TestCase):
-    def test_missing_pack_root_falls_back_to_chibi_with_one_warning(self) -> None:
+    def test_missing_pack_root_falls_back_to_the_frame_pack_with_one_warning(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             _write_bundle(root, standard_manifest=False)
             stderr = io.StringIO()
             with redirect_stderr(stderr):
                 descriptor = resolve_pack(root, "standard")
-            self.assertEqual(descriptor.pack_id, "chibi")
+            self.assertEqual(descriptor.pack_id, "chibi-frames")
             lines = stderr.getvalue().strip().splitlines()
             self.assertEqual(len(lines), 1)
             self.assertIn("proportion pack 'standard' unavailable", lines[0])
-            self.assertIn("falling back to chibi", lines[0])
+            self.assertIn("falling back to chibi-frames", lines[0])
 
     def test_frame_loss_in_the_selected_pack_falls_back_wholesale(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -64,14 +67,14 @@ class PackFallbackTests(unittest.TestCase):
 
             def loader(bundle_root: Path, pack_id: str):
                 descriptor = load_pack_descriptor(bundle_root, pack_id)
-                if descriptor.pack_id != "chibi":
+                if descriptor.pack_id != "chibi-frames":
                     raise ValueError("1 frame(s) unreadable, first 'idle.png'")
                 return descriptor
 
             stderr = io.StringIO()
             with redirect_stderr(stderr):
                 descriptor = resolve_pack(root, "standard", loader=loader)
-            self.assertEqual(descriptor.pack_id, "chibi")
+            self.assertEqual(descriptor.pack_id, "chibi-frames")
             self.assertIn("unreadable", stderr.getvalue())
 
     def test_unknown_pack_id_never_warns(self) -> None:
@@ -81,6 +84,9 @@ class PackFallbackTests(unittest.TestCase):
             stderr = io.StringIO()
             with redirect_stderr(stderr):
                 descriptor = resolve_pack(root, "does-not-exist")
+            # An unrecognised id is not a failure: it normalises to the default
+            # proportion, which is a different thing from the load-failure last
+            # resort and must not warn.
             self.assertEqual(descriptor.pack_id, "chibi")
             self.assertEqual(stderr.getvalue(), "")
 

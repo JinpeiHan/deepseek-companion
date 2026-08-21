@@ -10,7 +10,7 @@ const readJson = async (relative) => JSON.parse(await readFile(new URL(relative,
 
 test('registry declares the frame packs plus the rig packs', async () => {
   const registry = await readJson('../assets/pet-packs.json')
-  assert.equal(registry.defaultPack, 'chibi')
+  assert.equal(registry.defaultPack, 'chibi-frames')
   assert.deepEqual(Object.keys(registry.packs), [
     'chibi',
     'standard',
@@ -18,7 +18,14 @@ test('registry declares the frame packs plus the rig packs', async () => {
     'standard-rig',
     'chibi-rig',
     'slender-rig',
+    'chibi-frames',
   ])
+  // All three proportions the UI offers are rigs now, so the pet is
+  // interactive whichever one is picked.
+  for (const id of ['chibi', 'standard', 'slender']) {
+    const manifest = await readJson(`../assets/${registry.packs[id].manifest}`)
+    assert.equal(manifest.renderer, 'rig', `${id} should serve a rig`)
+  }
   // The default must stay a frame pack: a rig pack is only reachable by an
   // explicit choice, so a broken rig can never be what a new user first sees.
   const defaultManifest = await readJson(`../assets/${registry.packs[registry.defaultPack].manifest}`)
