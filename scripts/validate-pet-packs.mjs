@@ -26,8 +26,13 @@ const EDGE_ALPHA = 8
 const registeredFramePacks = async () => {
   const registry = await readJson('assets/pet-packs.json')
   const packs = {}
+  const REFERENCE_MANIFEST = 'pet-manifest.json'
   for (const [id, entry] of Object.entries(registry.packs)) {
-    if (id === registry.defaultPack) continue
+    // chibi is the matrix every other pack is compared *against*, so it is not
+    // itself a subject -- and it is the one frame pack that is not 512x512.
+    // Keying on its manifest rather than on defaultPack keeps that true now
+    // that the default proportion is a rig.
+    if (entry.manifest === REFERENCE_MANIFEST) continue
     const manifest = await readJson(`assets/${entry.manifest}`)
     if ((manifest.renderer ?? 'frames') !== 'frames') continue
     packs[id] = { manifest: `assets/${entry.manifest}`, root: `assets/${entry.root}` }

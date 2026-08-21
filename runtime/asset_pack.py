@@ -6,8 +6,23 @@ from pathlib import Path
 from typing import Any, Callable
 
 PACK_IDS = frozenset(
-    {"chibi", "standard", "slender", "standard-rig", "chibi-rig", "slender-rig"}
+    {
+        "chibi",
+        "standard",
+        "slender",
+        "standard-rig",
+        "chibi-rig",
+        "slender-rig",
+        # The frame pack chibi used to be. It stays registered under its own id
+        # so there is still one pack in the bundle that needs no rig to load,
+        # which is what resolve_pack falls back to when anything else breaks.
+        "chibi-frames",
+    }
 )
+#: Last resort for :func:`resolve_pack`. Deliberately not one of the three
+#: user-facing proportions: a fallback that needed a rig to load would be no
+#: fallback at all.
+FALLBACK_PACK = "chibi-frames"
 SUPPORTED_FORMAT_VERSIONS = frozenset({1, 2, 3})
 RENDERERS = frozenset({"frames", "rig"})
 

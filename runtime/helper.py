@@ -20,7 +20,13 @@ from typing import Any, Callable, Mapping, NamedTuple, TextIO
 
 try:
     from .animation_model import AnimationModel, crossfade_duration
-    from .asset_pack import PackDescriptor, load_pack_descriptor, load_pack_pixmaps, normalise_pack_id
+    from .asset_pack import (
+        FALLBACK_PACK,
+        PackDescriptor,
+        load_pack_descriptor,
+        load_pack_pixmaps,
+        normalise_pack_id,
+    )
     from .layout_store import default_layout_path, load_layout, save_layout
     from .persona_copy import interaction_copy, load_persona_copy
     from .rig_driver import RigDriver
@@ -28,7 +34,13 @@ try:
     from .rig_pack import animation_manifest_from_rig, baked_frame_paths, load_rig
 except ImportError:
     from animation_model import AnimationModel, crossfade_duration
-    from asset_pack import PackDescriptor, load_pack_descriptor, load_pack_pixmaps, normalise_pack_id
+    from asset_pack import (
+        FALLBACK_PACK,
+        PackDescriptor,
+        load_pack_descriptor,
+        load_pack_pixmaps,
+        normalise_pack_id,
+    )
     from layout_store import default_layout_path, load_layout, save_layout
     from persona_copy import interaction_copy, load_persona_copy
     from rig_driver import RigDriver
@@ -405,14 +417,15 @@ def resolve_pack(
     try:
         return loader(root, selected)
     except PACK_LOAD_ERRORS as error:
-        if selected == "chibi":
+        if selected == FALLBACK_PACK:
             raise
         print(
-            f"warning: proportion pack '{selected}' unavailable ({error}); falling back to chibi",
+            f"warning: proportion pack '{selected}' unavailable ({error}); "
+            f"falling back to {FALLBACK_PACK}",
             file=sys.stderr,
             flush=True,
         )
-    return loader(root, "chibi")
+    return loader(root, FALLBACK_PACK)
 
 
 def bundle_root() -> Path:

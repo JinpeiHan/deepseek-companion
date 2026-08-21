@@ -1,10 +1,10 @@
 {
   "formatVersion": 1,
-  "defaultPack": "chibi",
+  "defaultPack": "chibi-frames",
   "packs": {
     "chibi": {
-      "manifest": "pet-manifest.json",
-      "root": "pet"
+      "manifest": "pet-chibi-rig.json",
+      "root": "pet-chibi-rig"
     },
     "standard": {
       "manifest": "pet-standard-rig.json",
@@ -25,6 +25,10 @@
     "slender-rig": {
       "manifest": "pet-slender-rig.json",
       "root": "pet-slender-rig"
+    },
+    "chibi-frames": {
+      "manifest": "pet-manifest.json",
+      "root": "pet"
     }
   }
 }
